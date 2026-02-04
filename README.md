@@ -60,7 +60,10 @@ Start here: `docs/PRD.md`.
 - Export mock: draft report page can download JSON/CSV for the current queue
 - Draft cover preview: draft report page includes a presentation cover panel
 - Cover export: draft report page can download a cover text file
+- Cover image export: draft report page can download a presentation cover image
 - Draft metadata: report includes match label and owner fields
+- Draft annotations + labels: clip notes and tags export with the report
+- Share pack: draft report generates a share link with permissions
 - Pack stub: draft report can download a JSON pack bundle (metadata + CSV + cover)
 
 ## Data & state (prototype)

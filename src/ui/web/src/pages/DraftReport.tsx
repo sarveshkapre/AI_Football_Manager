@@ -1,23 +1,36 @@
 import { useMemo, useState } from 'react';
 import { ReportQueue } from '../components/ReportQueue';
 import { SectionHeader } from '../components/SectionHeader';
+import { useAnnotations } from '../context/AnnotationsContext';
 import { useAudit } from '../context/AuditContext';
+import { useLabels } from '../context/LabelsContext';
 import { useReportContext } from '../context/ReportContext';
-import { buildCoverText, buildPackStub, downloadFile } from '../utils/export';
+import {
+  buildCoverText,
+  buildPackStub,
+  downloadCoverImage,
+  downloadFile
+} from '../utils/export';
 import { formatDuration, durationToSeconds } from '../utils/time';
 
 export const DraftReport = () => {
   const { queue } = useReportContext();
   const { logEvent } = useAudit();
+  const { annotations } = useAnnotations();
+  const { labels } = useLabels();
   const [title, setTitle] = useState('Matchday Draft Report');
   const [notes, setNotes] = useState('');
   const [matchLabel, setMatchLabel] = useState('vs. Westbridge');
   const [owner, setOwner] = useState('Lead Analyst');
+  const [sharePermission, setSharePermission] = useState('View');
+  const shareLink = 'https://afm.example.com/share/preview';
 
   const totalDuration = useMemo(() => {
     const seconds = queue.reduce((sum, clip) => sum + durationToSeconds(clip.duration), 0);
     return formatDuration(seconds);
   }, [queue]);
+
+  const queueIds = useMemo(() => queue.map((clip) => clip.id), [queue]);
 
   const exportJson = () => {
     const payload = {
@@ -27,7 +40,13 @@ export const DraftReport = () => {
       owner,
       totalDuration,
       clipCount: queue.length,
-      clips: queue
+      clips: queue,
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      )
     };
     downloadFile('afm-report.json', JSON.stringify(payload, null, 2), 'application/json');
     logEvent('Report JSON exported', `${queue.length} clips`);
@@ -44,6 +63,19 @@ export const DraftReport = () => {
     logEvent('Report CSV exported', `${queue.length} clips`);
   };
 
+  const exportNotes = () => {
+    const payload = {
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      )
+    };
+    downloadFile('afm-notes.json', JSON.stringify(payload, null, 2), 'application/json');
+    logEvent('Notes exported', `${queue.length} clips`);
+  };
+
   const exportCover = () => {
     const coverText = buildCoverText(
       title,
@@ -54,6 +86,11 @@ export const DraftReport = () => {
     logEvent('Cover exported', title);
   };
 
+  const exportCoverImage = () => {
+    downloadCoverImage(title, matchLabel, notes);
+    logEvent('Cover image exported', title);
+  };
+
   const exportPack = () => {
     const metadata = {
       title,
@@ -62,7 +99,8 @@ export const DraftReport = () => {
       owner,
       createdAt: new Date().toISOString(),
       clipCount: queue.length,
-      totalDuration
+      totalDuration,
+      sharePermission
     };
     const csv = [
       'id,title,duration,tags',
@@ -80,6 +118,15 @@ export const DraftReport = () => {
     const pack = buildPackStub(metadata, csv, cover);
     downloadFile('afm-pack.json', pack, 'application/json');
     logEvent('Pack exported', `${queue.length} clips`);
+  };
+
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      logEvent('Share link copied', sharePermission);
+    } catch {
+      logEvent('Share link generated', sharePermission);
+    }
   };
 
   const coverClips = queue.slice(0, 3);
@@ -149,8 +196,8 @@ export const DraftReport = () => {
               <button className="btn" onClick={exportCsv}>
                 Download CSV
               </button>
-              <button className="btn" onClick={exportCover}>
-                Download cover
+              <button className="btn" onClick={exportNotes}>
+                Download notes
               </button>
             </div>
           </div>
@@ -161,24 +208,57 @@ export const DraftReport = () => {
         </div>
       </div>
 
-      <div className="card surface">
-        <SectionHeader title="Presentation cover" subtitle="Preview for the report pack." />
-        <div className="cover">
-          <div>
-            <p className="eyebrow">AI Football Manager</p>
-            <h2 className="cover-title">{title}</h2>
-            <p className="muted">{matchLabel}</p>
-            <p className="muted">{notes || 'Add a short summary to guide the staff.'}</p>
-          </div>
-          <div className="cover-list">
-            <h4>Key clips</h4>
-            {coverClips.length === 0 && <p className="muted">Add clips to show highlights.</p>}
-            {coverClips.map((clip) => (
-              <div key={clip.id} className="cover-item">
-                <span>{clip.title}</span>
-                <span className="pill">{clip.duration}</span>
+      <div className="grid two">
+        <div className="card surface">
+          <SectionHeader title="Presentation cover" subtitle="Preview for the report pack." />
+          <div className="cover">
+            <div>
+              <p className="eyebrow">AI Football Manager</p>
+              <h2 className="cover-title">{title}</h2>
+              <p className="muted">{matchLabel}</p>
+              <p className="muted">{notes || 'Add a short summary to guide the staff.'}</p>
+              <div className="cover-actions">
+                <button className="btn" onClick={exportCover}>
+                  Download cover text
+                </button>
+                <button className="btn" onClick={exportCoverImage}>
+                  Download cover image
+                </button>
               </div>
-            ))}
+            </div>
+            <div className="cover-list">
+              <h4>Key clips</h4>
+              {coverClips.length === 0 && <p className="muted">Add clips to show highlights.</p>}
+              {coverClips.map((clip) => (
+                <div key={clip.id} className="cover-item">
+                  <span>{clip.title}</span>
+                  <span className="pill">{clip.duration}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="card surface">
+          <SectionHeader title="Share pack" subtitle="Generate a shareable link." />
+          <div className="share">
+            <label className="field">
+              <span>Share link</span>
+              <input value={shareLink} readOnly />
+            </label>
+            <div className="share-actions">
+              <select
+                value={sharePermission}
+                onChange={(event) => setSharePermission(event.target.value)}
+              >
+                <option value="View">View only</option>
+                <option value="Comment">Comment</option>
+                <option value="Edit">Edit</option>
+              </select>
+              <button className="btn primary" onClick={copyShare}>
+                Copy link
+              </button>
+            </div>
           </div>
         </div>
       </div>

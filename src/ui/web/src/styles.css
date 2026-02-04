@@ -43,7 +43,8 @@ button {
 }
 
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -715,6 +716,18 @@ textarea {
   background: var(--surface-alt);
 }
 
+.audit {
+  display: grid;
+  gap: 10px;
+}
+
+.audit-row {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  padding: 12px;
+  background: var(--surface-alt);
+}
+
 .queue {
   display: grid;
   gap: 12px;
@@ -832,7 +845,8 @@ textarea {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.share select {
   border-radius: 12px;
   border: 1px solid var(--line);
   padding: 10px 14px;
@@ -868,6 +882,13 @@ textarea {
   font-size: 2rem;
 }
 
+.cover-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
 .cover-list {
   display: grid;
   gap: 10px;
@@ -881,6 +902,17 @@ textarea {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+}
+
+.share {
+  display: grid;
+  gap: 12px;
+}
+
+.share-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .feed {

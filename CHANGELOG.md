@@ -29,6 +29,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Draft report cover export and engagement stream wiring
 - Draft report metadata fields and clip annotations
 - Pack bundle export, clip labels, and audit log
+- Draft report share link, notes export, and cover image download
 
 ## [0.1.0] - 2026-02-04
 ### Added
