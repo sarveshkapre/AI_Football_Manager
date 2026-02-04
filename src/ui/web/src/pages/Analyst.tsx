@@ -1,24 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import { SectionHeader } from '../components/SectionHeader';
-import type { OverlayToggle, TimelineEvent } from '../types';
+import { useClipContext } from '../context/ClipContext';
+import type { Clip, OverlayToggle, Storyboard, TimelineEvent } from '../types';
 
 export const Analyst = () => {
+  const { openClip } = useClipContext();
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
+  const [storyboards, setStoryboards] = useState<Storyboard[]>([]);
+  const [clips, setClips] = useState<Clip[]>([]);
+  const [selected, setSelected] = useState<Clip[]>([]);
 
   useEffect(() => {
     const load = async () => {
-      const [timelineData, overlayData] = await Promise.all([
+      const [timelineData, overlayData, storyboardData, clipData] = await Promise.all([
         api.getTimeline(),
-        api.getOverlays()
+        api.getOverlays(),
+        api.getStoryboards(),
+        api.getClips()
       ]);
       setTimeline(timelineData);
       setOverlays(overlayData);
+      setStoryboards(storyboardData);
+      setClips(clipData);
     };
 
     load();
   }, []);
+
+  const availableClips = useMemo(
+    () => clips.filter((clip) => !selected.some((item) => item.id === clip.id)),
+    [clips, selected]
+  );
 
   return (
     <div className="page-content">
@@ -33,7 +47,14 @@ export const Analyst = () => {
           <SectionHeader title="Tactical timeline" subtitle="Auto-tagged shifts and events." />
           <div className="timeline-list">
             {timeline.map((event) => (
-              <div className="timeline-item" key={event.id}>
+              <button
+                className="timeline-item"
+                key={event.id}
+                onClick={async () => {
+                  const clip = await api.getClipById(event.clipId);
+                  openClip(clip);
+                }}
+              >
                 <div>
                   <p className="eyebrow">{event.minute}</p>
                   <h4>{event.label}</h4>
@@ -46,7 +67,7 @@ export const Analyst = () => {
                   </div>
                 </div>
                 <span className="pill">Confidence {event.confidence}</span>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -86,21 +107,57 @@ export const Analyst = () => {
         </div>
 
         <div className="card surface">
-          <SectionHeader title="Storyboards" subtitle="Build a clip reel fast." />
-          <div className="storyboard">
-            <div className="story-card">
-              <h4>Press escapes</h4>
-              <p>3 clips · 46s total</p>
+          <SectionHeader title="Storyboard builder" subtitle="Select clips to assemble a pack." />
+          <div className="storyboard-builder">
+            <div className="storyboard-column">
+              <h4>Selected clips</h4>
+              {selected.length === 0 && <p className="muted">Select clips to build a pack.</p>}
+              {selected.map((clip) => (
+                <div className="story-card" key={clip.id}>
+                  <div>
+                    <h4>{clip.title}</h4>
+                    <p>{clip.duration}</p>
+                  </div>
+                  <button
+                    className="btn ghost"
+                    onClick={() =>
+                      setSelected((items) => items.filter((item) => item.id !== clip.id))
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
             </div>
-            <div className="story-card">
-              <h4>Weak-side overloads</h4>
-              <p>4 clips · 58s total</p>
-            </div>
-            <div className="story-card">
-              <h4>Zone 14 turnovers</h4>
-              <p>2 clips · 22s total</p>
+            <div className="storyboard-column">
+              <h4>Available clips</h4>
+              {availableClips.map((clip) => (
+                <button
+                  className="story-card"
+                  key={clip.id}
+                  onClick={() => setSelected((items) => [...items, clip])}
+                >
+                  <div>
+                    <h4>{clip.title}</h4>
+                    <p>{clip.duration}</p>
+                  </div>
+                  <span className="pill">Add</span>
+                </button>
+              ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="card surface">
+        <SectionHeader title="Storyboards" subtitle="Saved narrative packs." />
+        <div className="storyboard">
+          {storyboards.map((board) => (
+            <div className="story-card" key={board.id}>
+              <h4>{board.title}</h4>
+              <p>{board.clips.length} clips · Updated {board.updated}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

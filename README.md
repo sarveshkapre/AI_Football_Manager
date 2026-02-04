@@ -54,7 +54,7 @@ Start here: `docs/PRD.md`.
 - Install dependencies: `npm install`
 - Run dev server: `npm run dev`
 - Vite root is set to `src/ui/web`
-- Navigate using hash routes: `#coach`, `#analyst`, `#reports`, `#settings`
+- Navigate using hash routes: `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

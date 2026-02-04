@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-export type RouteKey = 'coach' | 'analyst' | 'reports' | 'settings';
+export type RouteKey = 'coach' | 'analyst' | 'library' | 'reports' | 'settings';
 
-const routes: RouteKey[] = ['coach', 'analyst', 'reports', 'settings'];
+const routes: RouteKey[] = ['coach', 'analyst', 'library', 'reports', 'settings'];
 
 const getRouteFromHash = (): RouteKey => {
   const hash = window.location.hash.replace('#', '').trim();

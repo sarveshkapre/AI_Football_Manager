@@ -38,6 +38,7 @@ export interface TimelineEvent {
   label: string;
   confidence: number;
   tags: string[];
+  clipId: string;
 }
 
 export interface OverlayToggle {
@@ -67,4 +68,11 @@ export interface LiveEvent {
   message: string;
   confidence: number;
   clipId: string;
+}
+
+export interface Storyboard {
+  id: string;
+  title: string;
+  clips: Clip[];
+  updated: string;
 }

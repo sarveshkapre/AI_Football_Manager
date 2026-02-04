@@ -7,46 +7,11 @@ import {
   OverlayToggle,
   Recommendation,
   ReportItem,
+  Storyboard,
   TimelineEvent
 } from '../types';
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const liveStates: LiveState[] = [
-  {
-    minute: '63:12',
-    signal: 'High',
-    confidence: 0.78,
-    clips: 3,
-    insights: [
-      'Opposition 4-4-2 mid-block, compact central lanes.',
-      'Our progression is stalling in the RB-8 channel.',
-      'Transition risk rising after wide overloads.'
-    ]
-  },
-  {
-    minute: '64:02',
-    signal: 'Med',
-    confidence: 0.65,
-    clips: 2,
-    insights: [
-      'Press intensity dropping on their left side.',
-      'Switches to RW are creating 1v1 isolations.',
-      'Second-ball recoveries favor them in zone 14.'
-    ]
-  },
-  {
-    minute: '64:46',
-    signal: 'High',
-    confidence: 0.81,
-    clips: 3,
-    insights: [
-      'Their 9 is screening the 6; center access is blocked.',
-      'Our 8 is arriving late into half-space pockets.',
-      'Counterpress success improving after lost duels.'
-    ]
-  }
-];
 
 const overlays: OverlayToggle[] = [
   { id: 'o1', label: 'Spacing box', enabled: true },
@@ -83,6 +48,56 @@ const clips: Clip[] = [
     duration: '0:15',
     tags: ['set-piece'],
     overlays
+  },
+  {
+    id: 'clip-5',
+    title: 'Overlap frees the wide channel',
+    duration: '0:11',
+    tags: ['overlap', 'wide'],
+    overlays
+  },
+  {
+    id: 'clip-6',
+    title: 'High regain after counterpress',
+    duration: '0:09',
+    tags: ['counterpress', 'regain'],
+    overlays
+  }
+];
+
+const liveStates: LiveState[] = [
+  {
+    minute: '63:12',
+    signal: 'High',
+    confidence: 0.78,
+    clips: 3,
+    insights: [
+      'Opposition 4-4-2 mid-block, compact central lanes.',
+      'Our progression is stalling in the RB-8 channel.',
+      'Transition risk rising after wide overloads.'
+    ]
+  },
+  {
+    minute: '64:02',
+    signal: 'Med',
+    confidence: 0.65,
+    clips: 2,
+    insights: [
+      'Press intensity dropping on their left side.',
+      'Switches to RW are creating 1v1 isolations.',
+      'Second-ball recoveries favor them in zone 14.'
+    ]
+  },
+  {
+    minute: '64:46',
+    signal: 'High',
+    confidence: 0.81,
+    clips: 3,
+    insights: [
+      'Their 9 is screening the 6; center access is blocked.',
+      'Our 8 is arriving late into half-space pockets.',
+      'Counterpress success improving after lost duels.'
+    ]
   }
 ];
 
@@ -151,28 +166,32 @@ const timeline: TimelineEvent[] = [
     minute: '58:10',
     label: 'Press trap fails on right',
     confidence: 0.77,
-    tags: ['press', 'escape', 'right']
+    tags: ['press', 'escape', 'right'],
+    clipId: 'clip-1'
   },
   {
     id: 't2',
     minute: '60:42',
     label: 'Overload creates entry',
     confidence: 0.73,
-    tags: ['overload', 'entry']
+    tags: ['overload', 'entry'],
+    clipId: 'clip-2'
   },
   {
     id: 't3',
     minute: '62:05',
     label: 'Switch opens weak side',
     confidence: 0.7,
-    tags: ['switch', 'weak-side']
+    tags: ['switch', 'weak-side'],
+    clipId: 'clip-2'
   },
   {
     id: 't4',
     minute: '63:44',
     label: 'Turnover in zone 14',
     confidence: 0.65,
-    tags: ['turnover', 'zone-14']
+    tags: ['turnover', 'zone-14'],
+    clipId: 'clip-3'
   }
 ];
 
@@ -180,6 +199,21 @@ const reports: ReportItem[] = [
   { id: 'r1', title: 'Segment Report - Final Phase', status: 'Draft', updated: 'Today' },
   { id: 'r2', title: 'Match Report - vs. Westbridge', status: 'Ready', updated: 'Yesterday' },
   { id: 'r3', title: 'Opponent Scout - Press Patterns', status: 'Ready', updated: '2 days ago' }
+];
+
+const storyboards: Storyboard[] = [
+  {
+    id: 'sb1',
+    title: 'Press escapes',
+    clips: [clips[0], clips[5]],
+    updated: 'Today'
+  },
+  {
+    id: 'sb2',
+    title: 'Weak-side overloads',
+    clips: [clips[1], clips[4]],
+    updated: 'Yesterday'
+  }
 ];
 
 const liveEvents: LiveEvent[] = [
@@ -239,6 +273,14 @@ export const api = {
   async getClipById(id: string) {
     await wait(120);
     return clips.find((clip) => clip.id === id) ?? clips[0];
+  },
+  async getClips() {
+    await wait(160);
+    return clips;
+  },
+  async getStoryboards() {
+    await wait(160);
+    return storyboards;
   },
   async getLiveEvents() {
     await wait(180);

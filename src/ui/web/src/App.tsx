@@ -6,12 +6,14 @@ import { ClipProvider } from './context/ClipContext';
 import { useHashRoute } from './hooks/useHashRoute';
 import { Analyst } from './pages/Analyst';
 import { Coach } from './pages/Coach';
+import { Library } from './pages/Library';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
 
 const navItems = [
   { key: 'coach', label: 'Coach Mode', description: 'Live tactical guidance' },
   { key: 'analyst', label: 'Analyst Mode', description: 'Timeline + overlays' },
+  { key: 'library', label: 'Clip Library', description: 'Evidence clips' },
   { key: 'reports', label: 'Reports', description: 'Packs and exports' },
   { key: 'settings', label: 'Settings', description: 'Roles and defaults' }
 ] as const;
@@ -69,6 +71,7 @@ export default function App() {
           <div className="content">
             {route === 'coach' && <Coach />}
             {route === 'analyst' && <Analyst />}
+            {route === 'library' && <Library />}
             {route === 'reports' && <Reports />}
             {route === 'settings' && <Settings />}
           </div>
