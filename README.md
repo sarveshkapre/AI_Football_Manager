@@ -58,6 +58,7 @@ Start here: `docs/PRD.md`.
 - Keyboard shortcuts: `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library
 - Draft report route: `#draft`
 - Export mock: draft report page can download JSON/CSV for the current queue
+- Draft cover preview: draft report page includes a presentation cover panel
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

@@ -8,6 +8,7 @@ interface StoryboardContextValue {
   addStoryboard: (title: string, clips: Clip[]) => void;
   renameStoryboard: (id: string, title: string) => void;
   removeStoryboard: (id: string) => void;
+  reorderStoryboards: (boards: Storyboard[]) => void;
 }
 
 const storageKey = 'afm.storyboards';
@@ -47,7 +48,8 @@ export const StoryboardProvider = ({ children }: { children: React.ReactNode }) 
           prev.map((board) => (board.id === id ? { ...board, title, updated: 'Just now' } : board))
         ),
       removeStoryboard: (id: string) =>
-        setStoryboards((prev) => prev.filter((board) => board.id !== id))
+        setStoryboards((prev) => prev.filter((board) => board.id !== id)),
+      reorderStoryboards: (boards: Storyboard[]) => setStoryboards(boards)
     }),
     [storyboards]
   );

@@ -615,6 +615,10 @@ textarea {
   text-align: left;
 }
 
+.story-card.draggable {
+  cursor: grab;
+}
+
 .story-actions {
   display: flex;
   gap: 8px;
@@ -688,6 +692,22 @@ textarea {
 .engagement-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+}
+
+.stream {
+  display: grid;
+  gap: 10px;
+}
+
+.stream-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
   align-items: center;
   padding: 10px 12px;
   border-radius: var(--radius-sm);

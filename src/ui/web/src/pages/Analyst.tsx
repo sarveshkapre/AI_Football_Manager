@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import { SectionHeader } from '../components/SectionHeader';
+import { StoryboardList } from '../components/StoryboardList';
 import { useClipContext } from '../context/ClipContext';
 import { useStoryboards } from '../context/StoryboardContext';
 import type { Clip, OverlayToggle, TimelineEvent } from '../types';
 
 export const Analyst = () => {
   const { openClip } = useClipContext();
-  const { storyboards, addStoryboard, renameStoryboard, removeStoryboard } = useStoryboards();
+  const { addStoryboard } = useStoryboards();
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
   const [clips, setClips] = useState<Clip[]>([]);
@@ -170,32 +171,7 @@ export const Analyst = () => {
 
       <div className="card surface">
         <SectionHeader title="Storyboards" subtitle="Saved narrative packs." />
-        <div className="storyboard">
-          {storyboards.map((board) => (
-            <div className="story-card" key={board.id}>
-              <div>
-                <h4>{board.title}</h4>
-                <p>{board.clips.length} clips · Updated {board.updated}</p>
-              </div>
-              <div className="story-actions">
-                <button
-                  className="btn ghost"
-                  onClick={() => {
-                    const title = window.prompt('Rename storyboard', board.title);
-                    if (title && title.trim().length > 0) {
-                      renameStoryboard(board.id, title.trim());
-                    }
-                  }}
-                >
-                  Rename
-                </button>
-                <button className="btn ghost" onClick={() => removeStoryboard(board.id)}>
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <StoryboardList />
       </div>
     </div>
   );

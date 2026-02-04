@@ -25,6 +25,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - UI density toggle and report exports (JSON/CSV)
 - Presentation cover preview and evidence engagement widget
 - Notification cadence and auto-refresh settings
+- Storyboard drag ordering and engagement stream
 
 ## [0.1.0] - 2026-02-04
 ### Added
