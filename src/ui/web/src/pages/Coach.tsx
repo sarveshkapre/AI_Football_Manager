@@ -1,11 +1,29 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/mock';
+import { LiveEventFeed } from '../components/LiveEventFeed';
 import { SignalBadge } from '../components/SignalBadge';
 import { SectionHeader } from '../components/SectionHeader';
 import { StatCard } from '../components/StatCard';
+import { TrendChart } from '../components/TrendChart';
 import { useClipContext } from '../context/ClipContext';
 import { useLiveStore } from '../hooks/useLiveStore';
 import type { CoachCard, Recommendation } from '../types';
+
+const signalTrend = [
+  { label: '60', value: 70 },
+  { label: '62', value: 78 },
+  { label: '64', value: 64 },
+  { label: '66', value: 82 },
+  { label: '68', value: 74 }
+];
+
+const pressureTrend = [
+  { label: '60', value: 55 },
+  { label: '62', value: 61 },
+  { label: '64', value: 58 },
+  { label: '66', value: 72 },
+  { label: '68', value: 67 }
+];
 
 export const Coach = () => {
   const { liveState, moments, updatedAt } = useLiveStore();
@@ -117,6 +135,20 @@ export const Coach = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid two">
+        <div className="card surface">
+          <SectionHeader title="Live event feed" subtitle="Latest tactical events and triggers." />
+          <LiveEventFeed />
+        </div>
+        <div className="card surface">
+          <SectionHeader title="Signal trend" subtitle="Confidence and pressure proxy." />
+          <div className="trend-grid">
+            <TrendChart title="Signal quality" points={signalTrend} max={100} />
+            <TrendChart title="Press intensity" points={pressureTrend} max={100} />
           </div>
         </div>
       </div>

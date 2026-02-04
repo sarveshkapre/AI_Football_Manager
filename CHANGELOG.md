@@ -19,6 +19,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Clip viewer modal and live event toast feed
 - Clip library view and storyboard builder in Analyst Mode
 - Report export queue and keyboard shortcuts
+- Live event feed panel and signal trend charts in Coach Mode
 
 ## [0.1.0] - 2026-02-04
 ### Added

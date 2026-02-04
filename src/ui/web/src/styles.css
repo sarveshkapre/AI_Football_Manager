@@ -655,6 +655,70 @@ button {
   text-align: center;
 }
 
+.feed {
+  display: grid;
+  gap: 12px;
+}
+
+.feed-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  background: var(--surface-alt);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.feed-item:hover {
+  transform: translateY(-2px);
+}
+
+.trend-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.trend {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  padding: 16px;
+  background: var(--surface-alt);
+}
+
+.trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.trend-bars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: 10px;
+  align-items: end;
+  min-height: 110px;
+}
+
+.trend-bar {
+  display: grid;
+  gap: 6px;
+  align-items: end;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.trend-fill {
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(15, 76, 92, 0.9), rgba(15, 76, 92, 0.3));
+}
+
 .library-toolbar {
   display: grid;
   gap: 12px;
