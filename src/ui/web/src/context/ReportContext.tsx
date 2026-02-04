@@ -7,6 +7,7 @@ interface ReportContextValue {
   addClip: (clip: Clip) => void;
   removeClip: (clipId: string) => void;
   clearQueue: () => void;
+  setQueue: (clips: Clip[]) => void;
 }
 
 const storageKey = 'afm.reportQueue';
@@ -14,7 +15,7 @@ const storageKey = 'afm.reportQueue';
 const ReportContext = createContext<ReportContextValue | undefined>(undefined);
 
 export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
-  const [queue, setQueue] = useState<Clip[]>(() => loadFromStorage(storageKey, []));
+  const [queue, setQueueState] = useState<Clip[]>(() => loadFromStorage(storageKey, []));
 
   useEffect(() => {
     saveToStorage(storageKey, queue);
@@ -24,9 +25,11 @@ export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
     () => ({
       queue,
       addClip: (clip: Clip) =>
-        setQueue((prev) => (prev.some((item) => item.id === clip.id) ? prev : [...prev, clip])),
-      removeClip: (clipId: string) => setQueue((prev) => prev.filter((clip) => clip.id !== clipId)),
-      clearQueue: () => setQueue([])
+        setQueueState((prev) => (prev.some((item) => item.id === clip.id) ? prev : [...prev, clip])),
+      removeClip: (clipId: string) =>
+        setQueueState((prev) => prev.filter((clip) => clip.id !== clipId)),
+      clearQueue: () => setQueueState([]),
+      setQueue: (clips: Clip[]) => setQueueState(clips)
     }),
     [queue]
   );

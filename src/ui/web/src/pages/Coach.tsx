@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/mock';
 import { LiveEventFeed } from '../components/LiveEventFeed';
 import { SignalBadge } from '../components/SignalBadge';
+import { SignalHistory } from '../components/SignalHistory';
 import { SectionHeader } from '../components/SectionHeader';
 import { StatCard } from '../components/StatCard';
 import { TrendChart } from '../components/TrendChart';
@@ -153,22 +154,28 @@ export const Coach = () => {
         </div>
       </div>
 
-      <div className="card surface">
-        <SectionHeader title="Key moments" subtitle="Tap to replay the latest events." />
-        <div className="moment-strip">
-          {moments.map((moment) => (
-            <button
-              className="moment"
-              key={moment.id}
-              onClick={async () => {
-                const clip = await api.getClipById(moment.clipId);
-                openClip(clip);
-              }}
-            >
-              <h4>{moment.label}</h4>
-              <p>{moment.detail}</p>
-            </button>
-          ))}
+      <div className="grid two">
+        <div className="card surface">
+          <SectionHeader title="Signal history" subtitle="Select a time window." />
+          <SignalHistory />
+        </div>
+        <div className="card surface">
+          <SectionHeader title="Key moments" subtitle="Tap to replay the latest events." />
+          <div className="moment-strip">
+            {moments.map((moment) => (
+              <button
+                className="moment"
+                key={moment.id}
+                onClick={async () => {
+                  const clip = await api.getClipById(moment.clipId);
+                  openClip(clip);
+                }}
+              >
+                <h4>{moment.label}</h4>
+                <p>{moment.detail}</p>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

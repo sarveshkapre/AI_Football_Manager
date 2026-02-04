@@ -21,6 +21,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Report export queue and keyboard shortcuts
 - Live event feed panel and signal trend charts in Coach Mode
 - Draft report view with queue auto-fill and persisted storyboards
+- Drag-and-drop ordering for report queue and signal history panel
 
 ## [0.1.0] - 2026-02-04
 ### Added

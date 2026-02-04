@@ -1,7 +1,9 @@
 import { useReportContext } from '../context/ReportContext';
+import { useDragList } from '../hooks/useDragList';
 
 export const ReportQueue = () => {
-  const { queue, removeClip, clearQueue } = useReportContext();
+  const { queue, removeClip, clearQueue, setQueue } = useReportContext();
+  const { handleDragStart, handleDragOver, handleDrop } = useDragList(queue, setQueue);
 
   if (queue.length === 0) {
     return (
@@ -13,8 +15,15 @@ export const ReportQueue = () => {
 
   return (
     <div className="queue">
-      {queue.map((clip) => (
-        <div className="queue-row" key={clip.id}>
+      {queue.map((clip, index) => (
+        <div
+          className="queue-row draggable"
+          key={clip.id}
+          draggable
+          onDragStart={() => handleDragStart(index)}
+          onDragOver={handleDragOver}
+          onDrop={() => handleDrop(index)}
+        >
           <div>
             <h4>{clip.title}</h4>
             <p>{clip.duration}</p>

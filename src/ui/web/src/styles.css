@@ -656,6 +656,10 @@ textarea {
   background: var(--surface-alt);
 }
 
+.queue-row.draggable {
+  cursor: grab;
+}
+
 .queue-actions {
   display: flex;
   justify-content: space-between;
@@ -773,6 +777,38 @@ textarea {
   width: 100%;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(15, 76, 92, 0.9), rgba(15, 76, 92, 0.3));
+}
+
+.signal-history {
+  display: grid;
+  gap: 12px;
+}
+
+.signal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.segment {
+  display: inline-flex;
+  padding: 4px;
+  background: var(--surface-alt);
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.segment-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.segment-btn.active {
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .library-toolbar {
