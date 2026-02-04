@@ -54,6 +54,7 @@ Start here: `docs/PRD.md`.
 - Install dependencies: `npm install`
 - Run dev server: `npm run dev`
 - Vite root is set to `src/ui/web`
+- Navigate using hash routes: `#coach`, `#analyst`, `#reports`, `#settings`
 
 ## Status
 Early-stage product definition. Implementation will follow the PRD.
