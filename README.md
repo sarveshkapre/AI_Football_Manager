@@ -68,6 +68,7 @@ Start here: `docs/PRD.md`.
 - Ingest workflow: upload queue, alignment, segment builder, and pipeline status
 - Coach fast clipping: one-tap 10s/20s/45s capture plus custom in/out
 - Role-based access: settings include presets and per-view toggles
+- Analyst timeline filters: search, tag chips, confidence filter, manual tagging
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

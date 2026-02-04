@@ -494,6 +494,23 @@ select {
   gap: 12px;
 }
 
+.timeline-filters {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 12px;
+}
+
+.timeline-filters input,
+.timeline-filters select,
+.tagging-row input {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  background: var(--surface);
+  color: var(--text);
+}
+
 .timeline-item {
   display: flex;
   justify-content: space-between;
@@ -511,6 +528,11 @@ select {
   transform: translateY(-2px);
 }
 
+.timeline-item.active {
+  border-color: rgba(15, 76, 92, 0.5);
+  box-shadow: var(--shadow);
+}
+
 .tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -524,6 +546,34 @@ select {
   padding: 4px 8px;
   border-radius: 999px;
   font-size: 0.75rem;
+}
+
+.highlight-tag {
+  background: rgba(201, 162, 39, 0.18);
+  color: var(--warning);
+}
+
+.tagging-panel {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid;
+  gap: 12px;
+}
+
+.tagging-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  align-items: center;
+}
+
+.quick-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .overlay-controls {
@@ -1209,6 +1259,11 @@ select {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+}
+
+.tag-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .library-grid {
