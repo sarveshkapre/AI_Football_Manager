@@ -37,7 +37,15 @@ export const Reports = () => {
           </div>
         </div>
         <div className="card surface">
-          <SectionHeader title="Export queue" subtitle="Clips added from Coach/Analyst." />
+          <SectionHeader
+            title="Export queue"
+            subtitle="Clips added from Coach/Analyst."
+            action={
+              <button className="btn" onClick={() => (window.location.hash = '#draft')}>
+                Open draft
+              </button>
+            }
+          />
           <ReportQueue />
         </div>
       </div>

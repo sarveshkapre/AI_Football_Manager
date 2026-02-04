@@ -42,6 +42,11 @@ button {
   color: inherit;
 }
 
+input,
+textarea {
+  font: inherit;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -200,6 +205,12 @@ button {
 
 .btn.ghost {
   background: transparent;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .app-main {
@@ -583,6 +594,24 @@ button {
   text-align: left;
 }
 
+.story-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.storyboard-actions {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr auto;
+}
+
+.storyboard-actions input {
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  padding: 10px 16px;
+}
+
 .report-list {
   display: grid;
   gap: 12px;
@@ -653,6 +682,33 @@ button {
   border: 1px dashed var(--line);
   padding: 16px;
   text-align: center;
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.field input,
+.field textarea {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.summary {
+  display: flex;
+  gap: 32px;
+  align-items: center;
 }
 
 .feed {

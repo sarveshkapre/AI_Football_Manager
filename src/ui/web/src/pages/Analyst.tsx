@@ -2,27 +2,27 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import { SectionHeader } from '../components/SectionHeader';
 import { useClipContext } from '../context/ClipContext';
-import type { Clip, OverlayToggle, Storyboard, TimelineEvent } from '../types';
+import { useStoryboards } from '../context/StoryboardContext';
+import type { Clip, OverlayToggle, TimelineEvent } from '../types';
 
 export const Analyst = () => {
   const { openClip } = useClipContext();
+  const { storyboards, addStoryboard, renameStoryboard, removeStoryboard } = useStoryboards();
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
-  const [storyboards, setStoryboards] = useState<Storyboard[]>([]);
   const [clips, setClips] = useState<Clip[]>([]);
   const [selected, setSelected] = useState<Clip[]>([]);
+  const [storyboardTitle, setStoryboardTitle] = useState('');
 
   useEffect(() => {
     const load = async () => {
-      const [timelineData, overlayData, storyboardData, clipData] = await Promise.all([
+      const [timelineData, overlayData, clipData] = await Promise.all([
         api.getTimeline(),
         api.getOverlays(),
-        api.getStoryboards(),
         api.getClips()
       ]);
       setTimeline(timelineData);
       setOverlays(overlayData);
-      setStoryboards(storyboardData);
       setClips(clipData);
     };
 
@@ -146,6 +146,25 @@ export const Analyst = () => {
               ))}
             </div>
           </div>
+          <div className="storyboard-actions">
+            <input
+              type="text"
+              value={storyboardTitle}
+              onChange={(event) => setStoryboardTitle(event.target.value)}
+              placeholder="Storyboard title"
+            />
+            <button
+              className="btn primary"
+              disabled={selected.length === 0 || storyboardTitle.trim().length === 0}
+              onClick={() => {
+                addStoryboard(storyboardTitle.trim(), selected);
+                setSelected([]);
+                setStoryboardTitle('');
+              }}
+            >
+              Save storyboard
+            </button>
+          </div>
         </div>
       </div>
 
@@ -154,8 +173,26 @@ export const Analyst = () => {
         <div className="storyboard">
           {storyboards.map((board) => (
             <div className="story-card" key={board.id}>
-              <h4>{board.title}</h4>
-              <p>{board.clips.length} clips · Updated {board.updated}</p>
+              <div>
+                <h4>{board.title}</h4>
+                <p>{board.clips.length} clips · Updated {board.updated}</p>
+              </div>
+              <div className="story-actions">
+                <button
+                  className="btn ghost"
+                  onClick={() => {
+                    const title = window.prompt('Rename storyboard', board.title);
+                    if (title && title.trim().length > 0) {
+                      renameStoryboard(board.id, title.trim());
+                    }
+                  }}
+                >
+                  Rename
+                </button>
+                <button className="btn ghost" onClick={() => removeStoryboard(board.id)}>
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>

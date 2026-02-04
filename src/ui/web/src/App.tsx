@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
 import { LiveStatus } from './components/LiveStatus';
 import { ClipModal } from './components/Modal/ClipModal';
-import { ReportQueue } from './components/ReportQueue';
 import { ToastStack } from './components/Toast/ToastStack';
 import { ClipProvider } from './context/ClipContext';
 import { ReportProvider, useReportContext } from './context/ReportContext';
+import { StoryboardProvider } from './context/StoryboardContext';
 import { useHashRoute } from './hooks/useHashRoute';
 import { useHotkeys } from './hooks/useHotkeys';
 import { Analyst } from './pages/Analyst';
 import { Coach } from './pages/Coach';
+import { DraftReport } from './pages/DraftReport';
 import { Library } from './pages/Library';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
@@ -21,12 +22,18 @@ const navItems = [
   { key: 'settings', label: 'Settings', description: 'Roles and defaults' }
 ] as const;
 
+const routeLabels: Record<string, string> = {
+  coach: 'Coach Mode',
+  analyst: 'Analyst Mode',
+  library: 'Clip Library',
+  reports: 'Reports',
+  settings: 'Settings',
+  draft: 'Draft Report'
+};
+
 const Shell = () => {
   const route = useHashRoute();
-  const activeLabel = useMemo(
-    () => navItems.find((item) => item.key === route)?.label ?? 'Coach Mode',
-    [route]
-  );
+  const activeLabel = useMemo(() => routeLabels[route] ?? 'Coach Mode', [route]);
   const { queue } = useReportContext();
 
   useHotkeys({
@@ -102,17 +109,18 @@ const Shell = () => {
           {route === 'analyst' && <Analyst />}
           {route === 'library' && <Library />}
           {route === 'reports' && <Reports />}
+          {route === 'draft' && <DraftReport />}
           {route === 'settings' && <Settings />}
         </div>
       </div>
 
-      {route !== 'reports' && queue.length > 0 ? (
+      {route !== 'reports' && route !== 'draft' && queue.length > 0 ? (
         <div className="queue-dock">
           <div>
             <h4>Report queue</h4>
             <p>{queue.length} clips selected</p>
           </div>
-          <button className="btn" onClick={() => (window.location.hash = '#reports')}>
+          <button className="btn" onClick={() => (window.location.hash = '#draft')}>
             Review
           </button>
         </div>
@@ -125,9 +133,11 @@ export default function App() {
   return (
     <ClipProvider>
       <ReportProvider>
-        <Shell />
-        <ToastStack />
-        <ClipModal />
+        <StoryboardProvider>
+          <Shell />
+          <ToastStack />
+          <ClipModal />
+        </StoryboardProvider>
       </ReportProvider>
     </ClipProvider>
   );

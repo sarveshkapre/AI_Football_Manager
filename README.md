@@ -56,12 +56,14 @@ Start here: `docs/PRD.md`.
 - Vite root is set to `src/ui/web`
 - Navigate using hash routes: `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
 - Keyboard shortcuts: `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library
+- Draft report route: `#draft`
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`
 - Live updates use a lightweight store in `src/ui/web/src/store/liveStore.ts`
 - Clip modal and live event toasts use `src/ui/web/src/context/ClipContext.tsx`
 - Report queue context lives in `src/ui/web/src/context/ReportContext.tsx`
+- Storyboards persist via `src/ui/web/src/context/StoryboardContext.tsx`
 
 ## Status
 Early-stage product definition. Implementation will follow the PRD.
