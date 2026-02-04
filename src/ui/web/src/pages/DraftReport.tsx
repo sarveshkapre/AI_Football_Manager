@@ -2,16 +2,8 @@ import { useMemo, useState } from 'react';
 import { ReportQueue } from '../components/ReportQueue';
 import { SectionHeader } from '../components/SectionHeader';
 import { useReportContext } from '../context/ReportContext';
+import { buildCoverText, downloadFile } from '../utils/export';
 import { formatDuration, durationToSeconds } from '../utils/time';
-
-const download = (filename: string, content: string) => {
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(link.href);
-};
 
 export const DraftReport = () => {
   const { queue } = useReportContext();
@@ -27,9 +19,11 @@ export const DraftReport = () => {
     const payload = {
       title,
       notes,
+      totalDuration,
+      clipCount: queue.length,
       clips: queue
     };
-    download('afm-report.json', JSON.stringify(payload, null, 2));
+    downloadFile('afm-report.json', JSON.stringify(payload, null, 2), 'application/json');
   };
 
   const exportCsv = () => {
@@ -39,7 +33,16 @@ export const DraftReport = () => {
         .map((value) => `"${value.replace(/"/g, '""')}"`)
         .join(',')
     );
-    download('afm-report.csv', [header, ...rows].join('\n'));
+    downloadFile('afm-report.csv', [header, ...rows].join('\n'), 'text/csv');
+  };
+
+  const exportCover = () => {
+    const coverText = buildCoverText(
+      title,
+      notes,
+      queue.slice(0, 5).map((clip) => clip.title)
+    );
+    downloadFile('afm-cover.txt', coverText, 'text/plain');
   };
 
   const coverClips = queue.slice(0, 3);
@@ -88,6 +91,9 @@ export const DraftReport = () => {
               </button>
               <button className="btn" onClick={exportCsv}>
                 Download CSV
+              </button>
+              <button className="btn" onClick={exportCover}>
+                Download cover
               </button>
             </div>
           </div>

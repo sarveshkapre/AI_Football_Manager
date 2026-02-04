@@ -59,6 +59,7 @@ Start here: `docs/PRD.md`.
 - Draft report route: `#draft`
 - Export mock: draft report page can download JSON/CSV for the current queue
 - Draft cover preview: draft report page includes a presentation cover panel
+- Cover export: draft report page can download a cover text file
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

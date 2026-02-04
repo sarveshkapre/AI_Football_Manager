@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/mock';
+import { EngagementStream } from '../components/EngagementStream';
 import { EngagementWidget } from '../components/EngagementWidget';
 import { ReportQueue } from '../components/ReportQueue';
 import { SectionHeader } from '../components/SectionHeader';
@@ -57,23 +58,28 @@ export const Reports = () => {
           <EngagementWidget />
         </div>
         <div className="card surface">
-          <SectionHeader title="Export formats" subtitle="Presentation packs and data files." />
-          <div className="export-grid">
-            <div className="export-card">
-              <h4>Coach pack</h4>
-              <p>Clips + overlays + summary PDF.</p>
-              <button className="btn">Generate</button>
-            </div>
-            <div className="export-card">
-              <h4>Analyst data</h4>
-              <p>Tags, clips, JSON/CSV export.</p>
-              <button className="btn">Download</button>
-            </div>
-            <div className="export-card">
-              <h4>Broadcast pack</h4>
-              <p>Studio-ready sequence with graphics.</p>
-              <button className="btn">Render</button>
-            </div>
+          <SectionHeader title="Engagement stream" subtitle="Live clip opens." />
+          <EngagementStream />
+        </div>
+      </div>
+
+      <div className="card surface">
+        <SectionHeader title="Export formats" subtitle="Presentation packs and data files." />
+        <div className="export-grid">
+          <div className="export-card">
+            <h4>Coach pack</h4>
+            <p>Clips + overlays + summary PDF.</p>
+            <button className="btn">Generate</button>
+          </div>
+          <div className="export-card">
+            <h4>Analyst data</h4>
+            <p>Tags, clips, JSON/CSV export.</p>
+            <button className="btn">Download</button>
+          </div>
+          <div className="export-card">
+            <h4>Broadcast pack</h4>
+            <p>Studio-ready sequence with graphics.</p>
+            <button className="btn">Render</button>
           </div>
         </div>
       </div>

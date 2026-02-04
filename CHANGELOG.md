@@ -26,6 +26,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Presentation cover preview and evidence engagement widget
 - Notification cadence and auto-refresh settings
 - Storyboard drag ordering and engagement stream
+- Draft report cover export and engagement stream wiring
 
 ## [0.1.0] - 2026-02-04
 ### Added
