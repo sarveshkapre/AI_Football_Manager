@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
 import { ReportQueue } from '../components/ReportQueue';
 import { SectionHeader } from '../components/SectionHeader';
+import { useAudit } from '../context/AuditContext';
 import { useReportContext } from '../context/ReportContext';
-import { buildCoverText, downloadFile } from '../utils/export';
+import { buildCoverText, buildPackStub, downloadFile } from '../utils/export';
 import { formatDuration, durationToSeconds } from '../utils/time';
 
 export const DraftReport = () => {
   const { queue } = useReportContext();
+  const { logEvent } = useAudit();
   const [title, setTitle] = useState('Matchday Draft Report');
   const [notes, setNotes] = useState('');
   const [matchLabel, setMatchLabel] = useState('vs. Westbridge');
@@ -28,6 +30,7 @@ export const DraftReport = () => {
       clips: queue
     };
     downloadFile('afm-report.json', JSON.stringify(payload, null, 2), 'application/json');
+    logEvent('Report JSON exported', `${queue.length} clips`);
   };
 
   const exportCsv = () => {
@@ -38,6 +41,7 @@ export const DraftReport = () => {
         .join(',')
     );
     downloadFile('afm-report.csv', [header, ...rows].join('\n'), 'text/csv');
+    logEvent('Report CSV exported', `${queue.length} clips`);
   };
 
   const exportCover = () => {
@@ -47,6 +51,7 @@ export const DraftReport = () => {
       queue.slice(0, 5).map((clip) => clip.title)
     );
     downloadFile('afm-cover.txt', coverText, 'text/plain');
+    logEvent('Cover exported', title);
   };
 
   const exportPack = () => {
@@ -56,9 +61,25 @@ export const DraftReport = () => {
       match: matchLabel,
       owner,
       createdAt: new Date().toISOString(),
-      clipCount: queue.length
+      clipCount: queue.length,
+      totalDuration
     };
-    downloadFile('afm-pack.json', JSON.stringify(metadata, null, 2), 'application/json');
+    const csv = [
+      'id,title,duration,tags',
+      ...queue.map((clip) =>
+        [clip.id, clip.title, clip.duration, clip.tags.join('|')]
+          .map((value) => `"${value.replace(/"/g, '""')}"`)
+          .join(',')
+      )
+    ].join('\n');
+    const cover = buildCoverText(
+      title,
+      notes,
+      queue.slice(0, 5).map((clip) => clip.title)
+    );
+    const pack = buildPackStub(metadata, csv, cover);
+    downloadFile('afm-pack.json', pack, 'application/json');
+    logEvent('Pack exported', `${queue.length} clips`);
   };
 
   const coverClips = queue.slice(0, 3);
@@ -68,7 +89,11 @@ export const DraftReport = () => {
       <SectionHeader
         title="Draft Report"
         subtitle="Auto-filled from the report queue."
-        action={<button className="btn primary" onClick={exportPack}>Generate pack</button>}
+        action={
+          <button className="btn primary" onClick={exportPack}>
+            Generate pack
+          </button>
+        }
       />
 
       <div className="grid two">

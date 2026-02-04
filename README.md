@@ -61,6 +61,7 @@ Start here: `docs/PRD.md`.
 - Draft cover preview: draft report page includes a presentation cover panel
 - Cover export: draft report page can download a cover text file
 - Draft metadata: report includes match label and owner fields
+- Pack stub: draft report can download a JSON pack bundle (metadata + CSV + cover)
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

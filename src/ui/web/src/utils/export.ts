@@ -19,3 +19,18 @@ export const buildCoverText = (title: string, summary: string, clips: string[]) 
     ...clips.map((clip, index) => `${index + 1}. ${clip}`)
   ].join('\n');
 };
+
+export const buildPackStub = (
+  metadata: Record<string, unknown>,
+  csv: string,
+  cover: string
+) => {
+  const payload = {
+    metadata,
+    files: {
+      'report.csv': csv,
+      'cover.txt': cover
+    }
+  };
+  return JSON.stringify(payload, null, 2);
+};

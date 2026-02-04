@@ -4,7 +4,9 @@ import { ClipModal } from './components/Modal/ClipModal';
 import { PreferencesBridge } from './components/PreferencesBridge';
 import { ToastStack } from './components/Toast/ToastStack';
 import { AnnotationsProvider } from './context/AnnotationsContext';
+import { AuditProvider } from './context/AuditContext';
 import { ClipProvider } from './context/ClipContext';
+import { LabelsProvider } from './context/LabelsContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { ReportProvider, useReportContext } from './context/ReportContext';
 import { StoryboardProvider } from './context/StoryboardContext';
@@ -142,10 +144,14 @@ export default function App() {
           <UiProvider>
             <PreferencesProvider>
               <AnnotationsProvider>
-                <PreferencesBridge />
-                <Shell />
-                <ToastStack />
-                <ClipModal />
+                <LabelsProvider>
+                  <AuditProvider>
+                    <PreferencesBridge />
+                    <Shell />
+                    <ToastStack />
+                    <ClipModal />
+                  </AuditProvider>
+                </LabelsProvider>
               </AnnotationsProvider>
             </PreferencesProvider>
           </UiProvider>

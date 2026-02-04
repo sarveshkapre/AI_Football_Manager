@@ -28,6 +28,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Storyboard drag ordering and engagement stream
 - Draft report cover export and engagement stream wiring
 - Draft report metadata fields and clip annotations
+- Pack bundle export, clip labels, and audit log
 
 ## [0.1.0] - 2026-02-04
 ### Added
