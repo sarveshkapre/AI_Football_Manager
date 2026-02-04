@@ -16,6 +16,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - App shell with Coach, Analyst, Reports, and Settings views
 - Mock API layer for live state, cards, timeline, overlays, and reports
 - Lightweight live store with shared status indicator
+- Clip viewer modal and live event toast feed
 
 ## [0.1.0] - 2026-02-04
 ### Added

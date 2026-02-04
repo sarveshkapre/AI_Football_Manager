@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
 import { LiveStatus } from './components/LiveStatus';
+import { ClipModal } from './components/Modal/ClipModal';
+import { ToastStack } from './components/Toast/ToastStack';
+import { ClipProvider } from './context/ClipContext';
 import { useHashRoute } from './hooks/useHashRoute';
 import { Analyst } from './pages/Analyst';
 import { Coach } from './pages/Coach';
@@ -21,54 +24,59 @@ export default function App() {
   );
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark" />
-          <div>
-            <p className="brand-name">AI Football Manager</p>
-            <span className="brand-tag">Matchday Copilot</span>
+    <ClipProvider>
+      <div className="app-shell">
+        <aside className="sidebar">
+          <div className="brand">
+            <div className="brand-mark" />
+            <div>
+              <p className="brand-name">AI Football Manager</p>
+              <span className="brand-tag">Matchday Copilot</span>
+            </div>
           </div>
-        </div>
-        <nav className="nav">
-          {navItems.map((item) => (
-            <a
-              key={item.key}
-              href={`#${item.key}`}
-              className={route === item.key ? 'active' : ''}
-            >
-              <div>
-                <span>{item.label}</span>
-                <p>{item.description}</p>
-              </div>
-            </a>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
-          <LiveStatus />
-          <button className="btn ghost">Invite staff</button>
-        </div>
-      </aside>
+          <nav className="nav">
+            {navItems.map((item) => (
+              <a
+                key={item.key}
+                href={`#${item.key}`}
+                className={route === item.key ? 'active' : ''}
+              >
+                <div>
+                  <span>{item.label}</span>
+                  <p>{item.description}</p>
+                </div>
+              </a>
+            ))}
+          </nav>
+          <div className="sidebar-footer">
+            <LiveStatus />
+            <button className="btn ghost">Invite staff</button>
+          </div>
+        </aside>
 
-      <div className="app-main">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Matchday</p>
-            <h1>{activeLabel}</h1>
-          </div>
-          <div className="topbar-actions">
-            <button className="btn">Upload segment</button>
-            <button className="btn primary">Share pack</button>
-          </div>
-        </header>
+        <div className="app-main">
+          <header className="topbar">
+            <div>
+              <p className="eyebrow">Matchday</p>
+              <h1>{activeLabel}</h1>
+            </div>
+            <div className="topbar-actions">
+              <button className="btn">Upload segment</button>
+              <button className="btn primary">Share pack</button>
+            </div>
+          </header>
 
-        <div className="content">
-          {route === 'coach' && <Coach />}
-          {route === 'analyst' && <Analyst />}
-          {route === 'reports' && <Reports />}
-          {route === 'settings' && <Settings />}
+          <div className="content">
+            {route === 'coach' && <Coach />}
+            {route === 'analyst' && <Analyst />}
+            {route === 'reports' && <Reports />}
+            {route === 'settings' && <Settings />}
+          </div>
         </div>
       </div>
-    </div>
+
+      <ToastStack />
+      <ClipModal />
+    </ClipProvider>
   );
 }

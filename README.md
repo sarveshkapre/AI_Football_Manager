@@ -59,6 +59,7 @@ Start here: `docs/PRD.md`.
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`
 - Live updates use a lightweight store in `src/ui/web/src/store/liveStore.ts`
+- Clip modal and live event toasts use `src/ui/web/src/context/ClipContext.tsx`
 
 ## Status
 Early-stage product definition. Implementation will follow the PRD.

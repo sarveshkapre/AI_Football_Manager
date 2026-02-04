@@ -1,5 +1,7 @@
 import {
   CoachCard,
+  Clip,
+  LiveEvent,
   LiveState,
   Moment,
   OverlayToggle,
@@ -46,6 +48,44 @@ const liveStates: LiveState[] = [
   }
 ];
 
+const overlays: OverlayToggle[] = [
+  { id: 'o1', label: 'Spacing box', enabled: true },
+  { id: 'o2', label: 'Def/Mid/Att lines', enabled: true },
+  { id: 'o3', label: 'Ball trajectory', enabled: false },
+  { id: 'o4', label: 'Territory zones', enabled: false }
+];
+
+const clips: Clip[] = [
+  {
+    id: 'clip-1',
+    title: 'Press beaten via RB-8 channel',
+    duration: '0:12',
+    tags: ['press', 'escape', 'right'],
+    overlays
+  },
+  {
+    id: 'clip-2',
+    title: 'Switch opens weak side',
+    duration: '0:14',
+    tags: ['switch', 'overload'],
+    overlays
+  },
+  {
+    id: 'clip-3',
+    title: 'Turnover in zone 14',
+    duration: '0:10',
+    tags: ['turnover', 'zone-14'],
+    overlays
+  },
+  {
+    id: 'clip-4',
+    title: 'Set-piece sequence',
+    duration: '0:15',
+    tags: ['set-piece'],
+    overlays
+  }
+];
+
 const coachCards: CoachCard[] = [
   {
     id: 'now-1',
@@ -74,18 +114,18 @@ const coachCards: CoachCard[] = [
   {
     id: 'next-2',
     type: 'next',
-    title: 'Stretch with RW high + pin fullback',
-    detail: 'Create weak-side 1v1s to open central switch lane.',
+    title: 'Stagger 8s to occupy half-spaces',
+    detail: 'Create dual interior targets for switches.',
     confidence: 0.66,
     clips: 2
   }
 ];
 
 const moments: Moment[] = [
-  { id: 'm1', label: 'Press beaten', detail: '63:05 - 12s clip' },
-  { id: 'm2', label: 'Overload created', detail: '63:38 - 14s clip' },
-  { id: 'm3', label: 'Dangerous turnover', detail: '64:10 - 10s clip' },
-  { id: 'm4', label: 'Set-piece sequence', detail: '64:22 - 15s clip' }
+  { id: 'm1', label: 'Press beaten', detail: '63:05 - 12s clip', clipId: 'clip-1' },
+  { id: 'm2', label: 'Overload created', detail: '63:38 - 14s clip', clipId: 'clip-2' },
+  { id: 'm3', label: 'Dangerous turnover', detail: '64:10 - 10s clip', clipId: 'clip-3' },
+  { id: 'm4', label: 'Set-piece sequence', detail: '64:22 - 15s clip', clipId: 'clip-4' }
 ];
 
 const recommendations: Recommendation[] = [
@@ -136,17 +176,34 @@ const timeline: TimelineEvent[] = [
   }
 ];
 
-const overlays: OverlayToggle[] = [
-  { id: 'o1', label: 'Spacing box', enabled: true },
-  { id: 'o2', label: 'Def/Mid/Att lines', enabled: true },
-  { id: 'o3', label: 'Ball trajectory', enabled: false },
-  { id: 'o4', label: 'Territory zones', enabled: false }
-];
-
 const reports: ReportItem[] = [
   { id: 'r1', title: 'Segment Report - Final Phase', status: 'Draft', updated: 'Today' },
   { id: 'r2', title: 'Match Report - vs. Westbridge', status: 'Ready', updated: 'Yesterday' },
   { id: 'r3', title: 'Opponent Scout - Press Patterns', status: 'Ready', updated: '2 days ago' }
+];
+
+const liveEvents: LiveEvent[] = [
+  {
+    id: 'e1',
+    timestamp: '63:20',
+    message: 'Press trigger spotted on their left side. Trap recommended.',
+    confidence: 0.74,
+    clipId: 'clip-1'
+  },
+  {
+    id: 'e2',
+    timestamp: '63:45',
+    message: 'Weak-side overload created after switch. Consider pinning fullback.',
+    confidence: 0.7,
+    clipId: 'clip-2'
+  },
+  {
+    id: 'e3',
+    timestamp: '64:12',
+    message: 'Turnover in zone 14. Transition risk rising.',
+    confidence: 0.66,
+    clipId: 'clip-3'
+  }
 ];
 
 export const api = {
@@ -178,5 +235,14 @@ export const api = {
   async getReports() {
     await wait(200);
     return reports;
+  },
+  async getClipById(id: string) {
+    await wait(120);
+    return clips.find((clip) => clip.id === id) ?? clips[0];
+  },
+  async getLiveEvents() {
+    await wait(180);
+    const shuffled = [...liveEvents].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 2);
   }
 };

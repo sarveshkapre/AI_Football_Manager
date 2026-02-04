@@ -3,11 +3,13 @@ import { api } from '../api/mock';
 import { SignalBadge } from '../components/SignalBadge';
 import { SectionHeader } from '../components/SectionHeader';
 import { StatCard } from '../components/StatCard';
+import { useClipContext } from '../context/ClipContext';
 import { useLiveStore } from '../hooks/useLiveStore';
 import type { CoachCard, Recommendation } from '../types';
 
 export const Coach = () => {
   const { liveState, moments, updatedAt } = useLiveStore();
+  const { openClip } = useClipContext();
   const [cards, setCards] = useState<CoachCard[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
@@ -123,10 +125,17 @@ export const Coach = () => {
         <SectionHeader title="Key moments" subtitle="Tap to replay the latest events." />
         <div className="moment-strip">
           {moments.map((moment) => (
-            <div className="moment" key={moment.id}>
+            <button
+              className="moment"
+              key={moment.id}
+              onClick={async () => {
+                const clip = await api.getClipById(moment.clipId);
+                openClip(clip);
+              }}
+            >
               <h4>{moment.label}</h4>
               <p>{moment.detail}</p>
-            </div>
+            </button>
           ))}
         </div>
       </div>

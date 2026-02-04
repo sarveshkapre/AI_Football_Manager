@@ -29,6 +29,7 @@ export interface Moment {
   id: string;
   label: string;
   detail: string;
+  clipId: string;
 }
 
 export interface TimelineEvent {
@@ -50,4 +51,20 @@ export interface ReportItem {
   title: string;
   status: 'Draft' | 'Ready';
   updated: string;
+}
+
+export interface Clip {
+  id: string;
+  title: string;
+  duration: string;
+  tags: string[];
+  overlays: OverlayToggle[];
+}
+
+export interface LiveEvent {
+  id: string;
+  timestamp: string;
+  message: string;
+  confidence: number;
+  clipId: string;
 }

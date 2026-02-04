@@ -35,6 +35,13 @@ a {
   color: inherit;
 }
 
+button {
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -425,6 +432,16 @@ a {
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   background: var(--surface-alt);
+  display: grid;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.moment:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .timeline-list {
@@ -560,6 +577,91 @@ a {
   gap: 12px;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.modal {
+  width: min(720px, 90vw);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.modal-header,
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-body {
+  display: grid;
+  gap: 18px;
+}
+
+.video-preview {
+  display: grid;
+  gap: 12px;
+}
+
+.video-frame {
+  height: 220px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #1d1d1d, #404040);
+}
+
+.video-meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.overlay-panel {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.toast-stack {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: grid;
+  gap: 12px;
+  z-index: 30;
+}
+
+.toast {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  min-width: 260px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+}
+
+.toast:hover {
+  transform: translateY(-2px);
+}
+
 @media (max-width: 960px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -608,5 +710,14 @@ a {
 
   .row-meta {
     text-align: left;
+  }
+
+  .modal {
+    width: 92vw;
+  }
+
+  .toast-stack {
+    left: 16px;
+    right: 16px;
   }
 }
