@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { LiveStatus } from './components/LiveStatus';
 import { useHashRoute } from './hooks/useHashRoute';
 import { Analyst } from './pages/Analyst';
 import { Coach } from './pages/Coach';
@@ -44,10 +45,7 @@ export default function App() {
           ))}
         </nav>
         <div className="sidebar-footer">
-          <div className="status">
-            <span className="dot"></span>
-            Live capture connected
-          </div>
+          <LiveStatus />
           <button className="btn ghost">Invite staff</button>
         </div>
       </aside>

@@ -126,6 +126,37 @@ a {
   background: var(--success);
 }
 
+.live-status {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.85rem;
+}
+
+.live-status span {
+  color: var(--muted);
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.live-dot.on {
+  background: var(--success);
+  box-shadow: 0 0 0 6px rgba(27, 153, 139, 0.15);
+}
+
+.live-dot.off {
+  background: var(--danger);
+}
+
 .btn {
   border: 1px solid var(--line);
   background: var(--surface);

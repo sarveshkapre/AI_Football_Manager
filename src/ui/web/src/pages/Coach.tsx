@@ -3,31 +3,25 @@ import { api } from '../api/mock';
 import { SignalBadge } from '../components/SignalBadge';
 import { SectionHeader } from '../components/SectionHeader';
 import { StatCard } from '../components/StatCard';
-import type { CoachCard, LiveState, Moment, Recommendation } from '../types';
+import { useLiveStore } from '../hooks/useLiveStore';
+import type { CoachCard, Recommendation } from '../types';
 
 export const Coach = () => {
-  const [liveState, setLiveState] = useState<LiveState | null>(null);
+  const { liveState, moments, updatedAt } = useLiveStore();
   const [cards, setCards] = useState<CoachCard[]>([]);
-  const [moments, setMoments] = useState<Moment[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
   useEffect(() => {
     const load = async () => {
-      const [state, cardData, momentData, recs] = await Promise.all([
-        api.getLiveState(),
+      const [cardData, recs] = await Promise.all([
         api.getCoachCards(),
-        api.getMoments(),
         api.getRecommendations()
       ]);
-      setLiveState(state);
       setCards(cardData);
-      setMoments(momentData);
       setRecommendations(recs);
     };
 
     load();
-    const interval = window.setInterval(load, 45000);
-    return () => window.clearInterval(interval);
   }, []);
 
   const nowCards = cards.filter((card) => card.type === 'now');
@@ -83,8 +77,8 @@ export const Coach = () => {
 
       <div className="grid three">
         <StatCard label="Evidence clips" value="12" meta="Last 15 minutes" />
-        <StatCard label="Now refresh" value="45s" meta="Auto cadence" />
-        <StatCard label="Signals" value="High" meta="Tracking stable" />
+        <StatCard label="Now refresh" value="45s" meta={`Last ${updatedAt ? 'sync' : 'update'} `} />
+        <StatCard label="Signals" value={liveState?.signal ?? '--'} meta="Tracking stable" />
       </div>
 
       <div className="grid two">
