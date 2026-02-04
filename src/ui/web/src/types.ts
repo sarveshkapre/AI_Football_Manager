@@ -76,3 +76,40 @@ export interface Storyboard {
   clips: Clip[];
   updated: string;
 }
+
+export type UploadStatus = 'Uploading' | 'Processing' | 'Ready' | 'Failed';
+export type SegmentStatus = 'Queued' | 'Analyzing' | 'Ready';
+export type PipelineStatus = 'Complete' | 'In progress' | 'Queued';
+
+export interface UploadJob {
+  id: string;
+  filename: string;
+  status: UploadStatus;
+  progress: number;
+  duration: string;
+  size: string;
+  uploadedAt: string;
+}
+
+export interface Segment {
+  id: string;
+  label: string;
+  start: string;
+  end: string;
+  status: SegmentStatus;
+  signal: SignalQuality;
+}
+
+export interface PipelineStep {
+  id: string;
+  label: string;
+  status: PipelineStatus;
+  detail: string;
+}
+
+export interface AlignmentState {
+  method: string;
+  confidence: SignalQuality;
+  offset: string;
+  note: string;
+}

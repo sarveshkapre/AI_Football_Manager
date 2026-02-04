@@ -43,7 +43,9 @@ export const ReportQueue = () => {
         <button className="btn" onClick={clearQueue}>
           Clear queue
         </button>
-        <button className="btn primary">Export pack</button>
+        <button className="btn primary" onClick={() => (window.location.hash = '#draft')}>
+          Export pack
+        </button>
       </div>
     </div>
   );

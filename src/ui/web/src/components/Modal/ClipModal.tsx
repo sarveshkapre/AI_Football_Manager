@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/mock';
+import { useAudit } from '../../context/AuditContext';
 import { useClipContext } from '../../context/ClipContext';
 import { useReportContext } from '../../context/ReportContext';
 import type { Clip } from '../../types';
+import { downloadFile } from '../../utils/export';
 
 export const ClipModal = () => {
   const { clip, closeClip } = useClipContext();
   const { addClip } = useReportContext();
+  const { logEvent } = useAudit();
   const [detail, setDetail] = useState<Clip | null>(null);
 
   useEffect(() => {
@@ -22,6 +25,22 @@ export const ClipModal = () => {
   }
 
   const clipDetail = detail ?? clip;
+  const handleAdd = () => {
+    addClip(clipDetail);
+    logEvent('Clip queued', clipDetail.title);
+  };
+
+  const handleExport = () => {
+    const payload = {
+      id: clipDetail.id,
+      title: clipDetail.title,
+      duration: clipDetail.duration,
+      tags: clipDetail.tags,
+      overlays: clipDetail.overlays
+    };
+    downloadFile(`clip-${clipDetail.id}.json`, JSON.stringify(payload, null, 2), 'application/json');
+    logEvent('Clip exported', clipDetail.title);
+  };
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
@@ -56,10 +75,12 @@ export const ClipModal = () => {
           </div>
         </div>
         <footer className="modal-footer">
-          <button className="btn" onClick={() => addClip(clipDetail)}>
+          <button className="btn" onClick={handleAdd}>
             Add to report
           </button>
-          <button className="btn primary">Export clip</button>
+          <button className="btn primary" onClick={handleExport}>
+            Export clip
+          </button>
         </footer>
       </div>
     </div>

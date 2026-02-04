@@ -1,6 +1,9 @@
+import { useMemo } from 'react';
 import { SectionHeader } from '../components/SectionHeader';
+import { useAccess } from '../context/AccessContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { useUi } from '../context/UiContext';
+import type { AccessState } from '../context/AccessContext';
 
 const cadenceOptions = [30, 60, 90] as const;
 
@@ -8,6 +11,67 @@ export const Settings = () => {
   const { notificationCadence, autoRefresh, setNotificationCadence, setAutoRefresh } =
     usePreferences();
   const { density, setDensity } = useUi();
+  const { access, setAccess, setAccessState } = useAccess();
+
+  const presets: { id: string; label: string; state: AccessState }[] = [
+    {
+      id: 'full',
+      label: 'Full staff',
+      state: {
+        coach: true,
+        analyst: true,
+        library: true,
+        reports: true,
+        ingest: true,
+        settings: true,
+        draft: true
+      }
+    },
+    {
+      id: 'coach',
+      label: 'Coach bench',
+      state: {
+        coach: true,
+        analyst: false,
+        library: false,
+        reports: true,
+        ingest: true,
+        settings: true,
+        draft: true
+      }
+    },
+    {
+      id: 'analyst',
+      label: 'Analyst room',
+      state: {
+        coach: false,
+        analyst: true,
+        library: true,
+        reports: true,
+        ingest: true,
+        settings: true,
+        draft: true
+      }
+    }
+  ];
+
+  const activePreset = useMemo(() => {
+    const match = presets.find((preset) =>
+      Object.keys(preset.state).every(
+        (key) => preset.state[key as keyof AccessState] === access[key as keyof AccessState]
+      )
+    );
+    return match?.id ?? 'custom';
+  }, [access, presets]);
+
+  const accessItems: { key: keyof AccessState; label: string; description: string }[] = [
+    { key: 'ingest', label: 'Ingest', description: 'Uploads and alignment tools.' },
+    { key: 'coach', label: 'Coach Mode', description: 'Now and Do Next cards.' },
+    { key: 'analyst', label: 'Analyst Mode', description: 'Timeline, overlays, and chat.' },
+    { key: 'library', label: 'Clip Library', description: 'Search and playlist clips.' },
+    { key: 'reports', label: 'Reports', description: 'Exports, packs, and analytics.' },
+    { key: 'draft', label: 'Draft Report', description: 'Pack builder and share flow.' }
+  ];
 
   return (
     <div className="page-content">
@@ -71,21 +135,42 @@ export const Settings = () => {
           </div>
         </div>
         <div className="card surface">
-          <SectionHeader title="Roles" subtitle="Coach vs analyst access." />
+          <SectionHeader title="Access control" subtitle="Role-based permissions by view." />
           <div className="stack">
             <div className="row-card">
               <div>
-                <h4>Coach view</h4>
-                <p>Now/Do Next cards, key moments, evidence clips.</p>
+                <h4>Role presets</h4>
+                <p>Quickly align access for bench or analyst room.</p>
               </div>
-              <span className="pill">Enabled</span>
+              <div className="segment">
+                {presets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    className={`segment-btn ${activePreset === preset.id ? 'active' : ''}`}
+                    onClick={() => setAccessState(preset.state)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="row-card">
-              <div>
-                <h4>Analyst view</h4>
-                <p>Timeline, overlays, tagging, and report builder.</p>
-              </div>
-              <span className="pill">Enabled</span>
+            <div className="access-grid">
+              {accessItems.map((item) => (
+                <div className="access-row" key={item.key}>
+                  <div>
+                    <h4>{item.label}</h4>
+                    <p>{item.description}</p>
+                  </div>
+                  <label className="toggle">
+                    <input
+                      type="checkbox"
+                      checked={access[item.key]}
+                      onChange={(event) => setAccess(item.key, event.target.checked)}
+                    />
+                    <span>{access[item.key] ? 'Enabled' : 'Disabled'}</span>
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import { DensityToggle } from '../components/DensityToggle';
 import { LiveEventFeed } from '../components/LiveEventFeed';
@@ -7,9 +7,12 @@ import { SignalHistory } from '../components/SignalHistory';
 import { SectionHeader } from '../components/SectionHeader';
 import { StatCard } from '../components/StatCard';
 import { TrendChart } from '../components/TrendChart';
+import { useAudit } from '../context/AuditContext';
 import { useClipContext } from '../context/ClipContext';
+import { useReportContext } from '../context/ReportContext';
 import { useLiveStore } from '../hooks/useLiveStore';
-import type { CoachCard, Recommendation } from '../types';
+import type { CoachCard, Clip, OverlayToggle, Recommendation } from '../types';
+import { durationToSeconds, formatDuration } from '../utils/time';
 
 const signalTrend = [
   { label: '60', value: 70 },
@@ -30,17 +33,25 @@ const pressureTrend = [
 export const Coach = () => {
   const { liveState, moments, updatedAt } = useLiveStore();
   const { openClip } = useClipContext();
+  const { addClip } = useReportContext();
+  const { logEvent } = useAudit();
   const [cards, setCards] = useState<CoachCard[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
+  const [customIn, setCustomIn] = useState('63:20');
+  const [customOut, setCustomOut] = useState('63:35');
+  const [lastCapture, setLastCapture] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
-      const [cardData, recs] = await Promise.all([
+      const [cardData, recs, overlayData] = await Promise.all([
         api.getCoachCards(),
-        api.getRecommendations()
+        api.getRecommendations(),
+        api.getOverlays()
       ]);
       setCards(cardData);
       setRecommendations(recs);
+      setOverlays(overlayData);
     };
 
     load();
@@ -48,6 +59,35 @@ export const Coach = () => {
 
   const nowCards = cards.filter((card) => card.type === 'now');
   const nextCards = cards.filter((card) => card.type === 'next');
+
+  const overlayDefaults = useMemo(
+    () => overlays.map((overlay) => ({ ...overlay })),
+    [overlays]
+  );
+
+  const captureClip = (label: string, durationSeconds: number, tags: string[]) => {
+    const clip: Clip = {
+      id: `live-${Date.now()}`,
+      title: label,
+      duration: formatDuration(Math.max(durationSeconds, 1)),
+      tags,
+      overlays: overlayDefaults
+    };
+    addClip(clip);
+    logEvent('Live clip captured', clip.title);
+    setLastCapture(`${clip.title} (${clip.duration})`);
+  };
+
+  const handleQuickCapture = (seconds: number) => {
+    captureClip(`Live clip · last ${seconds}s`, seconds, ['live', 'quick']);
+  };
+
+  const handleCustomCapture = () => {
+    const start = durationToSeconds(customIn);
+    const end = durationToSeconds(customOut);
+    const duration = end > start ? end - start : 10;
+    captureClip(`Custom clip ${customIn}–${customOut}`, duration, ['live', 'custom']);
+  };
 
   return (
     <div className="page-content">
@@ -146,7 +186,7 @@ export const Coach = () => {
         </div>
       </div>
 
-      <div className="grid two">
+      <div className="grid three">
         <div className="card surface">
           <SectionHeader title="Live event feed" subtitle="Latest tactical events and triggers." />
           <LiveEventFeed />
@@ -158,13 +198,44 @@ export const Coach = () => {
             <TrendChart title="Press intensity" points={pressureTrend} max={100} />
           </div>
         </div>
-      </div>
-
-      <div className="grid two">
         <div className="card surface">
           <SectionHeader title="Signal history" subtitle="Select a time window." />
           <SignalHistory />
         </div>
+      </div>
+
+      <div className="grid two">
+        <div className="card surface">
+          <SectionHeader title="Fast clipping" subtitle="One-tap capture for key moments." />
+          <div className="clip-console">
+            <div className="clip-presets">
+              {[10, 20, 45].map((seconds) => (
+                <button
+                  key={seconds}
+                  className="btn"
+                  onClick={() => handleQuickCapture(seconds)}
+                >
+                  Last {seconds}s
+                </button>
+              ))}
+            </div>
+            <div className="clip-custom">
+              <label className="field">
+                <span>In</span>
+                <input value={customIn} onChange={(event) => setCustomIn(event.target.value)} />
+              </label>
+              <label className="field">
+                <span>Out</span>
+                <input value={customOut} onChange={(event) => setCustomOut(event.target.value)} />
+              </label>
+              <button className="btn primary" onClick={handleCustomCapture}>
+                Capture clip
+              </button>
+            </div>
+            {lastCapture ? <p className="muted">Last captured: {lastCapture}</p> : null}
+          </div>
+        </div>
+
         <div className="card surface">
           <SectionHeader title="Key moments" subtitle="Tap to replay the latest events." />
           <div className="moment-strip">

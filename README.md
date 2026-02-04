@@ -54,8 +54,8 @@ Start here: `docs/PRD.md`.
 - Install dependencies: `npm install`
 - Run dev server: `npm run dev`
 - Vite root is set to `src/ui/web`
-- Navigate using hash routes: `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
-- Keyboard shortcuts: `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library
+- Navigate using hash routes: `#ingest`, `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
+- Keyboard shortcuts: `U` Ingest, `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library
 - Draft report route: `#draft`
 - Export mock: draft report page can download JSON/CSV for the current queue
 - Draft cover preview: draft report page includes a presentation cover panel
@@ -65,6 +65,9 @@ Start here: `docs/PRD.md`.
 - Draft annotations + labels: clip notes and tags export with the report
 - Share pack: draft report generates a share link with permissions
 - Pack stub: draft report can download a JSON pack bundle (metadata + CSV + cover)
+- Ingest workflow: upload queue, alignment, segment builder, and pipeline status
+- Coach fast clipping: one-tap 10s/20s/45s capture plus custom in/out
+- Role-based access: settings include presets and per-view toggles
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

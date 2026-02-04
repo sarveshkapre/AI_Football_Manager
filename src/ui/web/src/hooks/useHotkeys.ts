@@ -5,6 +5,7 @@ interface HotkeyOptions {
   onAnalyst: () => void;
   onLibrary: () => void;
   onReports: () => void;
+  onIngest: () => void;
   onSearch: () => void;
 }
 
@@ -37,6 +38,9 @@ export const useHotkeys = (options: HotkeyOptions) => {
       }
       if (event.key === 'r' || event.key === 'R') {
         options.onReports();
+      }
+      if (event.key === 'u' || event.key === 'U') {
+        options.onIngest();
       }
       if (event.key === '/') {
         event.preventDefault();

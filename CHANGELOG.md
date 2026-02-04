@@ -30,6 +30,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Draft report metadata fields and clip annotations
 - Pack bundle export, clip labels, and audit log
 - Draft report share link, notes export, and cover image download
+- Ingest view with upload queue, alignment, segment builder, and pipeline status
+- Coach Mode fast clipping controls and live capture logging
+- Role-based access presets and view gating
+- Clip export logging from the evidence modal
 
 ## [0.1.0] - 2026-02-04
 ### Added

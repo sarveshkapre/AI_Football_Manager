@@ -3,6 +3,7 @@ import { LiveStatus } from './components/LiveStatus';
 import { ClipModal } from './components/Modal/ClipModal';
 import { PreferencesBridge } from './components/PreferencesBridge';
 import { ToastStack } from './components/Toast/ToastStack';
+import { AccessProvider, useAccess } from './context/AccessContext';
 import { AnnotationsProvider } from './context/AnnotationsContext';
 import { AuditProvider } from './context/AuditContext';
 import { ClipProvider } from './context/ClipContext';
@@ -16,11 +17,13 @@ import { useHotkeys } from './hooks/useHotkeys';
 import { Analyst } from './pages/Analyst';
 import { Coach } from './pages/Coach';
 import { DraftReport } from './pages/DraftReport';
+import { Ingest } from './pages/Ingest';
 import { Library } from './pages/Library';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
 
 const navItems = [
+  { key: 'ingest', label: 'Ingest', description: 'Upload + align video' },
   { key: 'coach', label: 'Coach Mode', description: 'Live tactical guidance' },
   { key: 'analyst', label: 'Analyst Mode', description: 'Timeline + overlays' },
   { key: 'library', label: 'Clip Library', description: 'Evidence clips' },
@@ -34,7 +37,8 @@ const routeLabels: Record<string, string> = {
   library: 'Clip Library',
   reports: 'Reports',
   settings: 'Settings',
-  draft: 'Draft Report'
+  draft: 'Draft Report',
+  ingest: 'Ingest'
 };
 
 const Shell = () => {
@@ -42,6 +46,14 @@ const Shell = () => {
   const activeLabel = useMemo(() => routeLabels[route] ?? 'Coach Mode', [route]);
   const { queue } = useReportContext();
   const { density } = useUi();
+  const { access } = useAccess();
+
+  const allowedNavItems = useMemo(
+    () => navItems.filter((item) => access[item.key as keyof typeof access]),
+    [access]
+  );
+
+  const isAllowed = access[route] ?? true;
 
   useHotkeys({
     onCoach: () => {
@@ -55,6 +67,9 @@ const Shell = () => {
     },
     onReports: () => {
       window.location.hash = '#reports';
+    },
+    onIngest: () => {
+      window.location.hash = '#ingest';
     },
     onSearch: () => {
       if (route === 'library') {
@@ -77,7 +92,7 @@ const Shell = () => {
           </div>
         </div>
         <nav className="nav">
-          {navItems.map((item) => (
+          {allowedNavItems.map((item) => (
             <a
               key={item.key}
               href={`#${item.key}`}
@@ -106,18 +121,31 @@ const Shell = () => {
             <h1>{activeLabel}</h1>
           </div>
           <div className="topbar-actions">
-            <button className="btn">Upload segment</button>
-            <button className="btn primary">Share pack</button>
+            <button className="btn" onClick={() => (window.location.hash = '#ingest')}>
+              Upload segment
+            </button>
+            <button className="btn primary" onClick={() => (window.location.hash = '#draft')}>
+              Share pack
+            </button>
           </div>
         </header>
 
         <div className="content">
-          {route === 'coach' && <Coach />}
-          {route === 'analyst' && <Analyst />}
-          {route === 'library' && <Library />}
-          {route === 'reports' && <Reports />}
-          {route === 'draft' && <DraftReport />}
-          {route === 'settings' && <Settings />}
+          {!isAllowed ? (
+            <div className="page-content">
+              <div className="card surface">
+                <h3>Access restricted</h3>
+                <p className="muted">Ask an admin to enable this view in Settings.</p>
+              </div>
+            </div>
+          ) : null}
+          {isAllowed && route === 'ingest' && <Ingest />}
+          {isAllowed && route === 'coach' && <Coach />}
+          {isAllowed && route === 'analyst' && <Analyst />}
+          {isAllowed && route === 'library' && <Library />}
+          {isAllowed && route === 'reports' && <Reports />}
+          {isAllowed && route === 'draft' && <DraftReport />}
+          {isAllowed && route === 'settings' && <Settings />}
         </div>
       </div>
 
@@ -143,16 +171,18 @@ export default function App() {
         <StoryboardProvider>
           <UiProvider>
             <PreferencesProvider>
-              <AnnotationsProvider>
-                <LabelsProvider>
-                  <AuditProvider>
-                    <PreferencesBridge />
-                    <Shell />
-                    <ToastStack />
-                    <ClipModal />
-                  </AuditProvider>
-                </LabelsProvider>
-              </AnnotationsProvider>
+              <AccessProvider>
+                <AnnotationsProvider>
+                  <LabelsProvider>
+                    <AuditProvider>
+                      <PreferencesBridge />
+                      <Shell />
+                      <ToastStack />
+                      <ClipModal />
+                    </AuditProvider>
+                  </LabelsProvider>
+                </AnnotationsProvider>
+              </AccessProvider>
             </PreferencesProvider>
           </UiProvider>
         </StoryboardProvider>

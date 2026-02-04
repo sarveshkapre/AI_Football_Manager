@@ -5,10 +5,14 @@ import {
   LiveState,
   Moment,
   OverlayToggle,
+  PipelineStep,
   Recommendation,
   ReportItem,
+  Segment,
   Storyboard,
-  TimelineEvent
+  TimelineEvent,
+  UploadJob,
+  AlignmentState
 } from '../types';
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -240,6 +244,88 @@ const liveEvents: LiveEvent[] = [
   }
 ];
 
+const uploads: UploadJob[] = [
+  {
+    id: 'upload-1',
+    filename: 'ARS-vs-WBR-2H.mp4',
+    status: 'Processing',
+    progress: 62,
+    duration: '45:12',
+    size: '1.4 GB',
+    uploadedAt: '2 min ago'
+  },
+  {
+    id: 'upload-2',
+    filename: 'Training-pressing-drill.mp4',
+    status: 'Ready',
+    progress: 100,
+    duration: '18:20',
+    size: '620 MB',
+    uploadedAt: 'Today'
+  }
+];
+
+const segments: Segment[] = [
+  {
+    id: 'seg-1',
+    label: 'Final phase',
+    start: '63:00',
+    end: '80:00',
+    status: 'Analyzing',
+    signal: 'Med'
+  },
+  {
+    id: 'seg-2',
+    label: 'Opening press',
+    start: '03:00',
+    end: '15:00',
+    status: 'Ready',
+    signal: 'High'
+  },
+  {
+    id: 'seg-3',
+    label: 'Set-piece wave',
+    start: '48:00',
+    end: '54:00',
+    status: 'Queued',
+    signal: 'Low'
+  }
+];
+
+const pipeline: PipelineStep[] = [
+  {
+    id: 'pipe-1',
+    label: 'Decode + sync',
+    status: 'Complete',
+    detail: 'Frames extracted and audio aligned'
+  },
+  {
+    id: 'pipe-2',
+    label: 'Tracking + registration',
+    status: 'In progress',
+    detail: '7/11 players tracked with stable ID'
+  },
+  {
+    id: 'pipe-3',
+    label: 'Tactical events',
+    status: 'Queued',
+    detail: 'Press, overload, and switch detectors'
+  },
+  {
+    id: 'pipe-4',
+    label: 'Clip + overlay render',
+    status: 'Queued',
+    detail: '10–15s evidence clips'
+  }
+];
+
+const alignment: AlignmentState = {
+  method: 'Scoreboard OCR',
+  confidence: 'Med',
+  offset: '+00:12',
+  note: 'Scoreboard visible 68% of frames'
+};
+
 export const api = {
   async getLiveState() {
     await wait(300);
@@ -286,5 +372,21 @@ export const api = {
     await wait(180);
     const shuffled = [...liveEvents].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 2);
+  },
+  async getUploads() {
+    await wait(140);
+    return uploads;
+  },
+  async getSegments() {
+    await wait(140);
+    return segments;
+  },
+  async getPipeline() {
+    await wait(140);
+    return pipeline;
+  },
+  async getAlignment() {
+    await wait(120);
+    return alignment;
   }
 };

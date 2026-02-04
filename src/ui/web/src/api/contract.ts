@@ -1,4 +1,18 @@
-import type { Clip, CoachCard, LiveEvent, LiveState, Moment, Recommendation, ReportItem, Storyboard, TimelineEvent } from '../types';
+import type {
+  AlignmentState,
+  Clip,
+  CoachCard,
+  LiveEvent,
+  LiveState,
+  Moment,
+  PipelineStep,
+  Recommendation,
+  ReportItem,
+  Segment,
+  Storyboard,
+  TimelineEvent,
+  UploadJob
+} from '../types';
 
 export interface ApiContract {
   getLiveState: () => Promise<LiveState>;
@@ -11,4 +25,8 @@ export interface ApiContract {
   getClips: () => Promise<Clip[]>;
   getStoryboards: () => Promise<Storyboard[]>;
   getLiveEvents: () => Promise<LiveEvent[]>;
+  getUploads: () => Promise<UploadJob[]>;
+  getSegments: () => Promise<Segment[]>;
+  getPipeline: () => Promise<PipelineStep[]>;
+  getAlignment: () => Promise<AlignmentState>;
 }
