@@ -4,6 +4,7 @@ AI Football Manager is a broadcast-video-first decision-support copilot for elit
 
 ## What this repo contains
 - Product requirements and roadmap documentation
+- Architecture and user-story definitions
 - Early system design notes and implementation scaffolding (as we build)
 
 Start here: `docs/PRD.md`.
@@ -39,6 +40,12 @@ Start here: `docs/PRD.md`.
 ## Repo conventions
 - Keep `CHANGELOG.md`, `README.md`, and `AGENTS.md` accurate and up to date.
 - Record decisions and product changes in `CHANGELOG.md`.
+
+## Docs
+- `docs/PRD.md` — product requirements
+- `docs/ARCHITECTURE.md` — system architecture overview
+- `docs/USER_STORIES.md` — MVP user stories and acceptance criteria
+- `docs/MVP_BACKLOG.md` — draft backlog and milestones
 
 ## Status
 Early-stage product definition. Implementation will follow the PRD.

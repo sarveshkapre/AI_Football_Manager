@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
 ## [Unreleased]
+### Added
+- Architecture overview documentation
+- MVP user stories and acceptance criteria
+- Draft MVP backlog and milestones
+- Source layout scaffolding under `src/`
 
 ## [0.1.0] - 2026-02-04
 ### Added

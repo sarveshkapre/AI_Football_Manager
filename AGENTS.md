@@ -12,6 +12,9 @@ These instructions apply to all automated agents and contributors working in thi
 - Product requirements live in `docs/PRD.md`.
 - Keep PRD updates incremental and dated in the changelog.
 - Use clear, concise language suitable for coaches and analysts.
+- Architecture notes live in `docs/ARCHITECTURE.md`.
+- User stories and acceptance criteria live in `docs/USER_STORIES.md`.
+- MVP backlog and milestones live in `docs/MVP_BACKLOG.md`.
 
 ## Repo hygiene
 - Prefer small, focused commits.
