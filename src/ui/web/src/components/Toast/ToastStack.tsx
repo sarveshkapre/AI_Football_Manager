@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/mock';
 import { useClipContext } from '../../context/ClipContext';
+import { usePreferences } from '../../context/PreferencesContext';
 import type { LiveEvent } from '../../types';
-
-const refreshMs = 30000;
 
 export const ToastStack = () => {
   const { openClip } = useClipContext();
+  const { notificationCadence } = usePreferences();
   const [events, setEvents] = useState<LiveEvent[]>([]);
 
   useEffect(() => {
@@ -15,9 +15,9 @@ export const ToastStack = () => {
       setEvents(data);
     };
     load();
-    const interval = window.setInterval(load, refreshMs);
+    const interval = window.setInterval(load, notificationCadence * 1000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [notificationCadence]);
 
   return (
     <div className="toast-stack">
@@ -25,13 +25,15 @@ export const ToastStack = () => {
         <button
           className="toast"
           key={event.id}
-          onClick={() => openClip({
-            id: event.clipId,
-            title: 'Live event clip',
-            duration: '0:12',
-            tags: ['live'],
-            overlays: []
-          })}
+          onClick={() =>
+            openClip({
+              id: event.clipId,
+              title: 'Live event clip',
+              duration: '0:12',
+              tags: ['live'],
+              overlays: []
+            })
+          }
         >
           <div>
             <p className="eyebrow">{event.timestamp}</p>

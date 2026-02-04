@@ -662,6 +662,39 @@ textarea {
   gap: 12px;
 }
 
+.engagement {
+  display: grid;
+  gap: 16px;
+}
+
+.engagement-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.engagement-card {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+}
+
+.engagement-list {
+  display: grid;
+  gap: 10px;
+}
+
+.engagement-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+}
+
 .queue {
   display: grid;
   gap: 12px;
@@ -740,6 +773,37 @@ textarea {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.cover {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: center;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #0f4c5c, #3a7ca5);
+  color: #ffffff;
+}
+
+.cover-title {
+  font-family: "Space Grotesk", "Helvetica Neue", sans-serif;
+  font-size: 2rem;
+}
+
+.cover-list {
+  display: grid;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+}
+
+.cover-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .feed {

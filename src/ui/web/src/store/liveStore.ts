@@ -8,7 +8,8 @@ export interface LiveSnapshot {
   connected: boolean;
 }
 
-const refreshIntervalMs = 45000;
+let refreshIntervalMs = 45000;
+let autoRefresh = true;
 
 let state: LiveSnapshot = {
   liveState: null,
@@ -50,15 +51,26 @@ const fetchSnapshot = async () => {
   }
 };
 
+const startInterval = () => {
+  if (intervalId) {
+    window.clearInterval(intervalId);
+    intervalId = null;
+  }
+  if (!autoRefresh) {
+    return;
+  }
+  intervalId = window.setInterval(fetchSnapshot, refreshIntervalMs);
+};
+
 export const liveStore = {
   getState() {
     return state;
   },
   subscribe(listener: () => void) {
     listeners.add(listener);
-    if (!intervalId) {
+    if (listeners.size === 1) {
       fetchSnapshot();
-      intervalId = window.setInterval(fetchSnapshot, refreshIntervalMs);
+      startInterval();
     }
 
     return () => {
@@ -69,5 +81,17 @@ export const liveStore = {
         setState({ connected: false });
       }
     };
+  },
+  setAutoRefresh(enabled: boolean) {
+    autoRefresh = enabled;
+    if (listeners.size > 0) {
+      startInterval();
+    }
+  },
+  setRefreshInterval(ms: number) {
+    refreshIntervalMs = ms;
+    if (listeners.size > 0) {
+      startInterval();
+    }
   }
 };

@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { LiveStatus } from './components/LiveStatus';
 import { ClipModal } from './components/Modal/ClipModal';
+import { PreferencesBridge } from './components/PreferencesBridge';
 import { ToastStack } from './components/Toast/ToastStack';
 import { ClipProvider } from './context/ClipContext';
+import { PreferencesProvider } from './context/PreferencesContext';
 import { ReportProvider, useReportContext } from './context/ReportContext';
 import { StoryboardProvider } from './context/StoryboardContext';
 import { UiProvider, useUi } from './context/UiContext';
@@ -137,9 +139,12 @@ export default function App() {
       <ReportProvider>
         <StoryboardProvider>
           <UiProvider>
-            <Shell />
-            <ToastStack />
-            <ClipModal />
+            <PreferencesProvider>
+              <PreferencesBridge />
+              <Shell />
+              <ToastStack />
+              <ClipModal />
+            </PreferencesProvider>
           </UiProvider>
         </StoryboardProvider>
       </ReportProvider>

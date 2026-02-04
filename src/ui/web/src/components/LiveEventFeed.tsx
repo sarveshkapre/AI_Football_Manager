@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/mock';
 import { useClipContext } from '../context/ClipContext';
+import { usePreferences } from '../context/PreferencesContext';
 import type { LiveEvent } from '../types';
 
 export const LiveEventFeed = () => {
   const { openClip } = useClipContext();
+  const { notificationCadence } = usePreferences();
   const [events, setEvents] = useState<LiveEvent[]>([]);
 
   useEffect(() => {
@@ -13,9 +15,9 @@ export const LiveEventFeed = () => {
       setEvents(data);
     };
     load();
-    const interval = window.setInterval(load, 30000);
+    const interval = window.setInterval(load, notificationCadence * 1000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [notificationCadence]);
 
   return (
     <div className="feed">

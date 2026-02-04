@@ -42,6 +42,8 @@ export const DraftReport = () => {
     download('afm-report.csv', [header, ...rows].join('\n'));
   };
 
+  const coverClips = queue.slice(0, 3);
+
   return (
     <div className="page-content">
       <SectionHeader
@@ -93,6 +95,27 @@ export const DraftReport = () => {
         <div className="card surface">
           <SectionHeader title="Queued clips" subtitle="Order reflects report sequence." />
           <ReportQueue />
+        </div>
+      </div>
+
+      <div className="card surface">
+        <SectionHeader title="Presentation cover" subtitle="Preview for the report pack." />
+        <div className="cover">
+          <div>
+            <p className="eyebrow">AI Football Manager</p>
+            <h2 className="cover-title">{title}</h2>
+            <p className="muted">{notes || 'Add a short summary to guide the staff.'}</p>
+          </div>
+          <div className="cover-list">
+            <h4>Key clips</h4>
+            {coverClips.length === 0 && <p className="muted">Add clips to show highlights.</p>}
+            {coverClips.map((clip) => (
+              <div key={clip.id} className="cover-item">
+                <span>{clip.title}</span>
+                <span className="pill">{clip.duration}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

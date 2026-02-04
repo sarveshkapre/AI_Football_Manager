@@ -66,6 +66,7 @@ Start here: `docs/PRD.md`.
 - Report queue context lives in `src/ui/web/src/context/ReportContext.tsx`
 - Storyboards persist via `src/ui/web/src/context/StoryboardContext.tsx`
 - UI density preference stored via `src/ui/web/src/context/UiContext.tsx`
+- Notification cadence and auto-refresh settings live in `src/ui/web/src/context/PreferencesContext.tsx`
 
 ## Status
 Early-stage product definition. Implementation will follow the PRD.
