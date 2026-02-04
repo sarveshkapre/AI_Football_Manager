@@ -1,18 +1,167 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import { AuditLog } from '../components/AuditLog';
 import { EngagementStream } from '../components/EngagementStream';
 import { EngagementWidget } from '../components/EngagementWidget';
 import { ReportQueue } from '../components/ReportQueue';
 import { SectionHeader } from '../components/SectionHeader';
-import type { ReportItem } from '../types';
+import { useAudit } from '../context/AuditContext';
+import { useReportContext } from '../context/ReportContext';
+import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
+import { downloadFile } from '../utils/export';
+import { clockToSeconds } from '../utils/time';
+
+interface SegmentReport {
+  segmentId: string;
+  title: string;
+  summary: string;
+  patterns: string[];
+  adjustments: string[];
+  clips: Clip[];
+  confidence: number;
+  signal: string;
+  generatedAt: string;
+}
 
 export const Reports = () => {
   const [reports, setReports] = useState<ReportItem[]>([]);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
+  const [clips, setClips] = useState<Clip[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string>('');
+  const [segmentReport, setSegmentReport] = useState<SegmentReport | null>(null);
+  const { queue } = useReportContext();
+  const { logEvent } = useAudit();
 
   useEffect(() => {
     api.getReports().then(setReports);
   }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      const [segmentData, timelineData, clipData, recs] = await Promise.all([
+        api.getSegments(),
+        api.getTimeline(),
+        api.getClips(),
+        api.getRecommendations()
+      ]);
+      setSegments(segmentData);
+      setTimeline(timelineData);
+      setClips(clipData);
+      setRecommendations(recs);
+      if (segmentData.length > 0) {
+        setSelectedSegmentId(segmentData[0].id);
+      }
+    };
+
+    load();
+  }, []);
+
+  const segmentOptions = useMemo(
+    () =>
+      segments.map((segment) => ({
+        id: segment.id,
+        label: `${segment.label} (${segment.start}–${segment.end})`
+      })),
+    [segments]
+  );
+
+  const generateSegmentReport = () => {
+    const segment = segments.find((item) => item.id === selectedSegmentId);
+    if (!segment) {
+      return;
+    }
+
+    const start = clockToSeconds(segment.start);
+    const end = clockToSeconds(segment.end);
+    const segmentEvents = timeline.filter((event) => {
+      const minute = clockToSeconds(event.minute);
+      if (minute === null || start === null || end === null) {
+        return true;
+      }
+      return minute >= start && minute <= end;
+    });
+
+    const tagCounts = new Map<string, number>();
+    segmentEvents.forEach((event) =>
+      event.tags.forEach((tag) => tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1))
+    );
+
+    const topTags = Array.from(tagCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+
+    const patterns =
+      topTags.length > 0
+        ? topTags.map(([tag, count]) => `Repeated ${tag} sequences (${count}x).`)
+        : ['No repeated patterns above threshold.'];
+
+    const adjustments =
+      recommendations.length > 0
+        ? recommendations.slice(0, 3).map((rec) => {
+            return `${rec.title} — Tradeoff: ${rec.tradeoff}.`;
+          })
+        : ['Hold shape and wait for a clearer signal.'];
+
+    const evidenceClips =
+      queue.length > 0
+        ? queue.slice(0, 5)
+        : clips.filter((clip) => segmentEvents.some((event) => event.clipId === clip.id));
+
+    const confidence =
+      segmentEvents.length > 0
+        ? Math.round(
+            (segmentEvents.reduce((sum, event) => sum + event.confidence, 0) /
+              segmentEvents.length) *
+              100
+          ) / 100
+        : 0.6;
+
+    const summary =
+      segmentEvents.length > 0
+        ? `During ${segment.label} (${segment.start}–${segment.end}), ${patterns[0].toLowerCase()}`
+        : `During ${segment.label} (${segment.start}–${segment.end}), signal quality was ${segment.signal.toLowerCase()} and evidence was sparse.`;
+
+    const report: SegmentReport = {
+      segmentId: segment.id,
+      title: `${segment.label} report`,
+      summary,
+      patterns,
+      adjustments,
+      clips: evidenceClips,
+      confidence,
+      signal: segment.signal,
+      generatedAt: new Date().toLocaleString()
+    };
+
+    setSegmentReport(report);
+    logEvent('Segment report generated', segment.label);
+  };
+
+  const downloadSegmentReport = () => {
+    if (!segmentReport) {
+      return;
+    }
+    downloadFile(
+      'segment-report.json',
+      JSON.stringify(segmentReport, null, 2),
+      'application/json'
+    );
+    logEvent('Segment report exported', segmentReport.title);
+  };
+
+  const copySummary = async () => {
+    if (!segmentReport) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(segmentReport.summary);
+      logEvent('Segment summary copied', segmentReport.title);
+    } catch {
+      logEvent('Segment summary generated', segmentReport.title);
+    }
+  };
 
   return (
     <div className="page-content">
@@ -50,6 +199,118 @@ export const Reports = () => {
             }
           />
           <ReportQueue />
+        </div>
+      </div>
+
+      <div className="grid two">
+        <div className="card surface">
+          <SectionHeader
+            title="Segment report"
+            subtitle="Auto-generate the key findings."
+            action={
+              <button
+                className="btn primary"
+                onClick={generateSegmentReport}
+                disabled={segments.length === 0}
+              >
+                Generate
+              </button>
+            }
+          />
+          <div className="segment-report-form">
+            <label className="field">
+              <span>Segment</span>
+              <select
+                value={selectedSegmentId}
+                onChange={(event) => setSelectedSegmentId(event.target.value)}
+                disabled={segmentOptions.length === 0}
+              >
+                {segmentOptions.length === 0 ? (
+                  <option value="">No segments available</option>
+                ) : (
+                  segmentOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+            <div className="segment-report-meta">
+              <div>
+                <p className="eyebrow">Queued clips</p>
+                <h4>{queue.length}</h4>
+              </div>
+              <div>
+                <p className="eyebrow">Timeline events</p>
+                <h4>{timeline.length}</h4>
+              </div>
+            </div>
+            <p className="muted">
+              Uses evidence clips from the queue when available; otherwise falls back to detected
+              timeline clips.
+            </p>
+          </div>
+        </div>
+
+        <div className="card surface">
+          <SectionHeader
+            title="Report output"
+            subtitle={segmentReport ? `Generated ${segmentReport.generatedAt}` : 'Not generated yet.'}
+            action={
+              <div className="header-actions">
+                <button className="btn" onClick={copySummary} disabled={!segmentReport}>
+                  Copy summary
+                </button>
+                <button className="btn" onClick={downloadSegmentReport} disabled={!segmentReport}>
+                  Download JSON
+                </button>
+              </div>
+            }
+          />
+          {segmentReport ? (
+            <div className="report-output">
+              <div className="report-block">
+                <p className="eyebrow">Summary</p>
+                <h3>{segmentReport.title}</h3>
+                <p>{segmentReport.summary}</p>
+                <div className="report-meta">
+                  <span className="pill">Signal {segmentReport.signal}</span>
+                  <span className="pill">Confidence {segmentReport.confidence}</span>
+                  <span className="pill">{segmentReport.clips.length} clips</span>
+                </div>
+              </div>
+              <div className="report-block">
+                <p className="eyebrow">Repeat patterns</p>
+                <ul className="report-bullets">
+                  {segmentReport.patterns.map((pattern) => (
+                    <li key={pattern}>{pattern}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="report-block">
+                <p className="eyebrow">Recommended adjustments</p>
+                <ul className="report-bullets">
+                  {segmentReport.adjustments.map((adjustment) => (
+                    <li key={adjustment}>{adjustment}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="report-block">
+                <p className="eyebrow">Evidence clips</p>
+                <div className="report-clips">
+                  {segmentReport.clips.map((clip) => (
+                    <div key={clip.id} className="report-clip">
+                      <span>{clip.title}</span>
+                      <span className="pill">{clip.duration}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="muted">Generate a report to view findings.</p>
+          )}
         </div>
       </div>
 

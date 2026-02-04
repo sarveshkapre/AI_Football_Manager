@@ -17,6 +17,20 @@ export const durationToSeconds = (duration: string) => {
   return 0;
 };
 
+export const clockToSeconds = (clock: string) => {
+  const parts = clock.split(':').map(Number);
+  if (parts.some((part) => Number.isNaN(part))) {
+    return null;
+  }
+  if (parts.length === 2) {
+    return parts[0] * 60 + parts[1];
+  }
+  if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  return null;
+};
+
 export const formatDuration = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;

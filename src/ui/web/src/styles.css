@@ -693,6 +693,62 @@ select {
   gap: 12px;
 }
 
+.segment-report-form {
+  display: grid;
+  gap: 16px;
+}
+
+.segment-report-form select {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.segment-report-meta {
+  display: flex;
+  gap: 32px;
+}
+
+.report-output {
+  display: grid;
+  gap: 20px;
+}
+
+.report-block {
+  display: grid;
+  gap: 10px;
+}
+
+.report-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.report-bullets {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.report-clips {
+  display: grid;
+  gap: 8px;
+}
+
+.report-clip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  background: var(--surface-alt);
+}
+
 .report-row {
   display: flex;
   justify-content: space-between;
