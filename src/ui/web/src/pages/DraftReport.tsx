@@ -9,6 +9,8 @@ export const DraftReport = () => {
   const { queue } = useReportContext();
   const [title, setTitle] = useState('Matchday Draft Report');
   const [notes, setNotes] = useState('');
+  const [matchLabel, setMatchLabel] = useState('vs. Westbridge');
+  const [owner, setOwner] = useState('Lead Analyst');
 
   const totalDuration = useMemo(() => {
     const seconds = queue.reduce((sum, clip) => sum + durationToSeconds(clip.duration), 0);
@@ -19,6 +21,8 @@ export const DraftReport = () => {
     const payload = {
       title,
       notes,
+      match: matchLabel,
+      owner,
       totalDuration,
       clipCount: queue.length,
       clips: queue
@@ -45,6 +49,18 @@ export const DraftReport = () => {
     downloadFile('afm-cover.txt', coverText, 'text/plain');
   };
 
+  const exportPack = () => {
+    const metadata = {
+      title,
+      notes,
+      match: matchLabel,
+      owner,
+      createdAt: new Date().toISOString(),
+      clipCount: queue.length
+    };
+    downloadFile('afm-pack.json', JSON.stringify(metadata, null, 2), 'application/json');
+  };
+
   const coverClips = queue.slice(0, 3);
 
   return (
@@ -52,7 +68,7 @@ export const DraftReport = () => {
       <SectionHeader
         title="Draft Report"
         subtitle="Auto-filled from the report queue."
-        action={<button className="btn primary">Generate pack</button>}
+        action={<button className="btn primary" onClick={exportPack}>Generate pack</button>}
       />
 
       <div className="grid two">
@@ -64,6 +80,22 @@ export const DraftReport = () => {
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Enter report title"
+              />
+            </label>
+            <label className="field">
+              <span>Match label</span>
+              <input
+                value={matchLabel}
+                onChange={(event) => setMatchLabel(event.target.value)}
+                placeholder="Opponent or fixture"
+              />
+            </label>
+            <label className="field">
+              <span>Owner</span>
+              <input
+                value={owner}
+                onChange={(event) => setOwner(event.target.value)}
+                placeholder="Primary analyst"
               />
             </label>
             <label className="field">
@@ -110,6 +142,7 @@ export const DraftReport = () => {
           <div>
             <p className="eyebrow">AI Football Manager</p>
             <h2 className="cover-title">{title}</h2>
+            <p className="muted">{matchLabel}</p>
             <p className="muted">{notes || 'Add a short summary to guide the staff.'}</p>
           </div>
           <div className="cover-list">

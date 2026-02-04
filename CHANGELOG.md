@@ -27,6 +27,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Notification cadence and auto-refresh settings
 - Storyboard drag ordering and engagement stream
 - Draft report cover export and engagement stream wiring
+- Draft report metadata fields and clip annotations
 
 ## [0.1.0] - 2026-02-04
 ### Added

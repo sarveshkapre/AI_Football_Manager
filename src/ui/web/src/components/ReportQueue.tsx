@@ -1,5 +1,6 @@
 import { useReportContext } from '../context/ReportContext';
 import { useDragList } from '../hooks/useDragList';
+import { QueueAnnotation } from './QueueAnnotation';
 
 export const ReportQueue = () => {
   const { queue, removeClip, clearQueue, setQueue } = useReportContext();
@@ -28,9 +29,12 @@ export const ReportQueue = () => {
             <h4>{clip.title}</h4>
             <p>{clip.duration}</p>
           </div>
-          <button className="btn ghost" onClick={() => removeClip(clip.id)}>
-            Remove
-          </button>
+          <div className="queue-actions-inline">
+            <QueueAnnotation clipId={clip.id} />
+            <button className="btn ghost" onClick={() => removeClip(clip.id)}>
+              Remove
+            </button>
+          </div>
         </div>
       ))}
       <div className="queue-actions">

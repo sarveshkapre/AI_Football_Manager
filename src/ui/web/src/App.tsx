@@ -3,6 +3,7 @@ import { LiveStatus } from './components/LiveStatus';
 import { ClipModal } from './components/Modal/ClipModal';
 import { PreferencesBridge } from './components/PreferencesBridge';
 import { ToastStack } from './components/Toast/ToastStack';
+import { AnnotationsProvider } from './context/AnnotationsContext';
 import { ClipProvider } from './context/ClipContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { ReportProvider, useReportContext } from './context/ReportContext';
@@ -140,10 +141,12 @@ export default function App() {
         <StoryboardProvider>
           <UiProvider>
             <PreferencesProvider>
-              <PreferencesBridge />
-              <Shell />
-              <ToastStack />
-              <ClipModal />
+              <AnnotationsProvider>
+                <PreferencesBridge />
+                <Shell />
+                <ToastStack />
+                <ClipModal />
+              </AnnotationsProvider>
             </PreferencesProvider>
           </UiProvider>
         </StoryboardProvider>

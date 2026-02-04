@@ -740,6 +740,29 @@ textarea {
   gap: 12px;
 }
 
+.queue-actions-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.annotation {
+  display: flex;
+  align-items: center;
+}
+
+.annotation-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.annotation-edit input {
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+}
+
 .queue-dock {
   position: fixed;
   right: 24px;
