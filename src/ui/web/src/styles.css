@@ -94,6 +94,9 @@ button {
   border: 1px solid transparent;
   background: transparent;
   transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .nav a p {
@@ -110,6 +113,15 @@ button {
 
 .nav a:hover {
   background: rgba(255, 255, 255, 0.7);
+}
+
+.nav-pill {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  align-self: flex-start;
 }
 
 .sidebar-footer {
@@ -600,6 +612,49 @@ button {
   gap: 12px;
 }
 
+.queue {
+  display: grid;
+  gap: 12px;
+}
+
+.queue-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-alt);
+}
+
+.queue-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.queue-dock {
+  position: fixed;
+  right: 24px;
+  top: 24px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 25;
+}
+
+.queue-empty {
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--line);
+  padding: 16px;
+  text-align: center;
+}
+
 .library-toolbar {
   display: grid;
   gap: 12px;
@@ -794,7 +849,8 @@ button {
 
   .row-card,
   .timeline-item,
-  .report-row {
+  .report-row,
+  .queue-row {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -810,5 +866,12 @@ button {
   .toast-stack {
     left: 16px;
     right: 16px;
+  }
+
+  .queue-dock {
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: 120px;
   }
 }

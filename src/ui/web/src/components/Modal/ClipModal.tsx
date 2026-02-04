@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/mock';
 import { useClipContext } from '../../context/ClipContext';
+import { useReportContext } from '../../context/ReportContext';
 import type { Clip } from '../../types';
 
 export const ClipModal = () => {
   const { clip, closeClip } = useClipContext();
+  const { addClip } = useReportContext();
   const [detail, setDetail] = useState<Clip | null>(null);
 
   useEffect(() => {
@@ -19,13 +21,15 @@ export const ClipModal = () => {
     return null;
   }
 
+  const clipDetail = detail ?? clip;
+
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
       <div className="modal">
         <header className="modal-header">
           <div>
             <p className="eyebrow">Evidence Clip</p>
-            <h3>{detail?.title ?? clip.title}</h3>
+            <h3>{clipDetail.title}</h3>
           </div>
           <button className="btn ghost" onClick={closeClip}>
             Close
@@ -35,14 +39,14 @@ export const ClipModal = () => {
           <div className="video-preview">
             <div className="video-frame"></div>
             <div className="video-meta">
-              <span>{detail?.duration ?? clip.duration}</span>
-              <span>{detail?.tags.join(' · ')}</span>
+              <span>{clipDetail.duration}</span>
+              <span>{clipDetail.tags.join(' · ')}</span>
             </div>
           </div>
           <div className="overlay-panel">
             <h4>Overlays</h4>
             <div className="overlay-controls">
-              {detail?.overlays.map((overlay) => (
+              {clipDetail.overlays.map((overlay) => (
                 <label className="toggle" key={overlay.id}>
                   <input type="checkbox" defaultChecked={overlay.enabled} />
                   <span>{overlay.label}</span>
@@ -52,8 +56,10 @@ export const ClipModal = () => {
           </div>
         </div>
         <footer className="modal-footer">
-          <button className="btn">Export clip</button>
-          <button className="btn primary">Add to report</button>
+          <button className="btn" onClick={() => addClip(clipDetail)}>
+            Add to report
+          </button>
+          <button className="btn primary">Export clip</button>
         </footer>
       </div>
     </div>
