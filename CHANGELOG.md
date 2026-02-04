@@ -12,6 +12,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Source layout scaffolding under `src/`
 - Minimal UI prototype under `src/ui/web`
 - React + Vite web UI scaffold with interactive mode toggle
+- Auto-rotating live state mock data for Coach Mode
 
 ## [0.1.0] - 2026-02-04
 ### Added

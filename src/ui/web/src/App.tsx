@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   analystHighlights,
   coachHighlights,
   evidenceCards,
+  liveStates,
   metrics,
-  nowInsights,
   recommendations,
   roadmap
 } from './data';
@@ -18,8 +18,23 @@ const navLinks = [
   { id: 'roadmap', label: 'Roadmap' }
 ];
 
+const stateRefreshMs = 45000;
+
 export default function App() {
   const [mode, setMode] = useState<Mode>('coach');
+  const [stateIndex, setStateIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setStateIndex((prev) => (prev + 1) % liveStates.length);
+    }, stateRefreshMs);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const liveState = liveStates[stateIndex];
+  const signalClass = liveState.signal.toLowerCase();
+
   const modeCopy = useMemo(
     () =>
       mode === 'coach'
@@ -83,20 +98,20 @@ export default function App() {
           </div>
           <div className="hero-surface reveal" style={{ ['--delay' as const]: '0.2s' }}>
             <div className="surface-header">
-              <span>Live Match - 63:12</span>
-              <span className="badge high">Signal High</span>
+              <span>Live Match - {liveState.minute}</span>
+              <span className={`badge ${signalClass}`}>Signal {liveState.signal}</span>
             </div>
             <div className="surface-body">
               <div className="card">
                 <p className="card-title">Now</p>
                 <ul className="card-list">
-                  {nowInsights.map((insight) => (
+                  {liveState.insights.map((insight) => (
                     <li key={insight}>{insight}</li>
                   ))}
                 </ul>
                 <div className="card-meta">
-                  <span>Confidence 0.78</span>
-                  <span>3 supporting clips</span>
+                  <span>Confidence {liveState.confidence}</span>
+                  <span>{liveState.clips} supporting clips</span>
                 </div>
               </div>
               <div className="card dark">
@@ -139,7 +154,7 @@ export default function App() {
             </button>
           </div>
           <div className="mode-panels reveal" style={{ ['--delay' as const]: '0.2s' }}>
-            <div className="panel active">
+            <div className="panel">
               <div className="panel-text">
                 <h3>{modeCopy.title}</h3>
                 <p>{modeCopy.summary}</p>
@@ -156,6 +171,22 @@ export default function App() {
                     <span>{highlight.meta}</span>
                   </div>
                 ))}
+                {mode === 'analyst' && (
+                  <div className="timeline">
+                    <div className="tick"></div>
+                    <div className="tick"></div>
+                    <div className="tick highlight"></div>
+                    <div className="tick"></div>
+                  </div>
+                )}
+                {mode === 'analyst' && (
+                  <div className="overlay-grid">
+                    <div className="overlay"></div>
+                    <div className="overlay"></div>
+                    <div className="overlay"></div>
+                    <div className="overlay"></div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

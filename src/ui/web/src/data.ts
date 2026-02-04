@@ -1,7 +1,37 @@
-export const nowInsights = [
-  'Opposition 4-4-2 mid-block, compact central lanes.',
-  'Our progression is stalling in the RB-8 channel.',
-  'Transition risk rising after wide overloads.'
+export const liveStates = [
+  {
+    minute: '63:12',
+    signal: 'High',
+    confidence: 0.78,
+    clips: 3,
+    insights: [
+      'Opposition 4-4-2 mid-block, compact central lanes.',
+      'Our progression is stalling in the RB-8 channel.',
+      'Transition risk rising after wide overloads.'
+    ]
+  },
+  {
+    minute: '64:02',
+    signal: 'Med',
+    confidence: 0.65,
+    clips: 2,
+    insights: [
+      'Press intensity dropping on their left side.',
+      'Switches to RW are creating 1v1 isolations.',
+      'Second-ball recoveries favor them in zone 14.'
+    ]
+  },
+  {
+    minute: '64:46',
+    signal: 'High',
+    confidence: 0.81,
+    clips: 3,
+    insights: [
+      'Their 9 is screening the 6; center access is blocked.',
+      'Our 8 is arriving late into half-space pockets.',
+      'Counterpress success improving after lost duels.'
+    ]
+  }
 ];
 
 export const recommendations = [

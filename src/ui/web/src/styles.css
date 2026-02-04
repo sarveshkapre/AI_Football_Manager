@@ -229,6 +229,16 @@ body {
   color: #ffffff;
 }
 
+.badge.med {
+  background: #c9b458;
+  color: #111111;
+}
+
+.badge.low {
+  background: #b23a48;
+  color: #ffffff;
+}
+
 .surface-body {
   display: grid;
   gap: 16px;
