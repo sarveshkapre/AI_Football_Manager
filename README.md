@@ -57,6 +57,7 @@ Start here: `docs/PRD.md`.
 - Navigate using hash routes: `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
 - Keyboard shortcuts: `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library
 - Draft report route: `#draft`
+- Export mock: draft report page can download JSON/CSV for the current queue
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`
@@ -64,6 +65,7 @@ Start here: `docs/PRD.md`.
 - Clip modal and live event toasts use `src/ui/web/src/context/ClipContext.tsx`
 - Report queue context lives in `src/ui/web/src/context/ReportContext.tsx`
 - Storyboards persist via `src/ui/web/src/context/StoryboardContext.tsx`
+- UI density preference stored via `src/ui/web/src/context/UiContext.tsx`
 
 ## Status
 Early-stage product definition. Implementation will follow the PRD.

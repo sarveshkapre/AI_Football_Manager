@@ -5,6 +5,7 @@ import { ToastStack } from './components/Toast/ToastStack';
 import { ClipProvider } from './context/ClipContext';
 import { ReportProvider, useReportContext } from './context/ReportContext';
 import { StoryboardProvider } from './context/StoryboardContext';
+import { UiProvider, useUi } from './context/UiContext';
 import { useHashRoute } from './hooks/useHashRoute';
 import { useHotkeys } from './hooks/useHotkeys';
 import { Analyst } from './pages/Analyst';
@@ -35,6 +36,7 @@ const Shell = () => {
   const route = useHashRoute();
   const activeLabel = useMemo(() => routeLabels[route] ?? 'Coach Mode', [route]);
   const { queue } = useReportContext();
+  const { density } = useUi();
 
   useHotkeys({
     onCoach: () => {
@@ -60,7 +62,7 @@ const Shell = () => {
   });
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell density-${density}`}>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark" />
@@ -134,9 +136,11 @@ export default function App() {
     <ClipProvider>
       <ReportProvider>
         <StoryboardProvider>
-          <Shell />
-          <ToastStack />
-          <ClipModal />
+          <UiProvider>
+            <Shell />
+            <ToastStack />
+            <ClipModal />
+          </UiProvider>
         </StoryboardProvider>
       </ReportProvider>
     </ClipProvider>

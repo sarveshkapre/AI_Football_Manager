@@ -54,6 +54,21 @@ textarea {
   background: radial-gradient(circle at top left, #ffffff 0%, #f5f4f2 60%, #ebe9e2 100%);
 }
 
+.app-shell.density-compact {
+  font-size: 0.95rem;
+}
+
+.app-shell.density-compact .card,
+.app-shell.density-compact .row-card,
+.app-shell.density-compact .report-row,
+.app-shell.density-compact .queue-row {
+  padding: 14px;
+}
+
+.app-shell.density-compact .content {
+  padding: 24px 40px 48px;
+}
+
 .sidebar {
   padding: 32px 24px;
   border-right: 1px solid var(--line);
@@ -270,6 +285,12 @@ textarea {
 .section-header p {
   color: var(--muted);
   margin-top: 4px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .card {
@@ -713,6 +734,12 @@ textarea {
   display: flex;
   gap: 32px;
   align-items: center;
+}
+
+.export-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .feed {

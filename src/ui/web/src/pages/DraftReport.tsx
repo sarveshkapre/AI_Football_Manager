@@ -4,6 +4,15 @@ import { SectionHeader } from '../components/SectionHeader';
 import { useReportContext } from '../context/ReportContext';
 import { formatDuration, durationToSeconds } from '../utils/time';
 
+const download = (filename: string, content: string) => {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
 export const DraftReport = () => {
   const { queue } = useReportContext();
   const [title, setTitle] = useState('Matchday Draft Report');
@@ -13,6 +22,25 @@ export const DraftReport = () => {
     const seconds = queue.reduce((sum, clip) => sum + durationToSeconds(clip.duration), 0);
     return formatDuration(seconds);
   }, [queue]);
+
+  const exportJson = () => {
+    const payload = {
+      title,
+      notes,
+      clips: queue
+    };
+    download('afm-report.json', JSON.stringify(payload, null, 2));
+  };
+
+  const exportCsv = () => {
+    const header = 'id,title,duration,tags';
+    const rows = queue.map((clip) =>
+      [clip.id, clip.title, clip.duration, clip.tags.join('|')]
+        .map((value) => `"${value.replace(/"/g, '""')}"`)
+        .join(',')
+    );
+    download('afm-report.csv', [header, ...rows].join('\n'));
+  };
 
   return (
     <div className="page-content">
@@ -51,6 +79,14 @@ export const DraftReport = () => {
                 <p className="eyebrow">Total duration</p>
                 <h3>{totalDuration}</h3>
               </div>
+            </div>
+            <div className="export-actions">
+              <button className="btn" onClick={exportJson}>
+                Download JSON
+              </button>
+              <button className="btn" onClick={exportCsv}>
+                Download CSV
+              </button>
             </div>
           </div>
         </div>

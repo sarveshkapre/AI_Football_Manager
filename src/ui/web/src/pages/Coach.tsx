@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/mock';
+import { DensityToggle } from '../components/DensityToggle';
 import { LiveEventFeed } from '../components/LiveEventFeed';
 import { SignalBadge } from '../components/SignalBadge';
 import { SignalHistory } from '../components/SignalHistory';
@@ -53,7 +54,12 @@ export const Coach = () => {
       <SectionHeader
         title="Coach Mode"
         subtitle="Rapid tactical guidance grounded in evidence."
-        action={<button className="btn primary">Request Live Clip</button>}
+        action={
+          <div className="header-actions">
+            <DensityToggle />
+            <button className="btn primary">Request Live Clip</button>
+          </div>
+        }
       />
 
       <div className="grid two">
