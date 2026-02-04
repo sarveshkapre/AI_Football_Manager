@@ -10,6 +10,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - MVP user stories and acceptance criteria
 - Draft MVP backlog and milestones
 - Source layout scaffolding under `src/`
+- Minimal UI prototype under `src/ui/web`
 
 ## [0.1.0] - 2026-02-04
 ### Added

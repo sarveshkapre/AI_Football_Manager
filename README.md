@@ -47,6 +47,10 @@ Start here: `docs/PRD.md`.
 - `docs/USER_STORIES.md` — MVP user stories and acceptance criteria
 - `docs/MVP_BACKLOG.md` — draft backlog and milestones
 
+## UI prototype
+- Static prototype: `src/ui/web/index.html`
+- Open the file directly in a browser to view the design
+
 ## Status
 Early-stage product definition. Implementation will follow the PRD.
 

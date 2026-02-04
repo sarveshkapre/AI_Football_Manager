@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Football Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="nav">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <span>AI Football Manager</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#product">Product</a>
+          <a href="#modes">Modes</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#roadmap">Roadmap</a>
+        </nav>
+        <button class="btn ghost">Request Demo</button>
+      </header>
+
+      <main>
+        <section class="hero" id="product">
+          <div class="hero-text">
+            <p class="kicker">Broadcast-video-first tactical copilot</p>
+            <h1>Decision support that feels like a world-class analyst on the bench.</h1>
+            <p class="lead">
+              AI Football Manager watches broadcast video, builds a live game-state model,
+              and delivers coach-ready tactical diagnosis with evidence, clips, and confidence.
+            </p>
+            <div class="hero-actions">
+              <button class="btn primary">Request Demo</button>
+              <button class="btn">View Coach Mode</button>
+            </div>
+            <div class="hero-badges">
+              <span>Evidence-first</span>
+              <span>Signal quality gating</span>
+              <span>Coach-ready outputs</span>
+            </div>
+          </div>
+          <div class="hero-surface">
+            <div class="surface-header">
+              <span>Live Match — 63:12</span>
+              <span class="badge high">Signal High</span>
+            </div>
+            <div class="surface-body">
+              <div class="card">
+                <p class="card-title">Now</p>
+                <ul class="card-list">
+                  <li>Opposition 4-4-2 mid-block, compact central lanes.</li>
+                  <li>Our progression is stalling in RB→8 channel.</li>
+                  <li>Transition risk rising after wide overloads.</li>
+                </ul>
+                <div class="card-meta">
+                  <span>Confidence 0.78</span>
+                  <span>3 supporting clips</span>
+                </div>
+              </div>
+              <div class="card dark">
+                <p class="card-title">Do next</p>
+                <p class="card-subtitle">Shift trap wide, then invert the 6</p>
+                <div class="chip-row">
+                  <span class="chip">Tradeoff: space behind LB</span>
+                  <span class="chip">Confidence 0.71</span>
+                </div>
+                <div class="clip-strip">
+                  <div class="clip"></div>
+                  <div class="clip"></div>
+                  <div class="clip"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="modes">
+          <div class="section-head">
+            <h2>Two modes, one shared truth.</h2>
+            <p>
+              Coach Mode is built for speed. Analyst Mode is built for depth. Both are grounded
+              in the same evidence and signal quality indicators.
+            </p>
+          </div>
+          <div class="mode-toggle">
+            <button class="tab active" data-mode="coach">Coach Mode</button>
+            <button class="tab" data-mode="analyst">Analyst Mode</button>
+          </div>
+          <div class="mode-panels">
+            <div class="panel active" data-panel="coach">
+              <div class="panel-text">
+                <h3>Coach Mode</h3>
+                <p>Instant context, clear options, and confidence-based guidance.</p>
+                <ul>
+                  <li>Now cards refresh every 30–60 seconds</li>
+                  <li>Do next options with tradeoffs</li>
+                  <li>Key moments strip for rapid replay</li>
+                </ul>
+              </div>
+              <div class="panel-visual">
+                <div class="mini-card">
+                  <p>Press beaten 3x in last 6 minutes</p>
+                  <span>Clip 12s</span>
+                </div>
+                <div class="mini-card">
+                  <p>Switches creating weak-side overloads</p>
+                  <span>Confidence 0.74</span>
+                </div>
+              </div>
+            </div>
+            <div class="panel" data-panel="analyst">
+              <div class="panel-text">
+                <h3>Analyst Mode</h3>
+                <p>Build narrative fast with timelines, overlays, and evidence-linked chat.</p>
+                <ul>
+                  <li>Tactical timeline with auto-tags</li>
+                  <li>Overlay toggles for lines, spacing, trajectories</li>
+                  <li>Ask the match with clip-backed answers</li>
+                </ul>
+              </div>
+              <div class="panel-visual">
+                <div class="timeline">
+                  <div class="tick"></div>
+                  <div class="tick"></div>
+                  <div class="tick highlight"></div>
+                  <div class="tick"></div>
+                </div>
+                <div class="overlay-grid">
+                  <div class="overlay"></div>
+                  <div class="overlay"></div>
+                  <div class="overlay"></div>
+                  <div class="overlay"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="evidence">
+          <div class="section-head">
+            <h2>Evidence-first by design.</h2>
+            <p>Every recommendation is grounded in clips and overlays with explicit confidence.</p>
+          </div>
+          <div class="evidence-grid">
+            <div class="evidence-card">
+              <h4>Signal quality gating</h4>
+              <p>Low visibility suppresses strong claims and flags the reason.</p>
+            </div>
+            <div class="evidence-card">
+              <h4>Clip-backed claims</h4>
+              <p>Each tactical diagnosis links to 1–3 supporting clips.</p>
+            </div>
+            <div class="evidence-card">
+              <h4>Transparent confidence</h4>
+              <p>Confidence scores cite tracking coverage and repetition.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section metrics">
+          <div class="metric">
+            <h3>&lt; 2 min</h3>
+            <p>Time to first insight after upload</p>
+          </div>
+          <div class="metric">
+            <h3>30–60s</h3>
+            <p>Now card refresh cadence</p>
+          </div>
+          <div class="metric">
+            <h3>10–15s</h3>
+            <p>Evidence clip length</p>
+          </div>
+        </section>
+
+        <section class="section" id="roadmap">
+          <div class="section-head">
+            <h2>Roadmap</h2>
+            <p>From broadcast uploads to live tactical collaboration.</p>
+          </div>
+          <div class="roadmap">
+            <div class="roadmap-step">
+              <span class="stage">V1</span>
+              <p>Broadcast upload, coach/analyst modes, evidence packs.</p>
+            </div>
+            <div class="roadmap-step">
+              <span class="stage">V2</span>
+              <p>Live stream ingest and low-latency collaboration.</p>
+            </div>
+            <div class="roadmap-step">
+              <span class="stage">V3</span>
+              <p>Tracking and event data integrations for higher fidelity.</p>
+            </div>
+            <div class="roadmap-step">
+              <span class="stage">V4</span>
+              <p>Broadcast-grade studio packs with narrative arcs.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>AI Football Manager — evidence-first tactical decision support.</p>
+        <button class="btn ghost">Contact</button>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
