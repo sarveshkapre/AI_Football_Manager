@@ -11,6 +11,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Draft MVP backlog and milestones
 - Source layout scaffolding under `src/`
 - Minimal UI prototype under `src/ui/web`
+- React + Vite web UI scaffold with interactive mode toggle
 
 ## [0.1.0] - 2026-02-04
 ### Added

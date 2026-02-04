@@ -48,8 +48,12 @@ Start here: `docs/PRD.md`.
 - `docs/MVP_BACKLOG.md` — draft backlog and milestones
 
 ## UI prototype
-- Static prototype: `src/ui/web/index.html`
-- Open the file directly in a browser to view the design
+- React + Vite prototype under `src/ui/web`
+
+## Development (web UI)
+- Install dependencies: `npm install`
+- Run dev server: `npm run dev`
+- Vite root is set to `src/ui/web`
 
 ## Status
 Early-stage product definition. Implementation will follow the PRD.

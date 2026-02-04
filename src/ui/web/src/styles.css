@@ -34,21 +34,54 @@ body {
   overflow: hidden;
 }
 
-.page::before {
+.page::before,
+.page::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background-image: linear-gradient(transparent 95%, rgba(0, 0, 0, 0.03) 96%),
-    linear-gradient(90deg, transparent 95%, rgba(0, 0, 0, 0.03) 96%);
-  background-size: 48px 48px;
-  opacity: 0.3;
-  pointer-events: none;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15, 76, 92, 0.12), transparent 65%);
+  filter: blur(2px);
   z-index: 0;
+  pointer-events: none;
+}
+
+.page::before {
+  top: -200px;
+  left: -120px;
+}
+
+.page::after {
+  bottom: -240px;
+  right: -160px;
 }
 
 .page > * {
   position: relative;
   z-index: 1;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: reveal 0.7s ease forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .nav {
@@ -323,14 +356,10 @@ body {
 }
 
 .panel {
-  display: none;
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   padding: 28px;
-}
-
-.panel.active {
-  display: grid;
 }
 
 .panel-text h3 {
