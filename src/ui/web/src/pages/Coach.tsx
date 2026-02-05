@@ -36,7 +36,7 @@ const pressureTrend = [
 export const Coach = () => {
   const { liveState, moments, updatedAt } = useLiveStore();
   const { openClip } = useClipContext();
-  const { addClip } = useReportContext();
+  const { addClip, queue } = useReportContext();
   const { logEvent } = useAudit();
   const { addLabel } = useLabels();
   const { setAnnotation } = useAnnotations();
@@ -106,6 +106,7 @@ export const Coach = () => {
   };
 
   const activeReplay = replayClips[replayIndex] ?? null;
+  const inQueue = activeReplay ? queue.some((clip) => clip.id === activeReplay.id) : false;
 
   const nextReplay = () => {
     setReplayIndex((prev) => (replayClips.length > 0 ? (prev + 1) % replayClips.length : 0));
@@ -132,6 +133,14 @@ export const Coach = () => {
     setAnnotation(activeReplay.id, quickNote.trim());
     logEvent('Quick note', activeReplay.title);
     setQuickNote('');
+  };
+
+  const queueReplay = () => {
+    if (!activeReplay || inQueue) {
+      return;
+    }
+    addClip(activeReplay);
+    logEvent('Replay queued', activeReplay.title);
   };
 
   return (
@@ -330,6 +339,9 @@ export const Coach = () => {
                   </button>
                   <button className="btn ghost" onClick={nextReplay}>
                     Next
+                  </button>
+                  <button className="btn" onClick={queueReplay} disabled={inQueue}>
+                    {inQueue ? 'Queued' : 'Add to report'}
                   </button>
                 </div>
               </div>
