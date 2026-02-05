@@ -8,6 +8,7 @@ import { AnnotationsProvider } from './context/AnnotationsContext';
 import { AuditProvider } from './context/AuditContext';
 import { ClipProvider } from './context/ClipContext';
 import { LabelsProvider } from './context/LabelsContext';
+import { LibraryProvider } from './context/LibraryContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { ReportProvider, useReportContext } from './context/ReportContext';
 import { StoryboardProvider } from './context/StoryboardContext';
@@ -172,16 +173,18 @@ export default function App() {
           <UiProvider>
             <PreferencesProvider>
               <AccessProvider>
-                <AnnotationsProvider>
-                  <LabelsProvider>
-                    <AuditProvider>
-                      <PreferencesBridge />
-                      <Shell />
-                      <ToastStack />
-                      <ClipModal />
-                    </AuditProvider>
-                  </LabelsProvider>
-                </AnnotationsProvider>
+                <LibraryProvider>
+                  <AnnotationsProvider>
+                    <LabelsProvider>
+                      <AuditProvider>
+                        <PreferencesBridge />
+                        <Shell />
+                        <ToastStack />
+                        <ClipModal />
+                      </AuditProvider>
+                    </LabelsProvider>
+                  </AnnotationsProvider>
+                </LibraryProvider>
               </AccessProvider>
             </PreferencesProvider>
           </UiProvider>

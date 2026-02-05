@@ -2,13 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import { SectionHeader } from '../components/SectionHeader';
 import { useClipContext } from '../context/ClipContext';
+import { useLibrary } from '../context/LibraryContext';
 import type { Clip } from '../types';
+import { downloadFile } from '../utils/export';
 
 export const Library = () => {
   const { openClip } = useClipContext();
+  const { savedSearches, addSearch, removeSearch } = useLibrary();
   const [clips, setClips] = useState<Clip[]>([]);
   const [query, setQuery] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [searchName, setSearchName] = useState('');
 
   useEffect(() => {
     api.getClips().then(setClips);
@@ -28,12 +32,45 @@ export const Library = () => {
     });
   }, [clips, query, activeTag]);
 
+  const applySavedSearch = (id: string) => {
+    const search = savedSearches.find((item) => item.id === id);
+    if (!search) {
+      return;
+    }
+    setQuery(search.query);
+    setActiveTag(search.tag);
+  };
+
+  const saveSearch = () => {
+    const name = searchName.trim();
+    if (!name) {
+      return;
+    }
+    addSearch(name, query, activeTag);
+    setSearchName('');
+  };
+
+  const exportPlaylist = () => {
+    const payload = {
+      name: query ? `Search: ${query}` : activeTag ? `Tag: ${activeTag}` : 'Playlist',
+      createdAt: new Date().toISOString(),
+      query,
+      tag: activeTag,
+      clips: filtered
+    };
+    downloadFile('afm-playlist.json', JSON.stringify(payload, null, 2), 'application/json');
+  };
+
   return (
     <div className="page-content">
       <SectionHeader
         title="Clip Library"
         subtitle="Search evidence clips and build packs quickly."
-        action={<button className="btn primary">New playlist</button>}
+        action={
+          <button className="btn primary" onClick={exportPlaylist} disabled={filtered.length === 0}>
+            Export playlist
+          </button>
+        }
       />
 
       <div className="card surface">
@@ -62,6 +99,39 @@ export const Library = () => {
             ))}
           </div>
         </div>
+        <div className="library-actions">
+          <input
+            type="text"
+            placeholder="Save this search as..."
+            value={searchName}
+            onChange={(event) => setSearchName(event.target.value)}
+          />
+          <button className="btn" onClick={saveSearch} disabled={!searchName.trim()}>
+            Save search
+          </button>
+        </div>
+        {savedSearches.length > 0 ? (
+          <div className="saved-searches">
+            {savedSearches.map((search) => (
+              <div key={search.id} className="saved-search">
+                <button className="btn ghost" onClick={() => applySavedSearch(search.id)}>
+                  <div>
+                    <h4>{search.name}</h4>
+                    <p>
+                      {search.query || 'Any query'} · {search.tag ?? 'All tags'}
+                    </p>
+                  </div>
+                  <span className="pill">Apply</span>
+                </button>
+                <button className="btn ghost" onClick={() => removeSearch(search.id)}>
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">No saved searches yet.</p>
+        )}
         <div className="library-grid">
           {filtered.map((clip) => (
             <button className="clip-card" key={clip.id} onClick={() => openClip(clip)}>

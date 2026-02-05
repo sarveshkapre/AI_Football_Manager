@@ -44,6 +44,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Evidence package export manifest
 - Live ingest simulation toggle and phase cycling
 - Coach Mode now reflects ingest simulation state
+- Library saved searches and playlist export
 
 ## [0.1.0] - 2026-02-04
 ### Added

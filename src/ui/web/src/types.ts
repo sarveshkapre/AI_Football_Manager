@@ -77,6 +77,14 @@ export interface Storyboard {
   updated: string;
 }
 
+export interface SavedSearch {
+  id: string;
+  name: string;
+  query: string;
+  tag: string | null;
+  createdAt: string;
+}
+
 export type UploadStatus = 'Uploading' | 'Processing' | 'Ready' | 'Failed';
 export type SegmentStatus = 'Queued' | 'Analyzing' | 'Ready';
 export type PipelineStatus = 'Complete' | 'In progress' | 'Queued';

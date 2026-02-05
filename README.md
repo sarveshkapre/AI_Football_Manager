@@ -78,6 +78,7 @@ Start here: `docs/PRD.md`.
 - Evidence package export (clip manifest + overlays + annotations)
 - Live ingest simulation toggle that cycles match phases
 - Ingest simulation uses live store phase cycling (Coach Mode reflects it)
+- Library saved searches and playlist export
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`
