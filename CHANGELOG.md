@@ -42,6 +42,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Minimap snapshot preview in Analyst Mode
 - Minimap timeline scrubber with play/pause
 - Evidence package export manifest
+- Live ingest simulation toggle and phase cycling
+- Coach Mode now reflects ingest simulation state
 
 ## [0.1.0] - 2026-02-04
 ### Added

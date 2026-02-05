@@ -76,6 +76,8 @@ Start here: `docs/PRD.md`.
 - Minimap snapshot preview with team shape metadata
 - Minimap scrubber with play/pause and timestamp slider
 - Evidence package export (clip manifest + overlays + annotations)
+- Live ingest simulation toggle that cycles match phases
+- Ingest simulation uses live store phase cycling (Coach Mode reflects it)
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

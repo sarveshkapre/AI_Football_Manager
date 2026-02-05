@@ -10,6 +10,7 @@ import { TrendChart } from '../components/TrendChart';
 import { useAudit } from '../context/AuditContext';
 import { useClipContext } from '../context/ClipContext';
 import { useReportContext } from '../context/ReportContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { useLiveStore } from '../hooks/useLiveStore';
 import type { CoachCard, Clip, OverlayToggle, Recommendation } from '../types';
 import { durationToSeconds, formatDuration } from '../utils/time';
@@ -35,6 +36,7 @@ export const Coach = () => {
   const { openClip } = useClipContext();
   const { addClip } = useReportContext();
   const { logEvent } = useAudit();
+  const { ingestSimulation } = usePreferences();
   const [cards, setCards] = useState<CoachCard[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
@@ -143,9 +145,21 @@ export const Coach = () => {
       </div>
 
       <div className="grid three">
-        <StatCard label="Evidence clips" value="12" meta="Last 15 minutes" />
-        <StatCard label="Now refresh" value="45s" meta={`Last ${updatedAt ? 'sync' : 'update'} `} />
-        <StatCard label="Signals" value={liveState?.signal ?? '--'} meta="Tracking stable" />
+        <StatCard
+          label="Evidence clips"
+          value="12"
+          meta={ingestSimulation ? 'Simulated feed' : 'Last 15 minutes'}
+        />
+        <StatCard
+          label="Now refresh"
+          value="45s"
+          meta={`Last ${updatedAt ? 'sync' : 'update'} `}
+        />
+        <StatCard
+          label="Signals"
+          value={liveState?.signal ?? '--'}
+          meta={ingestSimulation ? 'Simulation running' : 'Tracking stable'}
+        />
       </div>
 
       <div className="grid two">

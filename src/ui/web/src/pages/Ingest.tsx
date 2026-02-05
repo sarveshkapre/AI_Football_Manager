@@ -3,6 +3,7 @@ import { api } from '../api/mock';
 import { SectionHeader } from '../components/SectionHeader';
 import { SignalBadge } from '../components/SignalBadge';
 import { useAudit } from '../context/AuditContext';
+import { usePreferences } from '../context/PreferencesContext';
 import type { AlignmentState, PipelineStep, Segment, UploadJob } from '../types';
 
 const statusClassMap: Record<string, string> = {
@@ -18,6 +19,7 @@ const statusClassMap: Record<string, string> = {
 
 export const Ingest = () => {
   const { logEvent } = useAudit();
+  const { ingestSimulation, setIngestSimulation } = usePreferences();
   const [uploads, setUploads] = useState<UploadJob[]>([]);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [pipeline, setPipeline] = useState<PipelineStep[]>([]);
@@ -119,9 +121,19 @@ export const Ingest = () => {
         title="Ingest"
         subtitle="Upload broadcast video and align match time."
         action={
-          <button className="btn primary" onClick={handleUpload}>
-            Upload segment
-          </button>
+          <div className="header-actions">
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={ingestSimulation}
+                onChange={(event) => setIngestSimulation(event.target.checked)}
+              />
+              <span>{ingestSimulation ? 'Simulating' : 'Live feed'}</span>
+            </label>
+            <button className="btn primary" onClick={handleUpload}>
+              Upload segment
+            </button>
+          </div>
         }
       />
 

@@ -10,6 +10,7 @@ export interface LiveSnapshot {
 
 let refreshIntervalMs = 45000;
 let autoRefresh = true;
+let simulateIngest = true;
 
 let state: LiveSnapshot = {
   liveState: null,
@@ -21,6 +22,54 @@ let state: LiveSnapshot = {
 const listeners = new Set<() => void>();
 let intervalId: number | null = null;
 let isFetching = false;
+let phaseIndex = 0;
+
+const simulatedStates: LiveState[] = [
+  {
+    minute: '63:10',
+    signal: 'High',
+    confidence: 0.78,
+    clips: 3,
+    insights: [
+      'Opposition 4-4-2 mid-block, central lanes closed.',
+      'Switches to RW isolating fullback 1v1.',
+      'Transition risk rising after wide overloads.'
+    ]
+  },
+  {
+    minute: '64:20',
+    signal: 'Med',
+    confidence: 0.66,
+    clips: 2,
+    insights: [
+      'Press intensity drops on their left side.',
+      'Our 8 arriving late into half-space pockets.',
+      'Second-ball recoveries favor them in zone 14.'
+    ]
+  },
+  {
+    minute: '65:15',
+    signal: 'High',
+    confidence: 0.81,
+    clips: 3,
+    insights: [
+      'Their 9 screening the 6; center access blocked.',
+      'Weak-side overload forming after switch.',
+      'Counterpress success improving after lost duels.'
+    ]
+  },
+  {
+    minute: '66:05',
+    signal: 'Med',
+    confidence: 0.69,
+    clips: 2,
+    insights: [
+      'Press trigger on their left—trap is available.',
+      'Right half-space entry still blocked.',
+      'Wide spacing leaving backline exposed.'
+    ]
+  }
+];
 
 const emit = () => {
   listeners.forEach((listener) => listener());
@@ -37,7 +86,12 @@ const fetchSnapshot = async () => {
   }
   isFetching = true;
   try {
-    const [liveState, moments] = await Promise.all([api.getLiveState(), api.getMoments()]);
+    const [liveState, moments] = simulateIngest
+      ? [simulatedStates[phaseIndex], await api.getMoments()]
+      : await Promise.all([api.getLiveState(), api.getMoments()]);
+    if (simulateIngest) {
+      phaseIndex = (phaseIndex + 1) % simulatedStates.length;
+    }
     setState({
       liveState,
       moments,
@@ -92,6 +146,12 @@ export const liveStore = {
     refreshIntervalMs = ms;
     if (listeners.size > 0) {
       startInterval();
+    }
+  },
+  setSimulation(enabled: boolean) {
+    simulateIngest = enabled;
+    if (listeners.size > 0) {
+      fetchSnapshot();
     }
   }
 };

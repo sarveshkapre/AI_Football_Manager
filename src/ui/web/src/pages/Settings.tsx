@@ -8,7 +8,14 @@ import type { AccessState } from '../context/AccessContext';
 const cadenceOptions = [30, 60, 90] as const;
 
 export const Settings = () => {
-  const { notificationCadence, autoRefresh, setNotificationCadence, setAutoRefresh } =
+  const {
+    notificationCadence,
+    autoRefresh,
+    ingestSimulation,
+    setNotificationCadence,
+    setAutoRefresh,
+    setIngestSimulation
+  } =
     usePreferences();
   const { density, setDensity } = useUi();
   const { access, setAccess, setAccessState } = useAccess();
@@ -110,6 +117,20 @@ export const Settings = () => {
                   onChange={(event) => setAutoRefresh(event.target.checked)}
                 />
                 <span>{autoRefresh ? 'On' : 'Off'}</span>
+              </label>
+            </div>
+            <div className="row-card">
+              <div>
+                <h4>Ingest simulation</h4>
+                <p>Cycle through live phases for demo mode.</p>
+              </div>
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  checked={ingestSimulation}
+                  onChange={(event) => setIngestSimulation(event.target.checked)}
+                />
+                <span>{ingestSimulation ? 'On' : 'Off'}</span>
               </label>
             </div>
             <div className="row-card">
