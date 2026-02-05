@@ -7,6 +7,15 @@ import { useClipContext } from '../context/ClipContext';
 import { useStoryboards } from '../context/StoryboardContext';
 import type { Clip, OverlayToggle, TimelineEvent } from '../types';
 
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'ai';
+  text: string;
+  confidence?: number;
+  reason?: string;
+  evidence?: Clip[];
+}
+
 export const Analyst = () => {
   const { openClip } = useClipContext();
   const { addStoryboard } = useStoryboards();
@@ -22,6 +31,14 @@ export const Analyst = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [newTag, setNewTag] = useState('');
   const [highlights, setHighlights] = useState<Record<string, boolean>>({});
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 'ai-intro',
+      role: 'ai',
+      text: 'Ask about press breaks, overloads, switches, or turnovers to get evidence clips.'
+    }
+  ]);
 
   useEffect(() => {
     const load = async () => {
@@ -90,6 +107,113 @@ export const Analyst = () => {
       logEvent('Timeline highlight', `${label} (${next[selectedEventId] ? 'Marked' : 'Unmarked'})`);
       return next;
     });
+  };
+
+  const quickQuestions = [
+    'Where are we overloaded?',
+    'Show the last 3 press breaks.',
+    'Why can’t we progress centrally?',
+    'Where are turnovers happening?'
+  ];
+
+  const buildAnswer = (question: string) => {
+    const normalized = question.toLowerCase();
+    const tagTargets: string[] = [];
+    const pushIf = (tokens: string[], tag: string) => {
+      if (tokens.some((token) => normalized.includes(token))) {
+        tagTargets.push(tag);
+      }
+    };
+
+    pushIf(['press'], 'press');
+    pushIf(['overload'], 'overload');
+    pushIf(['switch'], 'switch');
+    pushIf(['turnover', 'giveaway'], 'turnover');
+    pushIf(['zone 14', 'zone-14', 'central', 'centre', 'centrally'], 'zone-14');
+    pushIf(['set piece', 'set-piece', 'corner', 'free kick'], 'set-piece');
+    pushIf(['weak side', 'weak-side'], 'weak-side');
+    pushIf(['left'], 'left');
+    pushIf(['right'], 'right');
+    pushIf(['entry'], 'entry');
+
+    const matches =
+      tagTargets.length > 0
+        ? timeline.filter((event) => event.tags.some((tag) => tagTargets.includes(tag)))
+        : timeline;
+
+    const sorted = [...matches].sort((a, b) => b.confidence - a.confidence);
+    const evidenceEvents = sorted.slice(0, 3);
+    const evidenceClips = Array.from(
+      new Map(
+        evidenceEvents
+          .map((event) => clips.find((clip) => clip.id === event.clipId))
+          .filter((clip): clip is Clip => Boolean(clip))
+          .map((clip) => [clip.id, clip])
+      ).values()
+    );
+
+    if (evidenceEvents.length === 0) {
+      return {
+        text: 'Signal quality is low or off-camera; no evidence clips found for that request.',
+        confidence: 0.4,
+        reason: 'Low tracking coverage'
+      };
+    }
+
+    const averageConfidence =
+      Math.round(
+        (evidenceEvents.reduce((sum, event) => sum + event.confidence, 0) /
+          evidenceEvents.length) *
+          100
+      ) / 100;
+
+    const minutes = evidenceEvents.map((event) => event.minute);
+    const side =
+      evidenceEvents.some((event) => event.tags.includes('left')) &&
+      evidenceEvents.some((event) => event.tags.includes('right'))
+        ? 'both flanks'
+        : evidenceEvents.some((event) => event.tags.includes('left'))
+        ? 'left side'
+        : evidenceEvents.some((event) => event.tags.includes('right'))
+        ? 'right side'
+        : 'central lanes';
+
+    const highlight = evidenceEvents[0]?.label;
+    const text = `Found ${evidenceEvents.length} relevant events, mostly on the ${side}. Primary pattern: ${highlight}. Evidence from ${minutes[0]}–${minutes[minutes.length - 1]}.`;
+
+    return {
+      text,
+      confidence: averageConfidence,
+      reason:
+        averageConfidence < 0.65
+          ? 'Moderate signal; some occlusion in broadcast angle'
+          : 'Stable tracking across the segment',
+      evidence: evidenceClips
+    };
+  };
+
+  const askQuestion = (question: string) => {
+    const trimmed = question.trim();
+    if (!trimmed) {
+      return;
+    }
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      text: trimmed
+    };
+    const answer = buildAnswer(trimmed);
+    const aiMessage: ChatMessage = {
+      id: `ai-${Date.now()}`,
+      role: 'ai',
+      text: answer.text,
+      confidence: answer.confidence,
+      reason: answer.reason,
+      evidence: answer.evidence
+    };
+    setChatMessages((prev) => [...prev, userMessage, aiMessage]);
+    setChatInput('');
+    logEvent('Ask the match', trimmed);
   };
 
   return (
@@ -230,13 +354,57 @@ export const Analyst = () => {
         <div className="card surface">
           <SectionHeader title="Ask the match" subtitle="Evidence-backed answers in seconds." />
           <div className="chat">
-            <div className="chat-bubble user">Where are we overloaded?</div>
-            <div className="chat-bubble ai">
-              We are overloaded on the right flank after switches. See clips 12s and 14s.
+            <div className="chat-quick">
+              {quickQuestions.map((question) => (
+                <button
+                  key={question}
+                  className="tag-chip"
+                  onClick={() => askQuestion(question)}
+                >
+                  {question}
+                </button>
+              ))}
             </div>
+            {chatMessages.map((message) => (
+              <div key={message.id} className={`chat-bubble ${message.role}`}>
+                <p>{message.text}</p>
+                {message.confidence !== undefined ? (
+                  <div className="chat-meta">
+                    <span className="pill">Confidence {message.confidence}</span>
+                    {message.reason ? <span className="muted">{message.reason}</span> : null}
+                  </div>
+                ) : null}
+                {message.evidence && message.evidence.length > 0 ? (
+                  <div className="chat-evidence">
+                    {message.evidence.map((clip) => (
+                      <button
+                        key={clip.id}
+                        className="chat-chip"
+                        onClick={() => openClip(clip)}
+                      >
+                        <span>{clip.title}</span>
+                        <span className="pill">{clip.duration}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))}
             <div className="chat-input">
-              <input type="text" placeholder="Ask a tactical question..." />
-              <button className="btn primary">Ask</button>
+              <input
+                type="text"
+                placeholder="Ask a tactical question..."
+                value={chatInput}
+                onChange={(event) => setChatInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    askQuestion(chatInput);
+                  }
+                }}
+              />
+              <button className="btn primary" onClick={() => askQuestion(chatInput)}>
+                Ask
+              </button>
             </div>
           </div>
         </div>

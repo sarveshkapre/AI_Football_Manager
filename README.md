@@ -72,6 +72,7 @@ Start here: `docs/PRD.md`.
 - Segment report generator: auto summary, patterns, adjustments, and evidence clips
 - Presentation HTML pack export with preview
 - Analyst data export bundle and broadcast pack preview from Reports
+- Ask the match Q&A flow with evidence clips and confidence gating
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

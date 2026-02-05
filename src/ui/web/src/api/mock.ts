@@ -161,6 +161,13 @@ const recommendations: Recommendation[] = [
     tradeoff: 'Less counterpress coverage',
     confidence: 0.64,
     clips: 2
+  },
+  {
+    id: 'rec-3',
+    title: 'Pin fullback to free the switch',
+    tradeoff: 'Wingback recovery coverage',
+    confidence: 0.68,
+    clips: 2
   }
 ];
 
@@ -196,6 +203,22 @@ const timeline: TimelineEvent[] = [
     confidence: 0.65,
     tags: ['turnover', 'zone-14'],
     clipId: 'clip-3'
+  },
+  {
+    id: 't5',
+    minute: '65:02',
+    label: 'Left-sided overload forms',
+    confidence: 0.71,
+    tags: ['overload', 'left', 'entry'],
+    clipId: 'clip-2'
+  },
+  {
+    id: 't6',
+    minute: '66:12',
+    label: 'Press trigger on their left',
+    confidence: 0.74,
+    tags: ['press', 'trigger', 'left'],
+    clipId: 'clip-1'
   }
 ];
 

@@ -608,10 +608,18 @@ select {
   gap: 12px;
 }
 
+.chat-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .chat-bubble {
   padding: 12px 16px;
   border-radius: 16px;
   max-width: 80%;
+  display: grid;
+  gap: 10px;
 }
 
 .chat-bubble.user {
@@ -623,6 +631,32 @@ select {
   background: rgba(15, 76, 92, 0.1);
   color: var(--accent);
   align-self: flex-end;
+}
+
+.chat-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.chat-evidence {
+  display: grid;
+  gap: 8px;
+}
+
+.chat-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  text-align: left;
 }
 
 .chat-input {

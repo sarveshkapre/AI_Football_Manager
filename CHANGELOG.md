@@ -38,6 +38,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Segment report generator with auto summary and evidence clips
 - Presentation HTML pack export and preview
 - Analyst data export bundle and broadcast pack preview
+- Ask the match Q&A flow with evidence clips and confidence gating
 
 ## [0.1.0] - 2026-02-04
 ### Added
