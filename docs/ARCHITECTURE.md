@@ -48,6 +48,12 @@ This document describes the intended system architecture for AI Football Manager
 - Field registration for spatial normalization
 - Occlusion handling with confidence degradation
 
+Prototype leverage (SoccerNet):
+- Calibration baseline for broadcast homography estimation
+- Tracking dev kit for player tracklets and ID stabilization
+- Game State Reconstruction (GSR) baseline for minimap/BEV rendering
+- Evaluation targets: GS-HOTA for GSR, MOT metrics for tracking stability
+
 ### 3. Game-state model
 - Maintains continuous state: phase, shape, line heights, compactness, territory
 - Aggregates windowed metrics and transitions

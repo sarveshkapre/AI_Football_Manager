@@ -5,6 +5,7 @@ import type {
   LiveEvent,
   LiveState,
   Moment,
+  MinimapSnapshot,
   PipelineStep,
   Recommendation,
   ReportItem,
@@ -29,4 +30,5 @@ export interface ApiContract {
   getSegments: () => Promise<Segment[]>;
   getPipeline: () => Promise<PipelineStep[]>;
   getAlignment: () => Promise<AlignmentState>;
+  getMinimapSnapshots: () => Promise<MinimapSnapshot[]>;
 }

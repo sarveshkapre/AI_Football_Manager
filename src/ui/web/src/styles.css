@@ -581,6 +581,118 @@ select {
   gap: 10px;
 }
 
+.minimap-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.minimap-toolbar select {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.minimap-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.minimap {
+  margin: 16px 0;
+}
+
+.minimap-field {
+  position: relative;
+  height: 280px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #e7f2ef, #f7fbfa);
+  border: 1px solid rgba(15, 76, 92, 0.2);
+  overflow: hidden;
+}
+
+.minimap-line.center {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  border-left: 1px dashed rgba(15, 76, 92, 0.25);
+}
+
+.minimap-circle {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 1px dashed rgba(15, 76, 92, 0.25);
+  left: calc(50% - 40px);
+  top: calc(50% - 40px);
+}
+
+.minimap-box {
+  position: absolute;
+  width: 70px;
+  height: 140px;
+  border: 1px solid rgba(15, 76, 92, 0.25);
+  top: calc(50% - 70px);
+}
+
+.minimap-box.left {
+  left: 0;
+  border-left: none;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.minimap-box.right {
+  right: 0;
+  border-right: none;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.minimap-player {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.minimap-player.team-home {
+  background: #0f4c5c;
+}
+
+.minimap-player.team-away {
+  background: #b23a48;
+}
+
+.minimap-player.is-highlighted {
+  box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.2);
+}
+
+.minimap-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.minimap-empty {
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--line);
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+}
+
 .toggle {
   display: flex;
   align-items: center;

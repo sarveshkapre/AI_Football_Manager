@@ -6,11 +6,14 @@
 - Video upload and decode pipeline
 - Clip alignment tooling (manual minute alignment)
 - Segment extraction and caching
+- SoccerNet calibration baseline integration (broadcast homography)
 
 2. Perception pipeline
 - Player/ball detection and tracking
 - Field registration and spatial normalization
 - Signal quality estimation
+- SoccerNet tracking dev kit for baseline tracklets
+- GSR minimap baseline + GS-HOTA evaluation
 
 3. Tactical interpreter
 - Tactical event detection (press, overload, switches, transitions)

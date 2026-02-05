@@ -4,6 +4,7 @@ import {
   LiveEvent,
   LiveState,
   Moment,
+  MinimapSnapshot,
   OverlayToggle,
   PipelineStep,
   Recommendation,
@@ -349,6 +350,73 @@ const alignment: AlignmentState = {
   note: 'Scoreboard visible 68% of frames'
 };
 
+const minimapSnapshots: MinimapSnapshot[] = [
+  {
+    id: 'mm-1',
+    label: 'In possession',
+    minute: '63:20',
+    phase: 'Sustained attack',
+    teamShape: '3-2-5',
+    inPossession: 'Home',
+    players: [
+      { id: 'h1', x: 18, y: 14, team: 'home' },
+      { id: 'h2', x: 22, y: 38, team: 'home' },
+      { id: 'h3', x: 26, y: 62, team: 'home' },
+      { id: 'h4', x: 40, y: 22, team: 'home' },
+      { id: 'h5', x: 44, y: 52, team: 'home', highlighted: true },
+      { id: 'h6', x: 52, y: 32, team: 'home' },
+      { id: 'h7', x: 58, y: 68, team: 'home' },
+      { id: 'h8', x: 68, y: 28, team: 'home' },
+      { id: 'h9', x: 76, y: 50, team: 'home' },
+      { id: 'h10', x: 72, y: 76, team: 'home' },
+      { id: 'h11', x: 84, y: 42, team: 'home' },
+      { id: 'a1', x: 30, y: 10, team: 'away' },
+      { id: 'a2', x: 34, y: 32, team: 'away' },
+      { id: 'a3', x: 36, y: 58, team: 'away' },
+      { id: 'a4', x: 46, y: 16, team: 'away' },
+      { id: 'a5', x: 50, y: 40, team: 'away' },
+      { id: 'a6', x: 54, y: 64, team: 'away' },
+      { id: 'a7', x: 62, y: 20, team: 'away' },
+      { id: 'a8', x: 62, y: 48, team: 'away' },
+      { id: 'a9', x: 64, y: 72, team: 'away' },
+      { id: 'a10', x: 72, y: 32, team: 'away' },
+      { id: 'a11', x: 74, y: 56, team: 'away' }
+    ]
+  },
+  {
+    id: 'mm-2',
+    label: 'Out of possession',
+    minute: '64:05',
+    phase: 'Mid-block',
+    teamShape: '4-4-2',
+    inPossession: 'Away',
+    players: [
+      { id: 'h1', x: 30, y: 18, team: 'home' },
+      { id: 'h2', x: 32, y: 38, team: 'home' },
+      { id: 'h3', x: 34, y: 60, team: 'home' },
+      { id: 'h4', x: 40, y: 12, team: 'home' },
+      { id: 'h5', x: 42, y: 30, team: 'home' },
+      { id: 'h6', x: 42, y: 50, team: 'home' },
+      { id: 'h7', x: 44, y: 70, team: 'home' },
+      { id: 'h8', x: 52, y: 24, team: 'home' },
+      { id: 'h9', x: 52, y: 46, team: 'home' },
+      { id: 'h10', x: 54, y: 66, team: 'home', highlighted: true },
+      { id: 'h11', x: 62, y: 42, team: 'home' },
+      { id: 'a1', x: 18, y: 24, team: 'away' },
+      { id: 'a2', x: 22, y: 44, team: 'away' },
+      { id: 'a3', x: 24, y: 64, team: 'away' },
+      { id: 'a4', x: 32, y: 20, team: 'away' },
+      { id: 'a5', x: 34, y: 40, team: 'away' },
+      { id: 'a6', x: 36, y: 60, team: 'away' },
+      { id: 'a7', x: 48, y: 18, team: 'away' },
+      { id: 'a8', x: 50, y: 38, team: 'away' },
+      { id: 'a9', x: 50, y: 62, team: 'away' },
+      { id: 'a10', x: 64, y: 32, team: 'away' },
+      { id: 'a11', x: 66, y: 52, team: 'away' }
+    ]
+  }
+];
+
 export const api = {
   async getLiveState() {
     await wait(300);
@@ -411,5 +479,9 @@ export const api = {
   async getAlignment() {
     await wait(120);
     return alignment;
+  },
+  async getMinimapSnapshots() {
+    await wait(160);
+    return minimapSnapshots;
   }
 };

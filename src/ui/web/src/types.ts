@@ -81,6 +81,27 @@ export type UploadStatus = 'Uploading' | 'Processing' | 'Ready' | 'Failed';
 export type SegmentStatus = 'Queued' | 'Analyzing' | 'Ready';
 export type PipelineStatus = 'Complete' | 'In progress' | 'Queued';
 
+export type TeamSide = 'home' | 'away';
+
+export interface PlayerDot {
+  id: string;
+  x: number;
+  y: number;
+  team: TeamSide;
+  role?: string;
+  highlighted?: boolean;
+}
+
+export interface MinimapSnapshot {
+  id: string;
+  label: string;
+  minute: string;
+  phase: string;
+  teamShape: string;
+  inPossession: string;
+  players: PlayerDot[];
+}
+
 export interface UploadJob {
   id: string;
   filename: string;

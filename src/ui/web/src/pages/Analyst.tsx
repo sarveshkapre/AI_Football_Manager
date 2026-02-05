@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
+import { Minimap } from '../components/Minimap';
 import { SectionHeader } from '../components/SectionHeader';
 import { StoryboardList } from '../components/StoryboardList';
 import { useAudit } from '../context/AuditContext';
 import { useClipContext } from '../context/ClipContext';
 import { useStoryboards } from '../context/StoryboardContext';
-import type { Clip, OverlayToggle, TimelineEvent } from '../types';
+import type { Clip, MinimapSnapshot, OverlayToggle, PlayerDot, TimelineEvent } from '../types';
 
 interface ChatMessage {
   id: string;
@@ -22,6 +23,7 @@ export const Analyst = () => {
   const { logEvent } = useAudit();
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
+  const [snapshots, setSnapshots] = useState<MinimapSnapshot[]>([]);
   const [clips, setClips] = useState<Clip[]>([]);
   const [selected, setSelected] = useState<Clip[]>([]);
   const [storyboardTitle, setStoryboardTitle] = useState('');
@@ -31,6 +33,8 @@ export const Analyst = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [newTag, setNewTag] = useState('');
   const [highlights, setHighlights] = useState<Record<string, boolean>>({});
+  const [activeSnapshotId, setActiveSnapshotId] = useState<string>('');
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerDot | null>(null);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -42,14 +46,19 @@ export const Analyst = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [timelineData, overlayData, clipData] = await Promise.all([
+      const [timelineData, overlayData, clipData, minimapData] = await Promise.all([
         api.getTimeline(),
         api.getOverlays(),
-        api.getClips()
+        api.getClips(),
+        api.getMinimapSnapshots()
       ]);
       setTimeline(timelineData);
       setOverlays(overlayData);
       setClips(clipData);
+      setSnapshots(minimapData);
+      if (minimapData.length > 0) {
+        setActiveSnapshotId(minimapData[0].id);
+      }
     };
 
     load();
@@ -81,6 +90,11 @@ export const Analyst = () => {
   const selectedEvent = useMemo(
     () => timeline.find((event) => event.id === selectedEventId) ?? null,
     [timeline, selectedEventId]
+  );
+
+  const activeSnapshot = useMemo(
+    () => snapshots.find((snapshot) => snapshot.id === activeSnapshotId) ?? null,
+    [snapshots, activeSnapshotId]
   );
 
   const addTagToSelected = (tag: string) => {
@@ -332,7 +346,50 @@ export const Analyst = () => {
         </div>
 
         <div className="card surface">
-          <SectionHeader title="Overlay controls" subtitle="Toggle visual layers per clip." />
+          <SectionHeader title="Minimap + overlays" subtitle="Broadcast-derived game state preview." />
+          <div className="minimap-toolbar">
+            <label className="field">
+              <span>Snapshot</span>
+              <select
+                value={activeSnapshotId}
+                onChange={(event) => setActiveSnapshotId(event.target.value)}
+                disabled={snapshots.length === 0}
+              >
+                {snapshots.length === 0 ? (
+                  <option value="">No snapshots</option>
+                ) : (
+                  snapshots.map((snapshot) => (
+                    <option key={snapshot.id} value={snapshot.id}>
+                      {snapshot.label} · {snapshot.minute}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+            <div className="minimap-meta">
+              <span className="pill">{activeSnapshot?.phase ?? 'Phase'}</span>
+              <span className="pill">{activeSnapshot?.teamShape ?? '--'}</span>
+            </div>
+          </div>
+          <Minimap snapshot={activeSnapshot} onSelectPlayer={(player) => setSelectedPlayer(player)} />
+          <div className="minimap-footer">
+            <div>
+              <p className="eyebrow">Possession</p>
+              <h4>{activeSnapshot?.inPossession ?? '--'}</h4>
+            </div>
+            <div>
+              <p className="eyebrow">Minute</p>
+              <h4>{activeSnapshot?.minute ?? '--'}</h4>
+            </div>
+            <div>
+              <p className="eyebrow">Selected</p>
+              <h4>
+                {selectedPlayer
+                  ? `${selectedPlayer.team.toUpperCase()} · ${selectedPlayer.id}`
+                  : 'None'}
+              </h4>
+            </div>
+          </div>
           <div className="overlay-controls">
             {overlays.map((overlay) => (
               <label className="toggle" key={overlay.id}>
@@ -340,12 +397,6 @@ export const Analyst = () => {
                 <span>{overlay.label}</span>
               </label>
             ))}
-          </div>
-          <div className="overlay-preview">
-            <div className="overlay-tile"></div>
-            <div className="overlay-tile"></div>
-            <div className="overlay-tile"></div>
-            <div className="overlay-tile"></div>
           </div>
         </div>
       </div>
