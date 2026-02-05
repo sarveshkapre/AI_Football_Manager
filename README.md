@@ -81,6 +81,7 @@ Start here: `docs/PRD.md`.
 - Library saved searches and playlist export
 - Analyst signal quality dashboard and snapshot cues
 - Coach evidence replay carousel with quick labels and notes
+- Print-friendly presentation pack view
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

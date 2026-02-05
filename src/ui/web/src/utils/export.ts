@@ -262,6 +262,128 @@ export const openHtmlPreview = (html: string) => {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 };
 
+export const buildPrintableHtml = ({
+  title,
+  match,
+  owner,
+  summary,
+  totalDuration,
+  clipCount,
+  clips,
+  labels = {},
+  annotations = {}
+}: PresentationPayload) => {
+  const clipRows = clips
+    .map((clip, index) => {
+      const clipLabels = labels[clip.id] ?? [];
+      const note = annotations[clip.id];
+      return `<tr>
+        <td>${index + 1}</td>
+        <td>
+          <strong>${clip.title}</strong><br/>
+          <span class="muted">${clip.tags.join(' · ')}</span>
+          ${clipLabels.length > 0 ? `<div class="chips">${clipLabels
+            .map((label) => `<span class="chip">${label}</span>`)
+            .join('')}</div>` : ''}
+          ${note ? `<div class="note">${note}</div>` : ''}
+        </td>
+        <td>${clip.duration}</td>
+      </tr>`;
+    })
+    .join('');
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title} · Print Pack</title>
+  <style>
+    :root {
+      --ink: #0b1f2a;
+      --muted: #5c6b73;
+      --line: #d4d9dd;
+      --accent: #0f4c5c;
+      --accent-soft: #e6f0f2;
+    }
+    body {
+      font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      margin: 32px;
+      background: #fff;
+    }
+    header {
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    h1 { margin: 0 0 4px; font-size: 2rem; }
+    .meta { display: flex; gap: 12px; flex-wrap: wrap; color: var(--muted); }
+    .summary {
+      margin-top: 16px;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+    }
+    th, td {
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 8px;
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .muted { color: var(--muted); }
+    .chips { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip { background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; }
+    .note {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #f7f8f9;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    @media print {
+      body { margin: 16mm; }
+      header { page-break-after: avoid; }
+      tr { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${title}</h1>
+    <div class="meta">
+      <span>${match}</span>
+      <span>Owner: ${owner}</span>
+      <span>${clipCount} clips</span>
+      <span>${totalDuration} total</span>
+    </div>
+    <div class="summary">${summary || 'No summary provided.'}</div>
+  </header>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Clip</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${clipRows || '<tr><td colspan="3" class="muted">No clips added.</td></tr>'}
+    </tbody>
+  </table>
+</body>
+</html>`;
+};
+
 interface EvidenceClipManifest {
   id: string;
   title: string;

@@ -7,6 +7,7 @@ import { useLabels } from '../context/LabelsContext';
 import { useReportContext } from '../context/ReportContext';
 import {
   buildCoverText,
+  buildPrintableHtml,
   buildPresentationHtml,
   buildPackStub,
   downloadCoverImage,
@@ -131,6 +132,26 @@ export const DraftReport = () => {
     });
     openHtmlPreview(html);
     logEvent('Presentation HTML previewed', title);
+  };
+
+  const previewPrintable = () => {
+    const html = buildPrintableHtml({
+      title,
+      match: matchLabel,
+      owner,
+      summary: notes,
+      totalDuration,
+      clipCount: queue.length,
+      clips: queue,
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      )
+    });
+    openHtmlPreview(html);
+    logEvent('Printable pack previewed', title);
   };
 
   const exportPack = () => {
@@ -271,6 +292,9 @@ export const DraftReport = () => {
               </button>
               <button className="btn ghost" onClick={previewPresentation}>
                 Preview pack
+              </button>
+              <button className="btn ghost" onClick={previewPrintable}>
+                Print view
               </button>
             </div>
           </div>
