@@ -7,9 +7,11 @@ import { useLabels } from '../context/LabelsContext';
 import { useReportContext } from '../context/ReportContext';
 import {
   buildCoverText,
+  buildPresentationHtml,
   buildPackStub,
   downloadCoverImage,
-  downloadFile
+  downloadFile,
+  openHtmlPreview
 } from '../utils/export';
 import { formatDuration, durationToSeconds } from '../utils/time';
 
@@ -89,6 +91,46 @@ export const DraftReport = () => {
   const exportCoverImage = () => {
     downloadCoverImage(title, matchLabel, notes);
     logEvent('Cover image exported', title);
+  };
+
+  const exportPresentation = () => {
+    const html = buildPresentationHtml({
+      title,
+      match: matchLabel,
+      owner,
+      summary: notes,
+      totalDuration,
+      clipCount: queue.length,
+      clips: queue,
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      )
+    });
+    downloadFile('afm-presentation.html', html, 'text/html');
+    logEvent('Presentation HTML exported', title);
+  };
+
+  const previewPresentation = () => {
+    const html = buildPresentationHtml({
+      title,
+      match: matchLabel,
+      owner,
+      summary: notes,
+      totalDuration,
+      clipCount: queue.length,
+      clips: queue,
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      )
+    });
+    openHtmlPreview(html);
+    logEvent('Presentation HTML previewed', title);
   };
 
   const exportPack = () => {
@@ -217,15 +259,21 @@ export const DraftReport = () => {
               <h2 className="cover-title">{title}</h2>
               <p className="muted">{matchLabel}</p>
               <p className="muted">{notes || 'Add a short summary to guide the staff.'}</p>
-              <div className="cover-actions">
-                <button className="btn" onClick={exportCover}>
-                  Download cover text
-                </button>
-                <button className="btn" onClick={exportCoverImage}>
-                  Download cover image
-                </button>
-              </div>
+            <div className="cover-actions">
+              <button className="btn" onClick={exportCover}>
+                Download cover text
+              </button>
+              <button className="btn" onClick={exportCoverImage}>
+                Download cover image
+              </button>
+              <button className="btn" onClick={exportPresentation}>
+                Download HTML pack
+              </button>
+              <button className="btn ghost" onClick={previewPresentation}>
+                Preview pack
+              </button>
             </div>
+          </div>
             <div className="cover-list">
               <h4>Key clips</h4>
               {coverClips.length === 0 && <p className="muted">Add clips to show highlights.</p>}

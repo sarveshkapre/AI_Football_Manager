@@ -36,6 +36,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Clip export logging from the evidence modal
 - Analyst timeline filters, manual tags, and highlight markers
 - Segment report generator with auto summary and evidence clips
+- Presentation HTML pack export and preview
 
 ## [0.1.0] - 2026-02-04
 ### Added

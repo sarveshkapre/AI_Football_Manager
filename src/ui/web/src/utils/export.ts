@@ -35,6 +35,233 @@ export const buildPackStub = (
   return JSON.stringify(payload, null, 2);
 };
 
+interface PresentationClip {
+  id: string;
+  title: string;
+  duration: string;
+  tags: string[];
+}
+
+interface PresentationPayload {
+  title: string;
+  match: string;
+  owner: string;
+  summary: string;
+  totalDuration: string;
+  clipCount: number;
+  clips: PresentationClip[];
+  labels?: Record<string, string[]>;
+  annotations?: Record<string, string>;
+}
+
+export const buildPresentationHtml = ({
+  title,
+  match,
+  owner,
+  summary,
+  totalDuration,
+  clipCount,
+  clips,
+  labels = {},
+  annotations = {}
+}: PresentationPayload) => {
+  const clipRows = clips
+    .map((clip, index) => {
+      const clipLabels = labels[clip.id] ?? [];
+      const note = annotations[clip.id];
+      const labelMarkup =
+        clipLabels.length > 0
+          ? `<div class="chips">${clipLabels
+              .map((label) => `<span class="chip">${label}</span>`)
+              .join('')}</div>`
+          : '';
+      const noteMarkup = note ? `<p class="note">${note}</p>` : '';
+      return `<div class="clip">
+        <div class="clip-meta">
+          <div>
+            <p class="eyebrow">Clip ${index + 1}</p>
+            <h3>${clip.title}</h3>
+            <p class="muted">${clip.duration} · ${clip.tags.join(' · ')}</p>
+          </div>
+          <span class="pill">${clip.duration}</span>
+        </div>
+        ${labelMarkup}
+        ${noteMarkup}
+      </div>`;
+    })
+    .join('');
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title} · AI Football Manager</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #0b1f2a;
+      --muted: #5c6b73;
+      --surface: #ffffff;
+      --surface-alt: #f4f6f8;
+      --line: rgba(11, 31, 42, 0.12);
+      --accent: #0f4c5c;
+      --accent-soft: rgba(15, 76, 92, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: #eef2f4;
+    }
+    main {
+      max-width: 980px;
+      margin: 32px auto;
+      padding: 0 24px 48px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0f4c5c, #3a7ca5);
+      color: #fff;
+      border-radius: 28px;
+      padding: 32px;
+      display: grid;
+      gap: 12px;
+      box-shadow: 0 20px 45px rgba(15, 76, 92, 0.18);
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: 2.4rem;
+    }
+    .hero p { margin: 0; opacity: 0.9; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .pill {
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+    }
+    section {
+      margin-top: 28px;
+      background: var(--surface);
+      border-radius: 22px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 24px rgba(11, 31, 42, 0.08);
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .summary {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+    .stat {
+      background: var(--surface-alt);
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+    .stat h3 { margin: 0; font-size: 1.4rem; }
+    .stat p { margin: 4px 0 0; color: var(--muted); }
+    .clip {
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--surface-alt);
+      border: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+    .clip-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .clip h3 { margin: 4px 0; }
+    .muted { color: var(--muted); }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .chip {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+    .note {
+      margin: 10px 0 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">AI Football Manager · Presentation Pack</p>
+      <h1>${title}</h1>
+      <p>${match} · Owner: ${owner}</p>
+      <div class="meta">
+        <span class="pill">${clipCount} clips</span>
+        <span class="pill">${totalDuration} total</span>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Summary</p>
+      <p class="summary">${summary || 'No summary provided.'}</p>
+      <div class="stats">
+        <div class="stat">
+          <h3>${clipCount}</h3>
+          <p>Evidence clips</p>
+        </div>
+        <div class="stat">
+          <h3>${totalDuration}</h3>
+          <p>Total clip duration</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Evidence Clips</p>
+      ${clipRows || '<p class="muted">No clips added to this pack.</p>'}
+    </section>
+  </main>
+</body>
+</html>`;
+};
+
+export const openHtmlPreview = (html: string) => {
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank', 'noopener,noreferrer');
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+};
+
 const wrapText = (
   ctx: CanvasRenderingContext2D,
   text: string,

@@ -70,6 +70,7 @@ Start here: `docs/PRD.md`.
 - Role-based access: settings include presets and per-view toggles
 - Analyst timeline filters: search, tag chips, confidence filter, manual tagging
 - Segment report generator: auto summary, patterns, adjustments, and evidence clips
+- Presentation HTML pack export with preview
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`
