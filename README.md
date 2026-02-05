@@ -86,6 +86,7 @@ Start here: `docs/PRD.md`.
 - Analyst insight packs saved from Ask-the-match responses
 - Coach replay clips can be queued directly to reports
 - Insight packs can be added to the report queue
+- Auto-generate segment report after upload completes (toggle in Ingest)
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

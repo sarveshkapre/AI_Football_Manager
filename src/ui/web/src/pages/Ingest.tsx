@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/mock';
 import { SectionHeader } from '../components/SectionHeader';
 import { SignalBadge } from '../components/SignalBadge';
@@ -30,6 +30,12 @@ export const Ingest = () => {
   const [segmentStart, setSegmentStart] = useState('63:00');
   const [segmentEnd, setSegmentEnd] = useState('80:00');
   const [manualOffset, setManualOffset] = useState('+00:12');
+  const [autoGenerateReports, setAutoGenerateReports] = useState(true);
+  const autoGenerateRef = useRef(autoGenerateReports);
+
+  useEffect(() => {
+    autoGenerateRef.current = autoGenerateReports;
+  }, [autoGenerateReports]);
 
   useEffect(() => {
     const load = async () => {
@@ -113,6 +119,14 @@ export const Ingest = () => {
         )
       );
       logEvent('Upload ready', next.filename);
+      if (autoGenerateRef.current) {
+        const readySegment =
+          segments.find((segment) => segment.status === 'Ready') ?? segments[0];
+        if (readySegment) {
+          saveToStorage('afm.lastSegment', readySegment.id);
+        }
+        window.location.hash = '#reports';
+      }
     }, 2400);
   };
 
@@ -141,6 +155,20 @@ export const Ingest = () => {
       <div className="grid two">
         <div className="card surface">
           <SectionHeader title="Upload queue" subtitle={uploadSummary} />
+          <div className="row-card">
+            <div>
+              <h4>Auto-generate segment report</h4>
+              <p>Open Reports as soon as a segment becomes ready.</p>
+            </div>
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={autoGenerateReports}
+                onChange={(event) => setAutoGenerateReports(event.target.checked)}
+              />
+              <span>{autoGenerateReports ? 'On' : 'Off'}</span>
+            </label>
+          </div>
           <div className="upload-drop">
             <div>
               <h4>Drop broadcast files</h4>
