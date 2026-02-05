@@ -8,8 +8,10 @@ import { SectionHeader } from '../components/SectionHeader';
 import { useAudit } from '../context/AuditContext';
 import { useReportContext } from '../context/ReportContext';
 import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
-import { downloadFile } from '../utils/export';
-import { clockToSeconds } from '../utils/time';
+import { useAnnotations } from '../context/AnnotationsContext';
+import { useLabels } from '../context/LabelsContext';
+import { buildPresentationHtml, downloadFile, openHtmlPreview } from '../utils/export';
+import { clockToSeconds, durationToSeconds, formatDuration } from '../utils/time';
 
 interface SegmentReport {
   segmentId: string;
@@ -33,6 +35,8 @@ export const Reports = () => {
   const [segmentReport, setSegmentReport] = useState<SegmentReport | null>(null);
   const { queue } = useReportContext();
   const { logEvent } = useAudit();
+  const { annotations } = useAnnotations();
+  const { labels } = useLabels();
 
   useEffect(() => {
     api.getReports().then(setReports);
@@ -66,6 +70,11 @@ export const Reports = () => {
       })),
     [segments]
   );
+
+  const totalDuration = useMemo(() => {
+    const seconds = queue.reduce((sum, clip) => sum + durationToSeconds(clip.duration), 0);
+    return formatDuration(seconds);
+  }, [queue]);
 
   const generateSegmentReport = () => {
     const segment = segments.find((item) => item.id === selectedSegmentId);
@@ -161,6 +170,45 @@ export const Reports = () => {
     } catch {
       logEvent('Segment summary generated', segmentReport.title);
     }
+  };
+
+  const exportAnalystData = () => {
+    const queueIds = queue.map((clip) => clip.id);
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      clipCount: queue.length,
+      totalDuration,
+      clips: queue,
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      )
+    };
+    downloadFile('afm-analyst-data.json', JSON.stringify(payload, null, 2), 'application/json');
+    logEvent('Analyst data exported', `${queue.length} clips`);
+  };
+
+  const renderBroadcastPack = () => {
+    const queueIds = queue.map((clip) => clip.id);
+    const html = buildPresentationHtml({
+      title: 'Broadcast pack',
+      match: segmentReport?.title ?? 'Matchday segment',
+      owner: 'Analyst room',
+      summary: segmentReport?.summary ?? 'Broadcast-ready evidence reel.',
+      totalDuration,
+      clipCount: queue.length,
+      clips: queue,
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      )
+    });
+    openHtmlPreview(html);
+    logEvent('Broadcast pack previewed', `${queue.length} clips`);
   };
 
   return (
@@ -332,17 +380,23 @@ export const Reports = () => {
             <div className="export-card">
               <h4>Coach pack</h4>
               <p>Clips + overlays + summary PDF.</p>
-              <button className="btn">Generate</button>
+              <button className="btn" onClick={() => (window.location.hash = '#draft')}>
+                Generate
+              </button>
             </div>
             <div className="export-card">
               <h4>Analyst data</h4>
               <p>Tags, clips, JSON/CSV export.</p>
-              <button className="btn">Download</button>
+              <button className="btn" onClick={exportAnalystData} disabled={queue.length === 0}>
+                Download
+              </button>
             </div>
             <div className="export-card">
               <h4>Broadcast pack</h4>
               <p>Studio-ready sequence with graphics.</p>
-              <button className="btn">Render</button>
+              <button className="btn" onClick={renderBroadcastPack} disabled={queue.length === 0}>
+                Render
+              </button>
             </div>
           </div>
         </div>
