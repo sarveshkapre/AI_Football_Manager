@@ -49,6 +49,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Coach evidence replay carousel with quick labels and notes
 - Print-friendly presentation pack view
 - Ingest-to-report handoff for ready segments
+- Analyst insight packs saved from Ask-the-match
 
 ## [0.1.0] - 2026-02-04
 ### Added

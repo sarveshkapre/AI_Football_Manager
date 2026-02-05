@@ -837,6 +837,29 @@ select {
   margin-top: 8px;
 }
 
+.pack-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pack-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  padding: 16px;
+  background: var(--surface-alt);
+}
+
+.pack-clips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .chat-input input {
   flex: 1;
   border-radius: 999px;

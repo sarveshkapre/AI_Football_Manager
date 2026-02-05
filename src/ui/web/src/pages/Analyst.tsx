@@ -18,6 +18,15 @@ interface ChatMessage {
   evidence?: Clip[];
 }
 
+interface InsightPack {
+  id: string;
+  question: string;
+  answer: string;
+  confidence?: number;
+  evidence: Clip[];
+  createdAt: string;
+}
+
 export const Analyst = () => {
   const { openClip } = useClipContext();
   const { addStoryboard } = useStoryboards();
@@ -46,6 +55,7 @@ export const Analyst = () => {
       text: 'Ask about press breaks, overloads, switches, or turnovers to get evidence clips.'
     }
   ]);
+  const [insightPacks, setInsightPacks] = useState<InsightPack[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -258,6 +268,19 @@ export const Analyst = () => {
     setChatMessages((prev) => [...prev, userMessage, aiMessage]);
     setChatInput('');
     logEvent('Ask the match', trimmed);
+  };
+
+  const saveInsightPack = (question: string, answer: ChatMessage) => {
+    const pack: InsightPack = {
+      id: `pack-${Date.now()}`,
+      question,
+      answer: answer.text,
+      confidence: answer.confidence,
+      evidence: answer.evidence ?? [],
+      createdAt: new Date().toLocaleString()
+    };
+    setInsightPacks((prev) => [pack, ...prev]);
+    logEvent('Insight pack saved', question);
   };
 
   return (
@@ -499,7 +522,7 @@ export const Analyst = () => {
                 </button>
               ))}
             </div>
-            {chatMessages.map((message) => (
+            {chatMessages.map((message, index) => (
               <div key={message.id} className={`chat-bubble ${message.role}`}>
                 <p>{message.text}</p>
                 {message.confidence !== undefined ? (
@@ -521,6 +544,19 @@ export const Analyst = () => {
                       </button>
                     ))}
                   </div>
+                ) : null}
+                {message.role === 'ai' && message.evidence ? (
+                  <button
+                    className="btn ghost"
+                    onClick={() => {
+                      const prevMessage = chatMessages[index - 1];
+                      if (prevMessage?.role === 'user') {
+                        saveInsightPack(prevMessage.text, message);
+                      }
+                    }}
+                  >
+                    Save insight pack
+                  </button>
                 ) : null}
               </div>
             ))}
@@ -608,6 +644,39 @@ export const Analyst = () => {
       <div className="card surface">
         <SectionHeader title="Storyboards" subtitle="Saved narrative packs." />
         <StoryboardList />
+      </div>
+
+      <div className="card surface">
+        <SectionHeader title="Insight packs" subtitle="Saved answers with evidence." />
+        {insightPacks.length === 0 ? (
+          <p className="muted">Save answers from Ask the match to build packs.</p>
+        ) : (
+          <div className="pack-list">
+            {insightPacks.map((pack) => (
+              <div className="pack-item" key={pack.id}>
+                <div>
+                  <p className="eyebrow">{pack.createdAt}</p>
+                  <h4>{pack.question}</h4>
+                  <p className="muted">{pack.answer}</p>
+                  <div className="pack-clips">
+                    {pack.evidence.map((clip) => (
+                      <button
+                        key={clip.id}
+                        className="tag-chip"
+                        onClick={() => openClip(clip)}
+                      >
+                        {clip.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {pack.confidence !== undefined ? (
+                  <span className="pill">Confidence {pack.confidence}</span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

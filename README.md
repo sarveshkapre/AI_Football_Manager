@@ -83,6 +83,7 @@ Start here: `docs/PRD.md`.
 - Coach evidence replay carousel with quick labels and notes
 - Print-friendly presentation pack view
 - Ingest-to-report handoff (ready segments open Reports pre-selected)
+- Analyst insight packs saved from Ask-the-match responses
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`
