@@ -74,6 +74,7 @@ Start here: `docs/PRD.md`.
 - Analyst data export bundle and broadcast pack preview from Reports
 - Ask the match Q&A flow with evidence clips and confidence gating
 - Minimap snapshot preview with team shape metadata
+- Minimap scrubber with play/pause and timestamp slider
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

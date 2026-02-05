@@ -414,6 +414,70 @@ const minimapSnapshots: MinimapSnapshot[] = [
       { id: 'a10', x: 64, y: 32, team: 'away' },
       { id: 'a11', x: 66, y: 52, team: 'away' }
     ]
+  },
+  {
+    id: 'mm-3',
+    label: 'High press',
+    minute: '65:18',
+    phase: 'Press trigger',
+    teamShape: '4-2-4',
+    inPossession: 'Away',
+    players: [
+      { id: 'h1', x: 22, y: 18, team: 'home' },
+      { id: 'h2', x: 26, y: 36, team: 'home' },
+      { id: 'h3', x: 28, y: 62, team: 'home' },
+      { id: 'h4', x: 34, y: 14, team: 'home' },
+      { id: 'h5', x: 38, y: 32, team: 'home' },
+      { id: 'h6', x: 38, y: 52, team: 'home' },
+      { id: 'h7', x: 40, y: 72, team: 'home' },
+      { id: 'h8', x: 54, y: 24, team: 'home' },
+      { id: 'h9', x: 54, y: 46, team: 'home' },
+      { id: 'h10', x: 56, y: 66, team: 'home' },
+      { id: 'h11', x: 64, y: 42, team: 'home' },
+      { id: 'a1', x: 10, y: 26, team: 'away' },
+      { id: 'a2', x: 12, y: 46, team: 'away' },
+      { id: 'a3', x: 14, y: 66, team: 'away' },
+      { id: 'a4', x: 24, y: 20, team: 'away' },
+      { id: 'a5', x: 26, y: 40, team: 'away', highlighted: true },
+      { id: 'a6', x: 28, y: 60, team: 'away' },
+      { id: 'a7', x: 42, y: 18, team: 'away' },
+      { id: 'a8', x: 44, y: 38, team: 'away' },
+      { id: 'a9', x: 44, y: 62, team: 'away' },
+      { id: 'a10', x: 58, y: 32, team: 'away' },
+      { id: 'a11', x: 60, y: 52, team: 'away' }
+    ]
+  },
+  {
+    id: 'mm-4',
+    label: 'Switching lanes',
+    minute: '66:08',
+    phase: 'Weak-side overload',
+    teamShape: '3-2-5',
+    inPossession: 'Home',
+    players: [
+      { id: 'h1', x: 16, y: 14, team: 'home' },
+      { id: 'h2', x: 20, y: 38, team: 'home' },
+      { id: 'h3', x: 24, y: 62, team: 'home' },
+      { id: 'h4', x: 38, y: 18, team: 'home' },
+      { id: 'h5', x: 42, y: 44, team: 'home' },
+      { id: 'h6', x: 44, y: 70, team: 'home' },
+      { id: 'h7', x: 56, y: 24, team: 'home' },
+      { id: 'h8', x: 62, y: 42, team: 'home' },
+      { id: 'h9', x: 68, y: 64, team: 'home', highlighted: true },
+      { id: 'h10', x: 76, y: 30, team: 'home' },
+      { id: 'h11', x: 82, y: 50, team: 'home' },
+      { id: 'a1', x: 26, y: 12, team: 'away' },
+      { id: 'a2', x: 30, y: 34, team: 'away' },
+      { id: 'a3', x: 32, y: 56, team: 'away' },
+      { id: 'a4', x: 44, y: 16, team: 'away' },
+      { id: 'a5', x: 48, y: 38, team: 'away' },
+      { id: 'a6', x: 50, y: 60, team: 'away' },
+      { id: 'a7', x: 58, y: 20, team: 'away' },
+      { id: 'a8', x: 60, y: 46, team: 'away' },
+      { id: 'a9', x: 62, y: 72, team: 'away' },
+      { id: 'a10', x: 70, y: 34, team: 'away' },
+      { id: 'a11', x: 72, y: 54, team: 'away' }
+    ]
   }
 ];
 

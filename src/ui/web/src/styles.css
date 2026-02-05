@@ -685,6 +685,18 @@ select {
   margin-bottom: 12px;
 }
 
+.minimap-scrub {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.minimap-scrub input[type='range'] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
 .minimap-empty {
   border-radius: var(--radius-sm);
   border: 1px dashed var(--line);

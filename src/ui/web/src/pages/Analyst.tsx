@@ -35,6 +35,7 @@ export const Analyst = () => {
   const [highlights, setHighlights] = useState<Record<string, boolean>>({});
   const [activeSnapshotId, setActiveSnapshotId] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerDot | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -96,6 +97,31 @@ export const Analyst = () => {
     () => snapshots.find((snapshot) => snapshot.id === activeSnapshotId) ?? null,
     [snapshots, activeSnapshotId]
   );
+
+  const activeSnapshotIndex = useMemo(() => {
+    const index = snapshots.findIndex((snapshot) => snapshot.id === activeSnapshotId);
+    return index >= 0 ? index : 0;
+  }, [snapshots, activeSnapshotId]);
+
+  useEffect(() => {
+    if (!activeSnapshotId || snapshots.every((snapshot) => snapshot.id !== activeSnapshotId)) {
+      setActiveSnapshotId(snapshots[0]?.id ?? '');
+    }
+  }, [activeSnapshotId, snapshots]);
+
+  useEffect(() => {
+    if (!isPlaying || snapshots.length < 2) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setActiveSnapshotId((prev) => {
+        const currentIndex = snapshots.findIndex((snapshot) => snapshot.id === prev);
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % snapshots.length : 0;
+        return snapshots[nextIndex]?.id ?? prev;
+      });
+    }, 1800);
+    return () => window.clearInterval(timer);
+  }, [isPlaying, snapshots]);
 
   const addTagToSelected = (tag: string) => {
     if (!selectedEventId || !tag.trim()) {
@@ -372,6 +398,25 @@ export const Analyst = () => {
             </div>
           </div>
           <Minimap snapshot={activeSnapshot} onSelectPlayer={(player) => setSelectedPlayer(player)} />
+          <div className="minimap-scrub">
+            <button className="btn" onClick={() => setIsPlaying((prev) => !prev)}>
+              {isPlaying ? 'Pause' : 'Play'}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={Math.max(0, snapshots.length - 1)}
+              value={activeSnapshotIndex}
+              onChange={(event) => {
+                const index = Number(event.target.value);
+                const snapshot = snapshots[index];
+                if (snapshot) {
+                  setActiveSnapshotId(snapshot.id);
+                }
+              }}
+            />
+            <span className="pill">{activeSnapshot?.minute ?? '--'}</span>
+          </div>
           <div className="minimap-footer">
             <div>
               <p className="eyebrow">Possession</p>

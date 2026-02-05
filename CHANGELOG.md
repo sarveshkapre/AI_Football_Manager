@@ -40,6 +40,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Analyst data export bundle and broadcast pack preview
 - Ask the match Q&A flow with evidence clips and confidence gating
 - Minimap snapshot preview in Analyst Mode
+- Minimap timeline scrubber with play/pause
 
 ## [0.1.0] - 2026-02-04
 ### Added
