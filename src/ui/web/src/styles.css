@@ -477,6 +477,49 @@ select {
   gap: 16px;
 }
 
+.replay {
+  display: grid;
+  gap: 16px;
+}
+
+.replay-preview {
+  height: 180px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #1d1d1d, #3b3b3b);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.replay-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.replay-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.replay-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.replay-note {
+  display: flex;
+  gap: 8px;
+}
+
+.replay-note input {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  padding: 10px 14px;
+}
+
 .moment {
   padding: 16px;
   border-radius: var(--radius-sm);
@@ -1611,6 +1654,33 @@ select {
 .overlay-panel {
   border-top: 1px solid var(--line);
   padding-top: 16px;
+}
+
+.clip-notes textarea,
+.label-form input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.clip-labels {
+  display: grid;
+  gap: 12px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.label-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .toast-stack {

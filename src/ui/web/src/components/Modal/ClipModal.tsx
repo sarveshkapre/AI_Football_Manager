@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../../api/mock';
 import { useAudit } from '../../context/AuditContext';
 import { useClipContext } from '../../context/ClipContext';
+import { useLabels } from '../../context/LabelsContext';
+import { useAnnotations } from '../../context/AnnotationsContext';
 import { useReportContext } from '../../context/ReportContext';
 import type { Clip } from '../../types';
 import { downloadFile } from '../../utils/export';
@@ -10,7 +12,10 @@ export const ClipModal = () => {
   const { clip, closeClip } = useClipContext();
   const { addClip } = useReportContext();
   const { logEvent } = useAudit();
+  const { labels, addLabel, removeLabel } = useLabels();
+  const { annotations, setAnnotation } = useAnnotations();
   const [detail, setDetail] = useState<Clip | null>(null);
+  const [newLabel, setNewLabel] = useState('');
 
   useEffect(() => {
     if (!clip) {
@@ -25,6 +30,8 @@ export const ClipModal = () => {
   }
 
   const clipDetail = detail ?? clip;
+  const clipLabels = labels[clipDetail.id] ?? [];
+  const clipAnnotation = annotations[clipDetail.id] ?? '';
   const handleAdd = () => {
     addClip(clipDetail);
     logEvent('Clip queued', clipDetail.title);
@@ -40,6 +47,16 @@ export const ClipModal = () => {
     };
     downloadFile(`clip-${clipDetail.id}.json`, JSON.stringify(payload, null, 2), 'application/json');
     logEvent('Clip exported', clipDetail.title);
+  };
+
+  const handleAddLabel = () => {
+    const label = newLabel.trim();
+    if (!label) {
+      return;
+    }
+    addLabel(clipDetail.id, label);
+    setNewLabel('');
+    logEvent('Label added', `${clipDetail.title} · ${label}`);
   };
 
   return (
@@ -71,6 +88,44 @@ export const ClipModal = () => {
                   <span>{overlay.label}</span>
                 </label>
               ))}
+            </div>
+            <div className="clip-notes">
+              <h4>Annotations</h4>
+              <textarea
+                rows={4}
+                value={clipAnnotation}
+                onChange={(event) => setAnnotation(clipDetail.id, event.target.value)}
+                placeholder="Add a coaching note tied to this clip."
+              />
+            </div>
+            <div className="clip-labels">
+              <h4>Labels</h4>
+              <div className="chip-row">
+                {clipLabels.length === 0 ? (
+                  <span className="muted">No labels yet.</span>
+                ) : (
+                  clipLabels.map((label) => (
+                    <button
+                      key={label}
+                      className="tag-chip"
+                      onClick={() => removeLabel(clipDetail.id, label)}
+                    >
+                      {label}
+                    </button>
+                  ))
+                )}
+              </div>
+              <div className="label-form">
+                <input
+                  type="text"
+                  value={newLabel}
+                  onChange={(event) => setNewLabel(event.target.value)}
+                  placeholder="Add label"
+                />
+                <button className="btn" onClick={handleAddLabel} disabled={!newLabel.trim()}>
+                  Add
+                </button>
+              </div>
             </div>
           </div>
         </div>

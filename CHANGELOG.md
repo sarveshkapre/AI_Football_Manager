@@ -46,6 +46,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Coach Mode now reflects ingest simulation state
 - Library saved searches and playlist export
 - Analyst signal quality dashboard and snapshot cues
+- Coach evidence replay carousel with quick labels and notes
 
 ## [0.1.0] - 2026-02-04
 ### Added

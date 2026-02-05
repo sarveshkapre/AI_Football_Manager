@@ -9,6 +9,8 @@ import { StatCard } from '../components/StatCard';
 import { TrendChart } from '../components/TrendChart';
 import { useAudit } from '../context/AuditContext';
 import { useClipContext } from '../context/ClipContext';
+import { useLabels } from '../context/LabelsContext';
+import { useAnnotations } from '../context/AnnotationsContext';
 import { useReportContext } from '../context/ReportContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { useLiveStore } from '../hooks/useLiveStore';
@@ -36,6 +38,8 @@ export const Coach = () => {
   const { openClip } = useClipContext();
   const { addClip } = useReportContext();
   const { logEvent } = useAudit();
+  const { addLabel } = useLabels();
+  const { setAnnotation } = useAnnotations();
   const { ingestSimulation } = usePreferences();
   const [cards, setCards] = useState<CoachCard[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -43,6 +47,9 @@ export const Coach = () => {
   const [customIn, setCustomIn] = useState('63:20');
   const [customOut, setCustomOut] = useState('63:35');
   const [lastCapture, setLastCapture] = useState<string | null>(null);
+  const [replayClips, setReplayClips] = useState<Clip[]>([]);
+  const [replayIndex, setReplayIndex] = useState(0);
+  const [quickNote, setQuickNote] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -57,6 +64,13 @@ export const Coach = () => {
     };
 
     load();
+  }, []);
+
+  useEffect(() => {
+    api.getClips().then((data) => {
+      setReplayClips(data.slice(0, 5));
+      setReplayIndex(0);
+    });
   }, []);
 
   const nowCards = cards.filter((card) => card.type === 'now');
@@ -89,6 +103,35 @@ export const Coach = () => {
     const end = durationToSeconds(customOut);
     const duration = end > start ? end - start : 10;
     captureClip(`Custom clip ${customIn}–${customOut}`, duration, ['live', 'custom']);
+  };
+
+  const activeReplay = replayClips[replayIndex] ?? null;
+
+  const nextReplay = () => {
+    setReplayIndex((prev) => (replayClips.length > 0 ? (prev + 1) % replayClips.length : 0));
+  };
+
+  const prevReplay = () => {
+    setReplayIndex((prev) =>
+      replayClips.length > 0 ? (prev - 1 + replayClips.length) % replayClips.length : 0
+    );
+  };
+
+  const addQuickLabel = (label: string) => {
+    if (!activeReplay) {
+      return;
+    }
+    addLabel(activeReplay.id, label);
+    logEvent('Quick label', `${activeReplay.title} · ${label}`);
+  };
+
+  const saveQuickNote = () => {
+    if (!activeReplay || !quickNote.trim()) {
+      return;
+    }
+    setAnnotation(activeReplay.id, quickNote.trim());
+    logEvent('Quick note', activeReplay.title);
+    setQuickNote('');
   };
 
   return (
@@ -265,6 +308,68 @@ export const Coach = () => {
                 <h4>{moment.label}</h4>
                 <p>{moment.detail}</p>
               </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid two">
+        <div className="card surface">
+          <SectionHeader title="Evidence replay" subtitle="Swipe through recent clips." />
+          {activeReplay ? (
+            <div className="replay">
+              <div className="replay-preview" onClick={() => openClip(activeReplay)} />
+              <div className="replay-meta">
+                <div>
+                  <h4>{activeReplay.title}</h4>
+                  <p className="muted">{activeReplay.duration}</p>
+                </div>
+                <div className="replay-controls">
+                  <button className="btn ghost" onClick={prevReplay}>
+                    Prev
+                  </button>
+                  <button className="btn ghost" onClick={nextReplay}>
+                    Next
+                  </button>
+                </div>
+              </div>
+              <div className="replay-tags">
+                {['Press', 'Overload', 'Switch', 'Turnover'].map((label) => (
+                  <button key={label} className="tag-chip" onClick={() => addQuickLabel(label)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="replay-note">
+                <input
+                  type="text"
+                  placeholder="Quick note for staff"
+                  value={quickNote}
+                  onChange={(event) => setQuickNote(event.target.value)}
+                />
+                <button className="btn" onClick={saveQuickNote} disabled={!quickNote.trim()}>
+                  Save note
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="muted">No clips available.</p>
+          )}
+        </div>
+
+        <div className="card surface">
+          <SectionHeader title="Bench notes" subtitle="Recent clip annotations." />
+          <div className="stack">
+            {replayClips.slice(0, 4).map((clip) => (
+              <div className="row-card" key={clip.id}>
+                <div>
+                  <h4>{clip.title}</h4>
+                  <p>{clip.duration}</p>
+                </div>
+                <button className="btn ghost" onClick={() => openClip(clip)}>
+                  Open
+                </button>
+              </div>
             ))}
           </div>
         </div>

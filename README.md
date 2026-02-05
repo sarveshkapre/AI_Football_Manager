@@ -80,6 +80,7 @@ Start here: `docs/PRD.md`.
 - Ingest simulation uses live store phase cycling (Coach Mode reflects it)
 - Library saved searches and playlist export
 - Analyst signal quality dashboard and snapshot cues
+- Coach evidence replay carousel with quick labels and notes
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`
