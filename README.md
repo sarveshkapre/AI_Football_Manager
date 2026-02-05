@@ -82,6 +82,7 @@ Start here: `docs/PRD.md`.
 - Analyst signal quality dashboard and snapshot cues
 - Coach evidence replay carousel with quick labels and notes
 - Print-friendly presentation pack view
+- Ingest-to-report handoff (ready segments open Reports pre-selected)
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

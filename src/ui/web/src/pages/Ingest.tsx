@@ -5,6 +5,7 @@ import { SignalBadge } from '../components/SignalBadge';
 import { useAudit } from '../context/AuditContext';
 import { usePreferences } from '../context/PreferencesContext';
 import type { AlignmentState, PipelineStep, Segment, UploadJob } from '../types';
+import { saveToStorage } from '../utils/storage';
 
 const statusClassMap: Record<string, string> = {
   Ready: 'pill-ready',
@@ -249,6 +250,17 @@ export const Ingest = () => {
                   <span className={`pill ${statusClassMap[segment.status] ?? ''}`}>
                     {segment.status}
                   </span>
+                  <button
+                    className="btn ghost"
+                    onClick={() => {
+                      saveToStorage('afm.lastSegment', segment.id);
+                      logEvent('Segment report opened', segment.label);
+                      window.location.hash = '#reports';
+                    }}
+                    disabled={segment.status !== 'Ready'}
+                  >
+                    Generate report
+                  </button>
                 </div>
               </div>
             ))}

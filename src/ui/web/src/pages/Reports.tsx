@@ -10,8 +10,14 @@ import { useReportContext } from '../context/ReportContext';
 import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
 import { useAnnotations } from '../context/AnnotationsContext';
 import { useLabels } from '../context/LabelsContext';
-import { buildEvidencePackage, buildPresentationHtml, downloadFile, openHtmlPreview } from '../utils/export';
+import {
+  buildEvidencePackage,
+  buildPresentationHtml,
+  downloadFile,
+  openHtmlPreview
+} from '../utils/export';
 import { clockToSeconds, durationToSeconds, formatDuration } from '../utils/time';
+import { loadFromStorage, saveToStorage } from '../utils/storage';
 
 interface SegmentReport {
   segmentId: string;
@@ -54,7 +60,11 @@ export const Reports = () => {
       setTimeline(timelineData);
       setClips(clipData);
       setRecommendations(recs);
-      if (segmentData.length > 0) {
+      const storedSegment = loadFromStorage<string | null>('afm.lastSegment', null);
+      if (storedSegment && segmentData.some((segment) => segment.id === storedSegment)) {
+        setSelectedSegmentId(storedSegment);
+        saveToStorage('afm.lastSegment', null);
+      } else if (segmentData.length > 0) {
         setSelectedSegmentId(segmentData[0].id);
       }
     };

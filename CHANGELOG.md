@@ -48,6 +48,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Analyst signal quality dashboard and snapshot cues
 - Coach evidence replay carousel with quick labels and notes
 - Print-friendly presentation pack view
+- Ingest-to-report handoff for ready segments
 
 ## [0.1.0] - 2026-02-04
 ### Added
