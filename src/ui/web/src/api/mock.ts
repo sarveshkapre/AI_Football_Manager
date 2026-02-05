@@ -268,6 +268,15 @@ const liveEvents: LiveEvent[] = [
   }
 ];
 
+const signalHistory = [
+  { minute: '62', value: 72 },
+  { minute: '63', value: 78 },
+  { minute: '64', value: 66 },
+  { minute: '65', value: 81 },
+  { minute: '66', value: 69 },
+  { minute: '67', value: 74 }
+];
+
 const uploads: UploadJob[] = [
   {
     id: 'upload-1',
@@ -547,5 +556,9 @@ export const api = {
   async getMinimapSnapshots() {
     await wait(160);
     return minimapSnapshots;
+  },
+  async getSignalHistory() {
+    await wait(120);
+    return signalHistory;
   }
 };

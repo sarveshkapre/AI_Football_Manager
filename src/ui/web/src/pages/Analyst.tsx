@@ -3,6 +3,7 @@ import { api } from '../api/mock';
 import { Minimap } from '../components/Minimap';
 import { SectionHeader } from '../components/SectionHeader';
 import { StoryboardList } from '../components/StoryboardList';
+import { TrendChart } from '../components/TrendChart';
 import { useAudit } from '../context/AuditContext';
 import { useClipContext } from '../context/ClipContext';
 import { useStoryboards } from '../context/StoryboardContext';
@@ -24,6 +25,7 @@ export const Analyst = () => {
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
   const [snapshots, setSnapshots] = useState<MinimapSnapshot[]>([]);
+  const [signalHistory, setSignalHistory] = useState<Array<{ minute: string; value: number }>>([]);
   const [clips, setClips] = useState<Clip[]>([]);
   const [selected, setSelected] = useState<Clip[]>([]);
   const [storyboardTitle, setStoryboardTitle] = useState('');
@@ -47,16 +49,18 @@ export const Analyst = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [timelineData, overlayData, clipData, minimapData] = await Promise.all([
+      const [timelineData, overlayData, clipData, minimapData, signalData] = await Promise.all([
         api.getTimeline(),
         api.getOverlays(),
         api.getClips(),
-        api.getMinimapSnapshots()
+        api.getMinimapSnapshots(),
+        api.getSignalHistory()
       ]);
       setTimeline(timelineData);
       setOverlays(overlayData);
       setClips(clipData);
       setSnapshots(minimapData);
+      setSignalHistory(signalData);
       if (minimapData.length > 0) {
         setActiveSnapshotId(minimapData[0].id);
       }
@@ -441,6 +445,40 @@ export const Analyst = () => {
                 <input type="checkbox" defaultChecked={overlay.enabled} />
                 <span>{overlay.label}</span>
               </label>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid two">
+        <div className="card surface">
+          <SectionHeader
+            title="Signal quality"
+            subtitle="Confidence trend over the last 6 minutes."
+          />
+          <TrendChart title="Signal stability" points={signalHistory} max={100} />
+        </div>
+        <div className="card surface">
+          <SectionHeader
+            title="Snapshot cues"
+            subtitle="Minimap selection tied to tactical phase."
+          />
+          <div className="stack">
+            {snapshots.map((snapshot) => (
+              <button
+                key={snapshot.id}
+                className={`row-card ${snapshot.id === activeSnapshotId ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveSnapshotId(snapshot.id);
+                  setIsPlaying(false);
+                }}
+              >
+                <div>
+                  <h4>{snapshot.label}</h4>
+                  <p>{snapshot.phase}</p>
+                </div>
+                <span className="pill">{snapshot.minute}</span>
+              </button>
             ))}
           </div>
         </div>

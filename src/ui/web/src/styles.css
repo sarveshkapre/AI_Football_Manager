@@ -454,6 +454,11 @@ select {
   background: var(--surface-alt);
 }
 
+.row-card.active {
+  border-color: rgba(15, 76, 92, 0.4);
+  box-shadow: var(--shadow);
+}
+
 .row-card h4 {
   margin-bottom: 6px;
 }

@@ -31,4 +31,5 @@ export interface ApiContract {
   getPipeline: () => Promise<PipelineStep[]>;
   getAlignment: () => Promise<AlignmentState>;
   getMinimapSnapshots: () => Promise<MinimapSnapshot[]>;
+  getSignalHistory: () => Promise<Array<{ minute: string; value: number }>>;
 }
