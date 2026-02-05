@@ -7,6 +7,7 @@ import { TrendChart } from '../components/TrendChart';
 import { useAudit } from '../context/AuditContext';
 import { useClipContext } from '../context/ClipContext';
 import { useStoryboards } from '../context/StoryboardContext';
+import { useReportContext } from '../context/ReportContext';
 import type { Clip, MinimapSnapshot, OverlayToggle, PlayerDot, TimelineEvent } from '../types';
 
 interface ChatMessage {
@@ -30,6 +31,7 @@ interface InsightPack {
 export const Analyst = () => {
   const { openClip } = useClipContext();
   const { addStoryboard } = useStoryboards();
+  const { enqueueClips } = useReportContext();
   const { logEvent } = useAudit();
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [overlays, setOverlays] = useState<OverlayToggle[]>([]);
@@ -281,6 +283,14 @@ export const Analyst = () => {
     };
     setInsightPacks((prev) => [pack, ...prev]);
     logEvent('Insight pack saved', question);
+  };
+
+  const addPackToQueue = (pack: InsightPack) => {
+    if (pack.evidence.length === 0) {
+      return;
+    }
+    enqueueClips(pack.evidence);
+    logEvent('Insight pack queued', pack.question);
   };
 
   return (
@@ -670,9 +680,14 @@ export const Analyst = () => {
                     ))}
                   </div>
                 </div>
-                {pack.confidence !== undefined ? (
-                  <span className="pill">Confidence {pack.confidence}</span>
-                ) : null}
+                <div className="pack-actions">
+                  {pack.confidence !== undefined ? (
+                    <span className="pill">Confidence {pack.confidence}</span>
+                  ) : null}
+                  <button className="btn" onClick={() => addPackToQueue(pack)}>
+                    Add to report
+                  </button>
+                </div>
               </div>
             ))}
           </div>

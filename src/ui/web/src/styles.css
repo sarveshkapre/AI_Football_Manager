@@ -860,6 +860,13 @@ select {
   margin-top: 8px;
 }
 
+.pack-actions {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  justify-items: end;
+}
+
 .chat-input input {
   flex: 1;
   border-radius: 999px;

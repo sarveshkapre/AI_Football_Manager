@@ -8,6 +8,7 @@ interface ReportContextValue {
   removeClip: (clipId: string) => void;
   clearQueue: () => void;
   setQueue: (clips: Clip[]) => void;
+  enqueueClips: (clips: Clip[]) => void;
 }
 
 const storageKey = 'afm.reportQueue';
@@ -29,7 +30,19 @@ export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
       removeClip: (clipId: string) =>
         setQueueState((prev) => prev.filter((clip) => clip.id !== clipId)),
       clearQueue: () => setQueueState([]),
-      setQueue: (clips: Clip[]) => setQueueState(clips)
+      setQueue: (clips: Clip[]) => setQueueState(clips),
+      enqueueClips: (clips: Clip[]) =>
+        setQueueState((prev) => {
+          const existing = new Set(prev.map((clip) => clip.id));
+          const next = [...prev];
+          clips.forEach((clip) => {
+            if (!existing.has(clip.id)) {
+              next.push(clip);
+              existing.add(clip.id);
+            }
+          });
+          return next;
+        })
     }),
     [queue]
   );

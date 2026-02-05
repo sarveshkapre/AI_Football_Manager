@@ -51,6 +51,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Ingest-to-report handoff for ready segments
 - Analyst insight packs saved from Ask-the-match
 - Coach replay clips can be queued to reports
+- Insight packs can be queued to reports
 
 ## [0.1.0] - 2026-02-04
 ### Added
