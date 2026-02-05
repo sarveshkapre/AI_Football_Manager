@@ -75,6 +75,7 @@ Start here: `docs/PRD.md`.
 - Ask the match Q&A flow with evidence clips and confidence gating
 - Minimap snapshot preview with team shape metadata
 - Minimap scrubber with play/pause and timestamp slider
+- Evidence package export (clip manifest + overlays + annotations)
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

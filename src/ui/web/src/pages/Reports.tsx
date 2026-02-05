@@ -10,7 +10,7 @@ import { useReportContext } from '../context/ReportContext';
 import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
 import { useAnnotations } from '../context/AnnotationsContext';
 import { useLabels } from '../context/LabelsContext';
-import { buildPresentationHtml, downloadFile, openHtmlPreview } from '../utils/export';
+import { buildEvidencePackage, buildPresentationHtml, downloadFile, openHtmlPreview } from '../utils/export';
 import { clockToSeconds, durationToSeconds, formatDuration } from '../utils/time';
 
 interface SegmentReport {
@@ -188,6 +188,36 @@ export const Reports = () => {
     };
     downloadFile('afm-analyst-data.json', JSON.stringify(payload, null, 2), 'application/json');
     logEvent('Analyst data exported', `${queue.length} clips`);
+  };
+
+  const exportEvidencePackage = () => {
+    const queueIds = queue.map((clip) => clip.id);
+    const manifest = queue.map((clip) => ({
+      id: clip.id,
+      title: clip.title,
+      duration: clip.duration,
+      tags: clip.tags,
+      overlays: clip.overlays,
+      labels: labels[clip.id] ?? [],
+      annotation: annotations[clip.id]
+    }));
+
+    const metadata = {
+      clipCount: queue.length,
+      totalDuration,
+      segment: segmentReport?.title ?? 'Unassigned',
+      owner: 'Analyst room',
+      labels: Object.fromEntries(
+        Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+      annotations: Object.fromEntries(
+        Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+      )
+    };
+
+    const payload = buildEvidencePackage(metadata, manifest);
+    downloadFile('afm-evidence-pack.json', payload, 'application/json');
+    logEvent('Evidence pack exported', `${queue.length} clips`);
   };
 
   const renderBroadcastPack = () => {
@@ -396,6 +426,13 @@ export const Reports = () => {
               <p>Studio-ready sequence with graphics.</p>
               <button className="btn" onClick={renderBroadcastPack} disabled={queue.length === 0}>
                 Render
+              </button>
+            </div>
+            <div className="export-card">
+              <h4>Evidence package</h4>
+              <p>Manifest with overlays, labels, annotations.</p>
+              <button className="btn" onClick={exportEvidencePackage} disabled={queue.length === 0}>
+                Export
               </button>
             </div>
           </div>

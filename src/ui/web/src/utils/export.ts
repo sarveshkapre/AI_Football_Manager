@@ -262,6 +262,28 @@ export const openHtmlPreview = (html: string) => {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 };
 
+interface EvidenceClipManifest {
+  id: string;
+  title: string;
+  duration: string;
+  tags: string[];
+  overlays: { id: string; label: string; enabled: boolean }[];
+  labels?: string[];
+  annotation?: string;
+}
+
+export const buildEvidencePackage = (
+  metadata: Record<string, unknown>,
+  clips: EvidenceClipManifest[]
+) => {
+  const payload = {
+    metadata,
+    clips,
+    generatedAt: new Date().toISOString()
+  };
+  return JSON.stringify(payload, null, 2);
+};
+
 const wrapText = (
   ctx: CanvasRenderingContext2D,
   text: string,
