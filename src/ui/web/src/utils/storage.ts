@@ -10,6 +10,15 @@ export const loadFromStorage = <T>(key: string, fallback: T): T => {
   }
 };
 
+export const loadFromStorageWithGuard = <T>(
+  key: string,
+  fallback: T,
+  guard: (value: unknown) => value is T
+): T => {
+  const parsed = loadFromStorage<unknown>(key, fallback);
+  return guard(parsed) ? parsed : fallback;
+};
+
 export const saveToStorage = (key: string, value: unknown) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));

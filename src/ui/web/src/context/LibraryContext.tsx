@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { SavedSearch } from '../types';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isSavedSearchArray } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 interface LibraryContextValue {
   savedSearches: SavedSearch[];
@@ -14,7 +15,7 @@ const LibraryContext = createContext<LibraryContextValue | undefined>(undefined)
 
 export const LibraryProvider = ({ children }: { children: React.ReactNode }) => {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>(() =>
-    loadFromStorage(storageKey, [])
+    loadFromStorageWithGuard(storageKey, [], isSavedSearchArray)
   );
 
   useEffect(() => {

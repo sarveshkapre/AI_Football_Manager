@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import type { Clip, Storyboard } from '../types';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isStoryboardArray } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 interface StoryboardContextValue {
   storyboards: Storyboard[];
@@ -16,7 +17,9 @@ const storageKey = 'afm.storyboards';
 const StoryboardContext = createContext<StoryboardContextValue | undefined>(undefined);
 
 export const StoryboardProvider = ({ children }: { children: React.ReactNode }) => {
-  const [storyboards, setStoryboards] = useState<Storyboard[]>(() => loadFromStorage(storageKey, []));
+  const [storyboards, setStoryboards] = useState<Storyboard[]>(() =>
+    loadFromStorageWithGuard(storageKey, [], isStoryboardArray)
+  );
 
   useEffect(() => {
     if (storyboards.length === 0) {

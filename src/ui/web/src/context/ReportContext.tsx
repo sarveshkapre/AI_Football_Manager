@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Clip } from '../types';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isClipArray } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 interface ReportContextValue {
   queue: Clip[];
@@ -16,7 +17,9 @@ const storageKey = 'afm.reportQueue';
 const ReportContext = createContext<ReportContextValue | undefined>(undefined);
 
 export const ReportProvider = ({ children }: { children: React.ReactNode }) => {
-  const [queue, setQueueState] = useState<Clip[]>(() => loadFromStorage(storageKey, []));
+  const [queue, setQueueState] = useState<Clip[]>(() =>
+    loadFromStorageWithGuard(storageKey, [], isClipArray)
+  );
 
   useEffect(() => {
     saveToStorage(storageKey, queue);

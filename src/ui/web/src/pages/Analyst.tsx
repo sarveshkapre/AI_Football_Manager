@@ -119,6 +119,11 @@ export const Analyst = () => {
     return index >= 0 ? index : 0;
   }, [snapshots, activeSnapshotId]);
 
+  const signalTrendPoints = useMemo(
+    () => signalHistory.map((point) => ({ label: point.minute, value: point.value })),
+    [signalHistory]
+  );
+
   useEffect(() => {
     if (!activeSnapshotId || snapshots.every((snapshot) => snapshot.id !== activeSnapshotId)) {
       setActiveSnapshotId(snapshots[0]?.id ?? '');
@@ -489,7 +494,7 @@ export const Analyst = () => {
             title="Signal quality"
             subtitle="Confidence trend over the last 6 minutes."
           />
-          <TrendChart title="Signal stability" points={signalHistory} max={100} />
+          <TrendChart title="Signal stability" points={signalTrendPoints} max={100} />
         </div>
         <div className="card surface">
           <SectionHeader

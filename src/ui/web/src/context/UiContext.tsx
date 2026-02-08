@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isDensity } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 type Density = 'standard' | 'compact';
 
@@ -13,7 +14,9 @@ const storageKey = 'afm.uiDensity';
 const UiContext = createContext<UiContextValue | undefined>(undefined);
 
 export const UiProvider = ({ children }: { children: React.ReactNode }) => {
-  const [density, setDensityState] = useState<Density>(() => loadFromStorage(storageKey, 'standard'));
+  const [density, setDensityState] = useState<Density>(() =>
+    loadFromStorageWithGuard(storageKey, 'standard', isDensity)
+  );
 
   useEffect(() => {
     saveToStorage(storageKey, density);

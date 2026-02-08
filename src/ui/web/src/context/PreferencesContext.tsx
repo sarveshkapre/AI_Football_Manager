@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isPreferencesState, type PreferencesState } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 type Cadence = 30 | 60 | 90;
 
@@ -13,49 +14,36 @@ interface PreferencesContextValue {
 }
 
 const storageKey = 'afm.preferences';
+const defaultPreferences: PreferencesState = {
+  notificationCadence: 30,
+  autoRefresh: true,
+  ingestSimulation: true
+};
 
 const PreferencesContext = createContext<PreferencesContextValue | undefined>(undefined);
 
 export const PreferencesProvider = ({ children }: { children: React.ReactNode }) => {
-  const [notificationCadence, setNotificationCadence] = useState<Cadence>(() => {
-    const stored = loadFromStorage(storageKey, {
-      notificationCadence: 30,
-      autoRefresh: true,
-      ingestSimulation: true
-    }).notificationCadence;
-    return stored ?? 30;
-  });
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(() => {
-    const stored = loadFromStorage(storageKey, {
-      notificationCadence: 30,
-      autoRefresh: true,
-      ingestSimulation: true
-    }).autoRefresh;
-    return stored ?? true;
-  });
-  const [ingestSimulation, setIngestSimulation] = useState<boolean>(() => {
-    const stored = loadFromStorage(storageKey, {
-      notificationCadence: 30,
-      autoRefresh: true,
-      ingestSimulation: true
-    }).ingestSimulation;
-    return stored ?? true;
-  });
+  const [preferences, setPreferences] = useState<PreferencesState>(() =>
+    loadFromStorageWithGuard(storageKey, defaultPreferences, isPreferencesState)
+  );
 
   useEffect(() => {
-    saveToStorage(storageKey, { notificationCadence, autoRefresh, ingestSimulation });
-  }, [notificationCadence, autoRefresh, ingestSimulation]);
+    saveToStorage(storageKey, preferences);
+  }, [preferences]);
 
   const value = useMemo(
     () => ({
-      notificationCadence,
-      autoRefresh,
-      ingestSimulation,
-      setNotificationCadence,
-      setAutoRefresh,
-      setIngestSimulation
+      notificationCadence: preferences.notificationCadence,
+      autoRefresh: preferences.autoRefresh,
+      ingestSimulation: preferences.ingestSimulation,
+      setNotificationCadence: (notificationCadence: Cadence) =>
+        setPreferences((prev) => ({ ...prev, notificationCadence })),
+      setAutoRefresh: (autoRefresh: boolean) =>
+        setPreferences((prev) => ({ ...prev, autoRefresh })),
+      setIngestSimulation: (ingestSimulation: boolean) =>
+        setPreferences((prev) => ({ ...prev, ingestSimulation }))
     }),
-    [notificationCadence, autoRefresh, ingestSimulation]
+    [preferences]
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

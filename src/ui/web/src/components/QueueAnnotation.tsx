@@ -8,7 +8,7 @@ interface QueueAnnotationProps {
 export const QueueAnnotation = ({ clipId }: QueueAnnotationProps) => {
   const { annotations, setAnnotation, removeAnnotation } = useAnnotations();
   const [isEditing, setIsEditing] = useState(false);
-  const [value, setValue] = useState(annotations[clipId]?.note ?? '');
+  const [value, setValue] = useState(annotations[clipId] ?? '');
 
   const save = () => {
     if (value.trim().length === 0) {
@@ -34,7 +34,7 @@ export const QueueAnnotation = ({ clipId }: QueueAnnotationProps) => {
         </div>
       ) : (
         <button className="btn ghost" onClick={() => setIsEditing(true)}>
-          {annotations[clipId]?.note ? 'Edit note' : 'Add note'}
+          {annotations[clipId] ? 'Edit note' : 'Add note'}
         </button>
       )}
     </div>

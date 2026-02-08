@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isAuditEventArray } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 export interface AuditEvent {
   id: string;
@@ -18,20 +19,24 @@ const storageKey = 'afm.audit';
 const AuditContext = createContext<AuditContextValue | undefined>(undefined);
 
 export const AuditProvider = ({ children }: { children: React.ReactNode }) => {
-  const [events, setEvents] = useState<AuditEvent[]>(() => loadFromStorage(storageKey, []));
+  const [events, setEvents] = useState<AuditEvent[]>(() =>
+    loadFromStorageWithGuard(storageKey, [], isAuditEventArray)
+  );
 
   const logEvent = (action: string, detail: string) => {
-    const next = [
-      {
-        id: `audit-${Date.now()}`,
-        timestamp: new Date().toLocaleString(),
-        action,
-        detail
-      },
-      ...events
-    ].slice(0, 20);
-    setEvents(next);
-    saveToStorage(storageKey, next);
+    setEvents((prev) => {
+      const next = [
+        {
+          id: `audit-${Date.now()}`,
+          timestamp: new Date().toLocaleString(),
+          action,
+          detail
+        },
+        ...prev
+      ].slice(0, 20);
+      saveToStorage(storageKey, next);
+      return next;
+    });
   };
 
   const value = useMemo(() => ({ events, logEvent }), [events]);

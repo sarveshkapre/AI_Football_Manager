@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isLabelsMap } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 interface LabelsContextValue {
   labels: Record<string, string[]>;
@@ -13,34 +14,36 @@ const LabelsContext = createContext<LabelsContextValue | undefined>(undefined);
 
 export const LabelsProvider = ({ children }: { children: React.ReactNode }) => {
   const [labels, setLabels] = useState<Record<string, string[]>>(() =>
-    loadFromStorage(storageKey, {})
+    loadFromStorageWithGuard(storageKey, {}, isLabelsMap)
   );
-
-  const persist = (next: Record<string, string[]>) => {
-    setLabels(next);
-    saveToStorage(storageKey, next);
-  };
 
   const value = useMemo(
     () => ({
       labels,
       addLabel: (clipId: string, label: string) => {
-        const existing = labels[clipId] ?? [];
-        if (existing.includes(label)) {
-          return;
-        }
-        persist({
-          ...labels,
-          [clipId]: [...existing, label]
+        setLabels((prev) => {
+          const existing = prev[clipId] ?? [];
+          if (existing.includes(label)) {
+            return prev;
+          }
+          const next = {
+            ...prev,
+            [clipId]: [...existing, label]
+          };
+          saveToStorage(storageKey, next);
+          return next;
         });
       },
-      removeLabel: (clipId: string, label: string) => {
-        const existing = labels[clipId] ?? [];
-        persist({
-          ...labels,
-          [clipId]: existing.filter((item) => item !== label)
-        });
-      }
+      removeLabel: (clipId: string, label: string) =>
+        setLabels((prev) => {
+          const existing = prev[clipId] ?? [];
+          const next = {
+            ...prev,
+            [clipId]: existing.filter((item) => item !== label)
+          };
+          saveToStorage(storageKey, next);
+          return next;
+        })
     }),
     [labels]
   );

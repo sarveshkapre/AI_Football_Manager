@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react';
-import { loadFromStorage, saveToStorage } from '../utils/storage';
+import { isAccessState } from '../utils/guards';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 
 export type AccessKey =
   | 'coach'
@@ -34,7 +35,7 @@ const AccessContext = createContext<AccessContextValue | undefined>(undefined);
 
 export const AccessProvider = ({ children }: { children: React.ReactNode }) => {
   const [access, setAccessStateInternal] = useState<AccessState>(() => {
-    const stored = loadFromStorage(storageKey, defaultAccess);
+    const stored = loadFromStorageWithGuard(storageKey, defaultAccess, isAccessState);
     return { ...defaultAccess, ...stored };
   });
 
@@ -44,8 +45,11 @@ export const AccessProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const setAccess = (key: AccessKey, value: boolean) => {
-    const next = { ...access, [key]: value };
-    setAccessState(next);
+    setAccessStateInternal((prev) => {
+      const next = { ...prev, [key]: value };
+      saveToStorage(storageKey, next);
+      return next;
+    });
   };
 
   const value = useMemo(() => ({ access, setAccess, setAccessState }), [access]);

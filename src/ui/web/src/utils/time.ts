@@ -6,8 +6,33 @@ export const formatClockTime = (iso: string | null) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
+const parseClockParts = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const parts = trimmed.split(':');
+  if (parts.length !== 2 && parts.length !== 3) {
+    return null;
+  }
+  const parsed = parts.map((part) => Number(part));
+  if (parsed.some((part) => Number.isNaN(part) || part < 0 || !Number.isInteger(part))) {
+    return null;
+  }
+  if (parsed[parsed.length - 1] >= 60) {
+    return null;
+  }
+  if (parsed.length === 3 && parsed[1] >= 60) {
+    return null;
+  }
+  return parsed;
+};
+
 export const durationToSeconds = (duration: string) => {
-  const parts = duration.split(':').map(Number);
+  const parts = parseClockParts(duration);
+  if (!parts) {
+    return 0;
+  }
   if (parts.length === 2) {
     return parts[0] * 60 + parts[1];
   }
@@ -18,8 +43,8 @@ export const durationToSeconds = (duration: string) => {
 };
 
 export const clockToSeconds = (clock: string) => {
-  const parts = clock.split(':').map(Number);
-  if (parts.some((part) => Number.isNaN(part))) {
+  const parts = parseClockParts(clock);
+  if (!parts) {
     return null;
   }
   if (parts.length === 2) {

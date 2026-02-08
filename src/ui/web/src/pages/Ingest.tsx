@@ -6,6 +6,7 @@ import { useAudit } from '../context/AuditContext';
 import { usePreferences } from '../context/PreferencesContext';
 import type { AlignmentState, PipelineStep, Segment, UploadJob } from '../types';
 import { saveToStorage } from '../utils/storage';
+import { clockToSeconds } from '../utils/time';
 
 const statusClassMap: Record<string, string> = {
   Ready: 'pill-ready',
@@ -31,11 +32,50 @@ export const Ingest = () => {
   const [segmentEnd, setSegmentEnd] = useState('80:00');
   const [manualOffset, setManualOffset] = useState('+00:12');
   const [autoGenerateReports, setAutoGenerateReports] = useState(true);
+  const [segmentError, setSegmentError] = useState<string | null>(null);
+  const [alignmentError, setAlignmentError] = useState<string | null>(null);
   const autoGenerateRef = useRef(autoGenerateReports);
+  const segmentsRef = useRef<Segment[]>([]);
+  const uploadTimersRef = useRef<number[]>([]);
 
   useEffect(() => {
     autoGenerateRef.current = autoGenerateReports;
   }, [autoGenerateReports]);
+
+  useEffect(() => {
+    segmentsRef.current = segments;
+  }, [segments]);
+
+  useEffect(() => {
+    return () => {
+      uploadTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    };
+  }, []);
+
+  const normalizeOffset = (value: string) => {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^([+-])(\d{2}):(\d{2})$/);
+    if (!match) {
+      return null;
+    }
+    const seconds = Number(match[3]);
+    if (Number.isNaN(seconds) || seconds >= 60) {
+      return null;
+    }
+    return `${match[1]}${match[2]}:${match[3]}`;
+  };
+
+  const validateSegmentWindow = (start: string, end: string) => {
+    const startSeconds = clockToSeconds(start);
+    const endSeconds = clockToSeconds(end);
+    if (startSeconds === null || endSeconds === null) {
+      return 'Use mm:ss or hh:mm:ss format for start and end.';
+    }
+    if (endSeconds <= startSeconds) {
+      return 'End time must be after start time.';
+    }
+    return null;
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -62,18 +102,26 @@ export const Ingest = () => {
   }, [uploads]);
 
   const addSegment = () => {
-    if (!segmentLabel.trim()) {
+    const label = segmentLabel.trim();
+    if (!label) {
+      setSegmentError('Add a segment label before queuing.');
+      return;
+    }
+    const validationError = validateSegmentWindow(segmentStart, segmentEnd);
+    if (validationError) {
+      setSegmentError(validationError);
       return;
     }
     const next: Segment = {
       id: `seg-${Date.now()}`,
-      label: segmentLabel.trim(),
+      label,
       start: segmentStart.trim(),
       end: segmentEnd.trim(),
       status: 'Queued',
       signal: 'Med'
     };
     setSegments((prev) => [next, ...prev]);
+    setSegmentError(null);
     logEvent('Segment queued', `${next.label} ${next.start}-${next.end}`);
   };
 
@@ -81,8 +129,15 @@ export const Ingest = () => {
     if (!alignment) {
       return;
     }
-    const next = { ...alignment, method: 'Manual', offset: manualOffset };
+    const normalizedOffset = normalizeOffset(manualOffset);
+    if (!normalizedOffset) {
+      setAlignmentError('Offset must use +mm:ss or -mm:ss.');
+      return;
+    }
+    const next = { ...alignment, method: 'Manual', offset: normalizedOffset };
     setAlignment(next);
+    setManualOffset(normalizedOffset);
+    setAlignmentError(null);
     logEvent('Alignment updated', `${next.offset} (${next.method})`);
   };
 
@@ -100,7 +155,7 @@ export const Ingest = () => {
     setUploads((prev) => [next, ...prev]);
     logEvent('Upload started', next.filename);
 
-    setTimeout(() => {
+    const processingTimer = window.setTimeout(() => {
       setUploads((prev) =>
         prev.map((item) =>
           item.id === id
@@ -109,8 +164,9 @@ export const Ingest = () => {
         )
       );
     }, 1200);
+    uploadTimersRef.current.push(processingTimer);
 
-    setTimeout(() => {
+    const readyTimer = window.setTimeout(() => {
       setUploads((prev) =>
         prev.map((item) =>
           item.id === id
@@ -120,14 +176,16 @@ export const Ingest = () => {
       );
       logEvent('Upload ready', next.filename);
       if (autoGenerateRef.current) {
+        const currentSegments = segmentsRef.current;
         const readySegment =
-          segments.find((segment) => segment.status === 'Ready') ?? segments[0];
+          currentSegments.find((segment) => segment.status === 'Ready') ?? currentSegments[0];
         if (readySegment) {
           saveToStorage('afm.lastSegment', readySegment.id);
         }
         window.location.hash = '#reports';
       }
     }, 2400);
+    uploadTimersRef.current.push(readyTimer);
   };
 
   return (
@@ -217,13 +275,17 @@ export const Ingest = () => {
                   <span>Offset (mm:ss)</span>
                   <input
                     value={manualOffset}
-                    onChange={(event) => setManualOffset(event.target.value)}
+                    onChange={(event) => {
+                      setManualOffset(event.target.value);
+                      setAlignmentError(null);
+                    }}
                   />
                 </label>
                 <button className="btn" onClick={applyAlignment}>
                   Apply offset
                 </button>
               </div>
+              {alignmentError ? <p className="form-error">{alignmentError}</p> : null}
               <div className="alignment-row">
                 <div>
                   <p className="eyebrow">Aligned to match clock</p>
@@ -244,7 +306,10 @@ export const Ingest = () => {
               <span>Segment label</span>
               <input
                 value={segmentLabel}
-                onChange={(event) => setSegmentLabel(event.target.value)}
+                onChange={(event) => {
+                  setSegmentLabel(event.target.value);
+                  setSegmentError(null);
+                }}
               />
             </label>
             <div className="segment-row">
@@ -252,17 +317,27 @@ export const Ingest = () => {
                 <span>Start</span>
                 <input
                   value={segmentStart}
-                  onChange={(event) => setSegmentStart(event.target.value)}
+                  onChange={(event) => {
+                    setSegmentStart(event.target.value);
+                    setSegmentError(null);
+                  }}
                 />
               </label>
               <label className="field">
                 <span>End</span>
-                <input value={segmentEnd} onChange={(event) => setSegmentEnd(event.target.value)} />
+                <input
+                  value={segmentEnd}
+                  onChange={(event) => {
+                    setSegmentEnd(event.target.value);
+                    setSegmentError(null);
+                  }}
+                />
               </label>
               <button className="btn primary" onClick={addSegment}>
                 Add segment
               </button>
             </div>
+            {segmentError ? <p className="form-error">{segmentError}</p> : null}
           </div>
           <div className="segment-list">
             {segments.map((segment) => (
