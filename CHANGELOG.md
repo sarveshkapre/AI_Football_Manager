@@ -53,6 +53,17 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Coach replay clips can be queued to reports
 - Insight packs can be queued to reports
 - Auto-generate segment report after upload completes
+- CI workflow for typecheck, tests, and production build on push/PR
+- Verification guide for local smoke and CI command parity (`docs/VERIFICATION.md`)
+- Vitest test suite covering time parsing, storage guards, and segment report generation
+- Runtime storage guards and validated hydration across UI context stores
+
+### Changed
+- Ingest now validates segment windows and manual alignment offsets with inline error messaging
+- Ingest upload simulation timers are cleaned up on unmount, and report auto-open uses latest segment state
+- Segment report generation moved to a reusable utility for easier testing and maintenance
+- Time parsing is stricter for malformed values and out-of-range seconds
+- Audit, labels, and annotations updates now use functional state writes to avoid stale-update races
 
 ## [0.1.0] - 2026-02-04
 ### Added

@@ -46,6 +46,7 @@ Start here: `docs/PRD.md`.
 - `docs/ARCHITECTURE.md` — system architecture overview
 - `docs/USER_STORIES.md` — MVP user stories and acceptance criteria
 - `docs/MVP_BACKLOG.md` — draft backlog and milestones
+- `docs/VERIFICATION.md` — local and CI verification checklist
 
 ## UI prototype
 - React + Vite prototype under `src/ui/web`
@@ -53,6 +54,8 @@ Start here: `docs/PRD.md`.
 ## Development (web UI)
 - Install dependencies: `npm install`
 - Run dev server: `npm run dev`
+- Run typecheck: `npm run typecheck`
+- Run tests: `npm run test`
 - Vite root is set to `src/ui/web`
 - Navigate using hash routes: `#ingest`, `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
 - Keyboard shortcuts: `U` Ingest, `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library
@@ -87,6 +90,9 @@ Start here: `docs/PRD.md`.
 - Coach replay clips can be queued directly to reports
 - Insight packs can be added to the report queue
 - Auto-generate segment report after upload completes (toggle in Ingest)
+
+## Continuous integration
+- GitHub Actions workflow at `.github/workflows/ci.yml` runs `npm ci`, `npm run typecheck`, `npm run test`, and `npm run build` on pushes to `main` and pull requests.
 
 ## Data & state (prototype)
 - Mock API lives in `src/ui/web/src/api/mock.ts`

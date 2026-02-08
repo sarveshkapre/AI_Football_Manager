@@ -1,0 +1,23 @@
+# Verification Guide
+
+Use this checklist before pushing changes to `main`.
+
+## Local checks
+1. Install deps: `npm install`
+2. Typecheck: `npm run typecheck`
+3. Unit tests: `npm run test`
+4. Production build: `npm run build`
+
+## Local smoke path
+1. Start dev server: `npm run dev -- --host 127.0.0.1 --port 4173`
+2. Verify app responds: `curl -I http://127.0.0.1:4173/`
+3. Stop the dev server.
+
+Expected smoke result: `HTTP/1.1 200 OK`.
+
+## CI checks
+GitHub Actions runs the same verification steps via `.github/workflows/ci.yml`:
+- `npm ci`
+- `npm run typecheck`
+- `npm run test`
+- `npm run build`
