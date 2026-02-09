@@ -4,7 +4,11 @@ import { Modal, useModalTitleId } from './Modal/Modal';
 
 type HotkeyItem = { label: string; keys: Array<string> };
 
-const keycap = (label: string) => <kbd className="keycap">{label}</kbd>;
+const keycap = (label: string) => (
+  <kbd className="keycap" key={label}>
+    {label}
+  </kbd>
+);
 
 export const HotkeyHelpModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const { access } = useAccess();

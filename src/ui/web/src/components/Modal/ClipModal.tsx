@@ -68,24 +68,26 @@ export const ClipModal = () => {
     setActiveStroke(null);
   }, [clip, detail]);
 
-  if (!clip) {
-    return null;
-  }
+  const clipDetail = clip ? (detail ?? clip) : null;
+  const clipId = clipDetail?.id ?? null;
+  const clipLabels = clipDetail ? (labels[clipDetail.id] ?? []) : [];
+  const clipAnnotation = clipDetail ? (annotations[clipDetail.id] ?? '') : '';
+  const strokes = clipDetail ? (strokesByClip[clipDetail.id] ?? []) : [];
 
-  const clipDetail = detail ?? clip;
-  const clipLabels = labels[clipDetail.id] ?? [];
-  const clipAnnotation = annotations[clipDetail.id] ?? '';
-  const strokes = strokesByClip[clipDetail.id] ?? [];
-
-  const clipWithOverlays = useMemo(
-    () => ({
+  const clipWithOverlays = useMemo(() => {
+    if (!clipDetail) {
+      return null;
+    }
+    return {
       ...clipDetail,
       overlays: localOverlays
-    }),
-    [clipDetail, localOverlays]
-  );
+    };
+  }, [clipDetail, localOverlays]);
 
   useEffect(() => {
+    if (!clipDetail) {
+      return;
+    }
     const stage = stageRef.current;
     const canvas = canvasRef.current;
     if (!stage || !canvas) {
@@ -103,14 +105,21 @@ export const ClipModal = () => {
     };
 
     resize();
+    window.addEventListener('resize', resize);
+
+    if (typeof ResizeObserver !== 'function') {
+      return () => {
+        window.removeEventListener('resize', resize);
+      };
+    }
+
     const observer = new ResizeObserver(() => resize());
     observer.observe(stage);
-    window.addEventListener('resize', resize);
     return () => {
       observer.disconnect();
       window.removeEventListener('resize', resize);
     };
-  }, [clipDetail.id]);
+  }, [clipId, clipDetail]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -187,6 +196,10 @@ export const ClipModal = () => {
       drawStroke(activeStroke, 0.7);
     }
   }, [activeStroke, stageSize.dpr, stageSize.height, stageSize.width, strokes]);
+
+  if (!clip || !clipWithOverlays) {
+    return null;
+  }
 
   const handleAdd = () => {
     addClip(clipWithOverlays);
@@ -456,4 +469,3 @@ export const ClipModal = () => {
     </Modal>
   );
 };
-
