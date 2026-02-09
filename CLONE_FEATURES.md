@@ -7,11 +7,14 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
-- [ ] P3 - Add lightweight performance instrumentation (render timing + localStorage write counts) to catch regressions as the prototype grows.
-- [ ] P3 - Add keyboard-only navigation pass for the main views (tab order, visible focus states, skip-to-content).
+- [ ] P1 (Selected) - Add “pack import” flow in Reports (import `afm-bundle.zip` / `afm-report.json`) and hydrate report queue + notes (labels/annotations/telestration) with validation + tests.
+- [ ] P1 (Selected) - Keyboard-only navigation pass (skip-to-content, `aria-current`, visible focus, predictable tab order) across Shell + main views.
+- [ ] P2 (Selected) - Add lightweight performance instrumentation (localStorage write counts + optional render timing) surfaced in Settings for regression detection.
 - [ ] P3 - Investigate and mitigate `npm audit` moderate vulnerabilities without breaking Vite/React tooling.
-- [ ] P4 - Add bulk tag/label actions in Analyst timeline (multi-select + apply/remove) to speed up matchday review.
-- [ ] P4 - Add minimal “pack import” flow in Reports (load a saved bundle manifest JSON and hydrate the queue) for round-trip validation.
+- [ ] P3 - Add bulk tag/label actions in Analyst timeline (multi-select + apply/remove) to speed up matchday review.
+- [ ] P3 - Add “imported pack banner” state (show pack title/owner/match + clear-import) to reduce confusion after importing.
+- [ ] P4 - Add report-queue presets (coach bench vs analyst room) for faster “build a pack” workflows.
+- [ ] P4 - Add minimal E2E smoke test (app boots + navigate routes + open clip modal) to reduce UI regressions not covered by unit tests.
 
 ## Implemented
 - [x] 2026-02-09 - Added one-click Draft Report zip bundle export (manifest + report + notes + cover + HTML packs + evidence package) for offline share handoff. Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/export.ts`, `package.json`, `src/ui/web/src/utils/export.test.ts`.
@@ -43,6 +46,8 @@
 - Market scan (bounded) suggests table-stakes: live tagging/hotkeys, rapid clip assembly, and shareable/permissioned packs with expiry. Sources (external, untrusted): https://www.hudl.com/products/sportscode, https://www.catapult.com/solutions/pro-video, https://wyscout.com/, https://www.nacsport.com/, https://longomatch.com/, https://metrica-sports.com/.
 - Bounded scan indicates telestration/drawing is explicit table-stakes (arrows/freehand/lines) with “presentational mode” variants (drawings shown only during presentation). Sources (external, untrusted): https://www.hudl.com/products/sportscode/tiers, https://www.hudl.com/products/studio, https://provideo.catapultsports.com/hc/en-us/articles/7333038946959-Freeze-Frame-Telestrations.
 - Offline sharing commonly includes packaged artifacts (video + graphics + notes) rather than single JSON exports; bundling assets into a zip reduces friction for “send to staff” workflows even in a prototype context.
+- Market scan (bounded) suggests parity expectations around live collaboration and “shared timelines” for matchday workflows, plus shareable presentations/packs with permissions. Sources (external, untrusted): https://www.hudl.com/releases/sportscode, https://provideo.catapultsports.com/hc/en-us/articles/7333070047887-Sharing-a-Presentation-Feature-in-Focus-Client, https://provideo.catapultsports.com/hc/en-us/articles/7333023161871-Live-Capture-Using-Multiple-Devices.
+- Market scan (bounded) reinforces that “presentation tooling” is positioned as a first-class workflow (not an export afterthought), including multi-angle/auto-annotations and cloud sharing. Sources (external, untrusted): https://www.catapult.com/solutions/pro-video, https://www.hudl.com/products/studio, https://www.hudl.com/blog/hudl-studio-telestration-sportscode.
 
 ## Notes
 - This file is maintained by the autonomous clone loop.
