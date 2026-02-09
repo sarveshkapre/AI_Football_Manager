@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import { useMemo, useState } from 'react';
 import { ReportQueue } from '../components/ReportQueue';
 import { SectionHeader } from '../components/SectionHeader';
@@ -8,12 +9,15 @@ import { useReportContext } from '../context/ReportContext';
 import { useTelestration } from '../context/TelestrationContext';
 import {
   buildCoverText,
+  buildEvidencePackage,
   buildPrintableHtml,
   buildPresentationHtml,
   buildPackStub,
   downloadCoverImage,
+  downloadBlob,
   downloadFile,
-  openHtmlPreview
+  openHtmlPreview,
+  renderCoverImageBlob
 } from '../utils/export';
 import { buildBundleManifest, buildShareLink, computeExpiresAt } from '../utils/share';
 import { formatDuration, durationToSeconds } from '../utils/time';
@@ -42,6 +46,7 @@ export const DraftReport = () => {
   const [shareIncludeNotes, setShareIncludeNotes] = useState(true);
   const [shareToken, setShareToken] = useState(() => generateShareToken());
   const [shareIssuedAt, setShareIssuedAt] = useState(() => Date.now());
+  const [zipBusy, setZipBusy] = useState(false);
   const shareBaseUrl = 'https://afm.example.com';
 
   const totalDuration = useMemo(() => {
@@ -249,6 +254,141 @@ export const DraftReport = () => {
     logEvent('Bundle manifest exported', `${queue.length} clips`);
   };
 
+  const exportZipBundle = async () => {
+    if (zipBusy) {
+      return;
+    }
+    setZipBusy(true);
+    try {
+      const createdAt = new Date().toISOString();
+      const queueIds = queue.map((clip) => clip.id);
+
+      const reportPayload = {
+        title,
+        notes,
+        match: matchLabel,
+        owner,
+        totalDuration,
+        clipCount: queue.length,
+        clips: queue,
+        annotations: Object.fromEntries(
+          Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
+        ),
+        labels: Object.fromEntries(
+          Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
+        ),
+        telestration
+      };
+
+      const csv = [
+        'id,title,duration,tags',
+        ...queue.map((clip) =>
+          [clip.id, clip.title, clip.duration, clip.tags.join('|')]
+            .map((value) => `"${value.replace(/"/g, '""')}"`)
+            .join(',')
+        )
+      ].join('\n');
+
+      const notesPayload = {
+        annotations: reportPayload.annotations,
+        labels: reportPayload.labels,
+        telestration
+      };
+
+      const coverText = buildCoverText(
+        title,
+        notes,
+        queue.slice(0, 5).map((clip) => clip.title)
+      );
+
+      const presentationHtml = buildPresentationHtml({
+        title,
+        match: matchLabel,
+        owner,
+        summary: notes,
+        totalDuration,
+        clipCount: queue.length,
+        clips: queue,
+        labels: reportPayload.labels,
+        annotations: reportPayload.annotations,
+        telestration
+      });
+
+      const printableHtml = buildPrintableHtml({
+        title,
+        match: matchLabel,
+        owner,
+        summary: notes,
+        totalDuration,
+        clipCount: queue.length,
+        clips: queue,
+        labels: reportPayload.labels,
+        annotations: reportPayload.annotations,
+        telestration
+      });
+
+      const evidenceManifest = queue.map((clip) => ({
+        id: clip.id,
+        title: clip.title,
+        duration: clip.duration,
+        tags: clip.tags,
+        overlays: clip.overlays,
+        labels: labels[clip.id] ?? [],
+        annotation: annotations[clip.id],
+        telestration: telestration[clip.id] ?? []
+      }));
+
+      const evidencePack = buildEvidencePackage(
+        {
+          createdAt,
+          clipCount: queue.length,
+          totalDuration,
+          match: matchLabel,
+          owner
+        },
+        evidenceManifest
+      );
+
+      const manifest = buildBundleManifest({
+        createdAt,
+        shareLink,
+        permission: sharePermission,
+        expiresAt: shareExpiresAt,
+        allowDownload: shareAllowDownload,
+        title,
+        match: matchLabel,
+        owner,
+        clipCount: queue.length,
+        totalDuration,
+        includeNotes: shareIncludeNotes
+      });
+
+      const coverPng = await renderCoverImageBlob(title, matchLabel, notes);
+
+      const zip = new JSZip();
+      zip.file('afm-bundle-manifest.json', JSON.stringify(manifest, null, 2));
+      zip.file('afm-report.json', JSON.stringify(reportPayload, null, 2));
+      zip.file('afm-report.csv', csv);
+      zip.file('afm-notes.json', JSON.stringify(notesPayload, null, 2));
+      zip.file('afm-cover.txt', coverText);
+      zip.file('afm-presentation.html', presentationHtml);
+      zip.file('afm-print.html', printableHtml);
+      zip.file('afm-evidence-pack.json', evidencePack);
+      if (coverPng) {
+        zip.file('afm-cover.png', coverPng);
+      }
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      downloadBlob('afm-bundle.zip', blob);
+      logEvent('Zip bundle exported', `${queue.length} clips`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unknown error';
+      logEvent('Zip bundle export failed', message);
+    } finally {
+      setZipBusy(false);
+    }
+  };
+
   const regenerateShare = () => {
     setShareToken(generateShareToken());
     setShareIssuedAt(Date.now());
@@ -436,6 +576,9 @@ export const DraftReport = () => {
                 />
                 <span>{shareIncludeNotes ? 'Include notes' : 'Notes excluded'}</span>
               </label>
+              <button className="btn primary" onClick={exportZipBundle} disabled={zipBusy}>
+                {zipBusy ? 'Building zip…' : 'Export zip bundle'}
+              </button>
               <button className="btn" onClick={exportBundleManifest}>
                 Download bundle manifest
               </button>

@@ -1,12 +1,16 @@
 import type { TelestrationStroke } from '../context/TelestrationContext';
 
-export const downloadFile = (filename: string, content: string, mime = 'text/plain') => {
-  const blob = new Blob([content], { type: `${mime};charset=utf-8;` });
+export const downloadBlob = (filename: string, blob: Blob) => {
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = filename;
   link.click();
   URL.revokeObjectURL(link.href);
+};
+
+export const downloadFile = (filename: string, content: string, mime = 'text/plain') => {
+  const blob = new Blob([content], { type: `${mime};charset=utf-8;` });
+  downloadBlob(filename, blob);
 };
 
 export const buildCoverText = (title: string, summary: string, clips: string[]) => {
@@ -553,12 +557,25 @@ export const downloadCoverImage = (
   summary: string,
   filename = 'afm-cover.png'
 ) => {
+  renderCoverImageBlob(title, match, summary).then((blob) => {
+    if (!blob) {
+      return;
+    }
+    downloadBlob(filename, blob);
+  });
+};
+
+export const renderCoverImageBlob = (
+  title: string,
+  match: string,
+  summary: string
+): Promise<Blob | null> => {
   const canvas = document.createElement('canvas');
   canvas.width = 1400;
   canvas.height = 900;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
-    return;
+    return Promise.resolve(null);
   }
 
   const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -583,14 +600,7 @@ export const downloadCoverImage = (
   ctx.font = '400 24px "Source Sans 3", Arial';
   wrapText(ctx, summary || 'Add a short summary to guide the staff.', 80, 490, 900, 34, 6);
 
-  canvas.toBlob((blob) => {
-    if (!blob) {
-      return;
-    }
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(link.href);
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob ?? null));
   });
 };

@@ -55,6 +55,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Auto-generate segment report after upload completes
 - Staff invite modal (email + role preset) with local persistence and audit logging
 - Telestration-lite drawing (freehand + arrow) on evidence clips, persisted per clip and exported in packs
+- One-click Draft Report zip bundle export (manifest + report + notes + cover + HTML packs + evidence package)
 - CI workflow for typecheck, tests, and production build on push/PR
 - Verification guide for local smoke and CI command parity (`docs/VERIFICATION.md`)
 - Vitest test suite covering time parsing, storage guards, and segment report generation
