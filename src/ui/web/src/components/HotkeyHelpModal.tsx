@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useAccess } from '../context/AccessContext';
+import { Modal, useModalTitleId } from './Modal/Modal';
 
 type HotkeyItem = { label: string; keys: Array<string> };
 
@@ -7,6 +8,8 @@ const keycap = (label: string) => <kbd className="keycap">{label}</kbd>;
 
 export const HotkeyHelpModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const { access } = useAccess();
+  const titleId = useModalTitleId();
+  const closeRef = useRef<HTMLButtonElement | null>(null);
 
   const navItems: HotkeyItem[] = useMemo(() => {
     const items: Array<{ allowed: boolean; label: string; keys: Array<string> }> = [
@@ -19,32 +22,14 @@ export const HotkeyHelpModal = ({ open, onClose }: { open: boolean; onClose: () 
     return items.filter((item) => item.allowed).map(({ label, keys }) => ({ label, keys }));
   }, [access]);
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose, open]);
-
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Hotkeys and help">
-      <div className="modal hotkey-modal">
+    <Modal open={open} onClose={onClose} labelledBy={titleId} className="hotkey-modal" initialFocusRef={closeRef}>
         <header className="modal-header">
           <div>
             <p className="eyebrow">Help</p>
-            <h3>Hotkeys</h3>
+            <h3 id={titleId}>Hotkeys</h3>
           </div>
-          <button className="btn ghost" onClick={onClose}>
+          <button className="btn ghost" onClick={onClose} ref={closeRef}>
             Close
           </button>
         </header>
@@ -108,8 +93,6 @@ export const HotkeyHelpModal = ({ open, onClose }: { open: boolean; onClose: () 
             Got it
           </button>
         </footer>
-      </div>
-    </div>
+    </Modal>
   );
 };
-

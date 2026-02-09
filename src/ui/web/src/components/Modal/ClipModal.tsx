@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../../api/mock';
 import { useAudit } from '../../context/AuditContext';
 import { useClipContext } from '../../context/ClipContext';
@@ -7,6 +7,7 @@ import { useAnnotations } from '../../context/AnnotationsContext';
 import { useReportContext } from '../../context/ReportContext';
 import type { Clip } from '../../types';
 import { downloadFile } from '../../utils/export';
+import { Modal, useModalTitleId } from './Modal';
 
 export const ClipModal = () => {
   const { clip, closeClip } = useClipContext();
@@ -16,6 +17,8 @@ export const ClipModal = () => {
   const { annotations, setAnnotation } = useAnnotations();
   const [detail, setDetail] = useState<Clip | null>(null);
   const [newLabel, setNewLabel] = useState('');
+  const titleId = useModalTitleId();
+  const closeRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!clip) {
@@ -60,14 +63,13 @@ export const ClipModal = () => {
   };
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal">
+    <Modal open={Boolean(clip)} onClose={closeClip} labelledBy={titleId} initialFocusRef={closeRef}>
         <header className="modal-header">
           <div>
             <p className="eyebrow">Evidence Clip</p>
-            <h3>{clipDetail.title}</h3>
+            <h3 id={titleId}>{clipDetail.title}</h3>
           </div>
-          <button className="btn ghost" onClick={closeClip}>
+          <button className="btn ghost" onClick={closeClip} ref={closeRef}>
             Close
           </button>
         </header>
@@ -137,7 +139,6 @@ export const ClipModal = () => {
             Export clip
           </button>
         </footer>
-      </div>
-    </div>
+    </Modal>
   );
 };

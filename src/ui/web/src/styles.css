@@ -42,6 +42,11 @@ button {
   color: inherit;
 }
 
+:focus-visible {
+  outline: 3px solid rgba(15, 76, 92, 0.35);
+  outline-offset: 3px;
+}
+
 input,
 textarea,
 select {

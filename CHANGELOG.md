@@ -72,6 +72,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - In-app hotkey/help modal (`?`) plus a first-run onboarding tour (skippable)
 - Draft report Share pack now supports permission presets, expiring links, and a downloadable bundle manifest
 - Analyst timeline filters now persist across sessions, and manual tagging supports Enter-to-add for faster workflows
+- Modals now trap focus, restore focus on close, and support Escape and click-outside close for better keyboard accessibility
 
 ## [0.1.0] - 2026-02-04
 ### Added

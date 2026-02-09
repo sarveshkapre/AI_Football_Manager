@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useRef } from 'react';
+import { Modal, useModalTitleId } from './Modal/Modal';
 
 const keycap = (label: string) => <kbd className="keycap">{label}</kbd>;
 
@@ -11,37 +12,17 @@ export const OnboardingTourModal = ({
   onClose: () => void;
   onStart: () => void;
 }) => {
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose, open]);
-
-  if (!open) {
-    return null;
-  }
+  const titleId = useModalTitleId();
+  const skipRef = useRef<HTMLButtonElement | null>(null);
 
   return (
-    <div
-      className="modal-backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Welcome tour"
-    >
-      <div className="modal tour-modal">
+    <Modal open={open} onClose={onClose} labelledBy={titleId} className="tour-modal" initialFocusRef={skipRef}>
         <header className="modal-header">
           <div>
             <p className="eyebrow">Welcome</p>
-            <h3>AI Football Manager</h3>
+            <h3 id={titleId}>AI Football Manager</h3>
           </div>
-          <button className="btn ghost" onClick={onClose}>
+          <button className="btn ghost" onClick={onClose} ref={skipRef}>
             Skip
           </button>
         </header>
@@ -89,8 +70,6 @@ export const OnboardingTourModal = ({
             Start in Ingest
           </button>
         </footer>
-      </div>
-    </div>
+    </Modal>
   );
 };
-
