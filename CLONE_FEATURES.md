@@ -7,18 +7,18 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
-- [ ] P1 - Add one-click “Export zip bundle” in Draft Report (manifest + report JSON/CSV + notes + cover text/image + presentation HTML) for offline share handoff.
-- [ ] P1 - Add telestration-lite drawing tools (freehand + arrow) on evidence clips, persist per-clip, and include exports in presentation packs + evidence packages.
-- [ ] P2 - Fix modal accessibility basics: focus trap, Esc-close, return focus on close, and `aria-labelledby` wiring (Clip / Hotkeys / Tour).
-- [ ] P2 - Add an “Invite staff” modal (email + role preset) in Settings, persist invites locally, and log invitations to the audit stream.
-- [ ] P2 - Make ClipModal overlay toggles affect queued clip + clip exports (don’t export stale overlay state).
 - [ ] P3 - Add lightweight performance instrumentation (render timing + localStorage write counts) to catch regressions as the prototype grows.
 - [ ] P3 - Add keyboard-only navigation pass for the main views (tab order, visible focus states, skip-to-content).
-- [ ] P3 - Add unit tests for new export helpers (zip builder, telestration serialization guards) to keep prototype exports deterministic.
+- [ ] P3 - Investigate and mitigate `npm audit` moderate vulnerabilities without breaking Vite/React tooling.
 - [ ] P4 - Add bulk tag/label actions in Analyst timeline (multi-select + apply/remove) to speed up matchday review.
 - [ ] P4 - Add minimal “pack import” flow in Reports (load a saved bundle manifest JSON and hydrate the queue) for round-trip validation.
 
 ## Implemented
+- [x] 2026-02-09 - Added one-click Draft Report zip bundle export (manifest + report + notes + cover + HTML packs + evidence package) for offline share handoff. Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/export.ts`, `package.json`, `src/ui/web/src/utils/export.test.ts`.
+- [x] 2026-02-09 - Added telestration-lite drawing (freehand + arrow) on evidence clips, persisted per clip, and exported in presentation packs + evidence packages. Evidence: `src/ui/web/src/components/Modal/ClipModal.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`, `src/ui/web/src/utils/export.ts`, `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`.
+- [x] 2026-02-09 - Improved modal accessibility (focus trap, Esc-close, return focus, click-outside close, `aria-labelledby`). Evidence: `src/ui/web/src/components/Modal/Modal.tsx`, `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/components/Modal/ClipModal.tsx`, `src/ui/web/src/styles.css`.
+- [x] 2026-02-09 - Added “Invite staff” modal (email + role preset), persisted locally, with audit logging. Evidence: `src/ui/web/src/components/InviteStaffModal.tsx`, `src/ui/web/src/context/InvitesContext.tsx`, `src/ui/web/src/pages/Settings.tsx`, `src/ui/web/src/App.tsx`, `src/ui/web/src/utils/guards.ts`.
+- [x] 2026-02-09 - Made ClipModal overlay toggles affect queued clips and exports (no stale overlay state). Evidence: `src/ui/web/src/components/Modal/ClipModal.tsx`.
 - [x] 2026-02-09 - Strengthened Draft report Share pack with permission presets, expiring links, and a downloadable bundle manifest. Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/share.ts`, `src/ui/web/src/utils/share.test.ts`, `src/ui/web/src/styles.css`.
 - [x] 2026-02-09 - Added an in-app hotkey/help overlay (coach-readable, `?`) and a skippable first-run onboarding tour. Evidence: `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`, `src/ui/web/src/styles.css`.
 - [x] 2026-02-09 - Persisted Analyst timeline filters across sessions and added Enter-to-add tagging. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/types.ts`.
@@ -41,6 +41,8 @@
 - Enforcing typecheck + tests in CI surfaced latent type mismatches that Vite build alone would not catch.
 - Market baseline for matchday tools clusters around rapid clipping/tagging, role-based access, and shareable packs; the prototype’s fastest wins are reliability and workflow polish (access-aware routing, bounded saved searches, crash recovery).
 - Market scan (bounded) suggests table-stakes: live tagging/hotkeys, rapid clip assembly, and shareable/permissioned packs with expiry. Sources (external, untrusted): https://www.hudl.com/products/sportscode, https://www.catapult.com/solutions/pro-video, https://wyscout.com/, https://www.nacsport.com/, https://longomatch.com/, https://metrica-sports.com/.
+- Bounded scan indicates telestration/drawing is explicit table-stakes (arrows/freehand/lines) with “presentational mode” variants (drawings shown only during presentation). Sources (external, untrusted): https://www.hudl.com/products/sportscode/tiers, https://www.hudl.com/products/studio, https://provideo.catapultsports.com/hc/en-us/articles/7333038946959-Freeze-Frame-Telestrations.
+- Offline sharing commonly includes packaged artifacts (video + graphics + notes) rather than single JSON exports; bundling assets into a zip reduces friction for “send to staff” workflows even in a prototype context.
 
 ## Notes
 - This file is maintained by the autonomous clone loop.

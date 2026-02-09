@@ -70,6 +70,7 @@ Start here: `docs/PRD.md`.
 - Draft annotations + labels: clip notes and tags export with the report
 - Share pack: draft report generates a share link with permissions
 - Pack stub: draft report can download a JSON pack bundle (metadata + CSV + cover)
+- Zip bundle export: draft report can download a zip containing manifest + report + notes + cover + HTML packs + evidence package
 - Ingest workflow: upload queue, alignment, segment builder, and pipeline status
 - Coach fast clipping: one-tap 10s/20s/45s capture plus custom in/out
 - Role-based access: settings include presets and per-view toggles
@@ -80,7 +81,7 @@ Start here: `docs/PRD.md`.
 - Ask the match Q&A flow with evidence clips and confidence gating
 - Minimap snapshot preview with team shape metadata
 - Minimap scrubber with play/pause and timestamp slider
-- Evidence package export (clip manifest + overlays + annotations)
+- Evidence package export (clip manifest + overlays + annotations + telestration)
 - Live ingest simulation toggle that cycles match phases
 - Ingest simulation uses live store phase cycling (Coach Mode reflects it)
 - Library saved searches and playlist export
