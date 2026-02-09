@@ -65,6 +65,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Project memory and incident tracking docs (`PROJECT_MEMORY.md`, `INCIDENTS.md`)
 - Reports pack import flow (zip bundle or report JSON) that hydrates the export queue plus clip notes (labels/annotations/telestration)
 - Settings performance panel that surfaces lightweight localStorage persistence counters (writes/removes/bytes + top keys)
+- Analyst bulk actions: multi-select timeline events (Cmd/Ctrl-click, Shift range) with bulk tag add/remove and bulk highlight.
+- Reports import clarity: persistent imported-pack banner (title/match/owner/source + clear) after importing a bundle.
+- UI smoke test coverage (happy-dom) for app boot + route navigation + clip modal open.
 
 ### Changed
 - Ingest now validates segment windows and manual alignment offsets with inline error messaging
@@ -80,6 +83,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Modals now trap focus, restore focus on close, and support Escape and click-outside close for better keyboard accessibility
 - Clip overlay toggles now affect queued clips and clip exports (no stale overlay state)
 - Shell navigation now includes a skip-to-content link and exposes `aria-current` for the active route to improve keyboard accessibility
+- Clip modal no longer violates React Rules of Hooks (prevents runtime crashes when opening clips in strict environments).
+- Dependency hygiene: cleared `npm audit` by overriding `esbuild` without forcing a Vite major upgrade.
 
 ## [0.1.0] - 2026-02-04
 ### Added

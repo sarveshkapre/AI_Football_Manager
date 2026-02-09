@@ -7,19 +7,17 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
-Selected (Cycle 4)
-- [ ] P1 - Add bulk tag actions in Analyst timeline (multi-select; apply/remove tags; bulk highlight) to speed up matchday review.
-- [ ] P1 - Add a persistent imported-pack banner in Reports (title/match/owner/source + clear-import) to reduce confusion after importing bundles.
-- [ ] P2 - Add UI smoke coverage (app boots + navigate routes + open clip modal) under Vitest to catch regressions beyond pure utilities.
-- [ ] P2 - Mitigate `npm audit` moderate `esbuild` vulnerability via safe dependency overrides (no forced Vite major upgrade); re-run audit and record evidence.
-
-Other candidates
+Selected (Next session)
 - [ ] P3 - Add report-queue presets (coach bench vs analyst room) for faster “build a pack” workflows.
 - [ ] P3 - Add “import strategy” when loading a pack: replace queue vs append; show clip conflict handling.
 - [ ] P4 - Add a “tag palette” (hotkeys + recent tags) to reduce mouse travel during live tagging.
 - [ ] P4 - Add a lightweight visual diff for imported packs (what changed vs current queue) before applying import.
 
 ## Implemented
+- [x] 2026-02-09 - Analyst workflow speed: multi-select timeline events (Cmd/Ctrl-click, Shift range) with bulk tag add/remove and bulk highlight. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/styles.css`.
+- [x] 2026-02-09 - Reports clarity: persistent imported-pack banner (title/match/owner/source + clear) after importing a bundle. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/styles.css`.
+- [x] 2026-02-09 - Security hygiene: cleared `npm audit` by overriding `esbuild` without forcing a Vite major upgrade. Evidence: `package.json`, `package-lock.json`.
+- [x] 2026-02-09 - Added UI smoke coverage in Vitest (happy-dom) for boot + route navigation + clip modal open; fixed ClipModal hook ordering to prevent runtime crashes. Evidence: `src/ui/web/src/App.smoke.test.tsx`, `vitest.config.ts`, `src/ui/web/src/components/Modal/ClipModal.tsx`.
 - [x] 2026-02-09 - Added Reports pack import flow for `afm-bundle.zip` / `afm-report.json` that hydrates the report queue + notes (labels/annotations/telestration), with validation and unit tests. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/import.ts`, `src/ui/web/src/utils/import.test.ts`, `src/ui/web/src/context/LabelsContext.tsx`, `src/ui/web/src/context/AnnotationsContext.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`.
 - [x] 2026-02-09 - Keyboard accessibility pass: added skip-to-content link and `aria-current` for active navigation items. Evidence: `src/ui/web/src/App.tsx`, `src/ui/web/src/styles.css`.
 - [x] 2026-02-09 - Added lightweight persistence performance counters (localStorage writes/removes/bytes + top keys) surfaced in Settings. Evidence: `src/ui/web/src/utils/perf.ts`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/pages/Settings.tsx`.

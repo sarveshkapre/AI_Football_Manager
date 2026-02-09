@@ -23,6 +23,22 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - **Trust label**: Trusted
 - **Confidence**: High
 
+### 2026-02-09 (Cycle 4) - Ship Workflow Polish + Add UI Smoke Coverage
+- **Decision**: Prioritize matchday workflow speed and reliability: bulk timeline selection/tag actions in Analyst, a persistent import-context banner in Reports, and a UI smoke test that exercises boot/navigation/clip modal. Clear `npm audit` without forcing a Vite major upgrade by overriding `esbuild`.
+- **Why**: Analysts need bulk actions to reduce repetitive tagging; imported packs need persistent context to avoid “what state am I in?” confusion; and the ClipModal is a core flow worth protecting with an integration smoke test. The `esbuild` advisory was blocking hygiene and could be mitigated safely via overrides.
+- **Evidence**:
+  - Bulk timeline multi-select and tag add/remove lives in `src/ui/web/src/pages/Analyst.tsx` with styling in `src/ui/web/src/styles.css`.
+  - Reports import banner state is persisted and guarded via `src/ui/web/src/pages/Reports.tsx` and `src/ui/web/src/utils/guards.ts`.
+  - UI smoke test added at `src/ui/web/src/App.smoke.test.tsx` and wired via `vitest.config.ts`.
+  - ClipModal hook-order crash fixed in `src/ui/web/src/components/Modal/ClipModal.tsx`.
+  - `npm audit --audit-level=moderate` now reports 0 vulnerabilities after `esbuild` override (`package.json`, `package-lock.json`).
+- **Impact**: Faster tagging during review, clearer post-import state, and reduced risk of regressions in a high-frequency UI path.
+- **Follow-ups**:
+  - Consider a true browser E2E pass (Playwright) once CI/runtime budgets are clear.
+  - Evaluate whether happy-dom warnings in CI should be eliminated (switch to jsdom or configure environment options).
+- **Trust label**: Trusted
+- **Confidence**: High
+
 ## Recent Decisions (Structured)
 - 2026-02-09 | Add in-app hotkey help (`?`) + first-run onboarding tour | Improve first-run comprehension and reduce bench friction; keep the “coach-readable in 5 seconds” bar | Evidence: `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `fb50412` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Strengthen Draft report Share pack with permission presets + expiring links + bundle manifest export | Match table-stakes share workflows (permissioning, expiry, offline handoff) while staying prototype-safe | Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/share.ts`, `src/ui/web/src/utils/share.test.ts`, `src/ui/web/src/styles.css`; `npm test` (pass) | Commit: `c76663e` | Confidence: High | Trust: Trusted
@@ -35,18 +51,25 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - 2026-02-09 | Add Reports pack import (zip/report JSON) with validated hydration of queue + notes | Enables round-trip validation of export bundles and reduces friction when staff sends packs back/forth; hydration is constrained to imported clip IDs to avoid wiping unrelated local state | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/import.ts`, `src/ui/web/src/utils/import.test.ts`, `src/ui/web/src/context/LabelsContext.tsx`, `src/ui/web/src/context/AnnotationsContext.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`; `npm run verify` (pass) | Commit: `fe7ab29` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Add skip-to-content link + `aria-current` for active navigation | Improves keyboard accessibility and reduces “tab fatigue” in matchday workflows | Evidence: `src/ui/web/src/App.tsx`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `fe7ab29` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Add lightweight localStorage persistence counters in Settings | Provides quick visibility into persistence churn (writes/removes/bytes) to catch regressions as prototype grows | Evidence: `src/ui/web/src/utils/perf.ts`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/pages/Settings.tsx`; `npm run verify` (pass) | Commit: `83f6402` | Confidence: Medium | Trust: Trusted
+- 2026-02-09 | Add Analyst bulk multi-select tagging + Reports import banner | Reduce matchday friction (bulk tagging, post-import clarity) while staying prototype-safe | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/guards.ts`; `npm run verify` (pass) | Commit: `4b68231` | Confidence: High | Trust: Trusted
+- 2026-02-09 | Clear `npm audit` by overriding `esbuild` | Address dev-server advisory without forcing a Vite major upgrade; keep CI green | Evidence: `package.json`, `package-lock.json`; `npm audit --audit-level=moderate` (pass) | Commit: `820db3e` | Confidence: High | Trust: Trusted
+- 2026-02-09 | Add UI smoke test and fix ClipModal hook ordering | Prevent regressions and eliminate a hook-order crash in a core “open clip” workflow | Evidence: `src/ui/web/src/App.smoke.test.tsx`, `vitest.config.ts`, `src/ui/web/src/components/Modal/ClipModal.tsx`; `npm run verify` (pass) | Commit: `b1ce305`, `4d5faeb` | Confidence: High | Trust: Trusted
 
 ## Mistakes And Fixes
 - Zip import unit test initially failed in Node when feeding a `Blob` directly into JSZip.
   Root cause: JSZip load path is sensitive to `Blob` implementations in non-browser environments.
   Fix: normalize zip inputs to `ArrayBuffer` before calling `JSZip.loadAsync`.
   Prevention rule: when writing cross-env import/export utilities, add a unit test that exercises the Node path and normalize inputs at boundaries.
+- ClipModal triggered a hook-order crash when opening a clip (conditional return before all hooks).
+  Root cause: early return prevented some hooks from running on initial render; later renders added hooks.
+  Fix: move “no clip” return after hooks and guard inside effects/memos.
+  Prevention rule: add/keep at least one UI integration smoke test that opens the ClipModal and navigates routes.
 
 ## Verification Evidence
 - `npm run verify` (pass)
 - `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` (pass: server started)
-- `curl -fsS http://127.0.0.1:4173/` (pass: returned `index.html`)
-- `npm audit --audit-level=moderate` (fail: 5 moderate vulnerabilities; fix requires `npm audit fix --force` upgrading Vite to `7.3.1` which is a breaking major)
+- `curl -fsSI http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`)
+- `npm audit --audit-level=moderate` (pass: 0 vulnerabilities)
 
 ## Gap Map (Cycle 1)
 - Missing (parity): telestration/drawing tools on clips; zip-style export bundles for offline sharing; invite/collaboration entrypoint beyond a stub button.
