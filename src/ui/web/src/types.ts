@@ -143,3 +143,9 @@ export interface AlignmentState {
   offset: string;
   note: string;
 }
+
+export interface AnalystTimelineFilters {
+  query: string;
+  activeTag: string | null;
+  minConfidence: number;
+}

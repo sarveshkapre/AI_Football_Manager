@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   isAccessState,
+  isAnalystTimelineFilters,
   isClipArray,
   isNullableString,
   isPreferencesState,
@@ -85,5 +86,14 @@ describe('storage guards', () => {
     expect(isNullableString('segment-1')).toBe(true);
     expect(isNullableString(null)).toBe(true);
     expect(isNullableString(42)).toBe(false);
+  });
+
+  it('validates analyst timeline filters', () => {
+    expect(isAnalystTimelineFilters({ query: '', activeTag: null, minConfidence: 0 })).toBe(true);
+    expect(isAnalystTimelineFilters({ query: 'press', activeTag: 'press', minConfidence: 0.7 })).toBe(
+      true
+    );
+    expect(isAnalystTimelineFilters({ query: 'x', activeTag: null, minConfidence: 2 })).toBe(false);
+    expect(isAnalystTimelineFilters({ query: 1, activeTag: null, minConfidence: 0 })).toBe(false);
   });
 });

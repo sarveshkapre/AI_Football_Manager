@@ -71,6 +71,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Saved library searches are deduplicated, recency-ordered, and capped to prevent list bloat
 - In-app hotkey/help modal (`?`) plus a first-run onboarding tour (skippable)
 - Draft report Share pack now supports permission presets, expiring links, and a downloadable bundle manifest
+- Analyst timeline filters now persist across sessions, and manual tagging supports Enter-to-add for faster workflows
 
 ## [0.1.0] - 2026-02-04
 ### Added

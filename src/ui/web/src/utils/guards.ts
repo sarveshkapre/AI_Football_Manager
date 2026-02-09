@@ -1,4 +1,4 @@
-import type { Clip, OverlayToggle, SavedSearch, Storyboard } from '../types';
+import type { AnalystTimelineFilters, Clip, OverlayToggle, SavedSearch, Storyboard } from '../types';
 import type { AccessState } from '../context/AccessContext';
 import type { AuditEvent } from '../context/AuditContext';
 
@@ -100,3 +100,11 @@ export const isAnnotationsMap = (value: unknown): value is Record<string, string
 
 export const isNullableString = (value: unknown): value is string | null =>
   typeof value === 'string' || value === null;
+
+export const isAnalystTimelineFilters = (value: unknown): value is AnalystTimelineFilters =>
+  isRecord(value) &&
+  typeof value.query === 'string' &&
+  isNullableString(value.activeTag) &&
+  typeof value.minConfidence === 'number' &&
+  value.minConfidence >= 0 &&
+  value.minConfidence <= 1;

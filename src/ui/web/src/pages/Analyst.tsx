@@ -8,7 +8,10 @@ import { useAudit } from '../context/AuditContext';
 import { useClipContext } from '../context/ClipContext';
 import { useStoryboards } from '../context/StoryboardContext';
 import { useReportContext } from '../context/ReportContext';
+import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
+import { isAnalystTimelineFilters } from '../utils/guards';
 import type { Clip, MinimapSnapshot, OverlayToggle, PlayerDot, TimelineEvent } from '../types';
+import type { AnalystTimelineFilters } from '../types';
 
 interface ChatMessage {
   id: string;
@@ -28,6 +31,13 @@ interface InsightPack {
   createdAt: string;
 }
 
+const analystFiltersKey = 'afm.analyst.timelineFilters.v1';
+const defaultAnalystFilters: AnalystTimelineFilters = {
+  query: '',
+  activeTag: null,
+  minConfidence: 0
+};
+
 export const Analyst = () => {
   const { openClip } = useClipContext();
   const { addStoryboard } = useStoryboards();
@@ -40,9 +50,30 @@ export const Analyst = () => {
   const [clips, setClips] = useState<Clip[]>([]);
   const [selected, setSelected] = useState<Clip[]>([]);
   const [storyboardTitle, setStoryboardTitle] = useState('');
-  const [query, setQuery] = useState('');
-  const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [minConfidence, setMinConfidence] = useState(0);
+  const [query, setQuery] = useState(() => {
+    const stored = loadFromStorageWithGuard(
+      analystFiltersKey,
+      defaultAnalystFilters,
+      isAnalystTimelineFilters
+    );
+    return stored.query;
+  });
+  const [activeTag, setActiveTag] = useState<string | null>(() => {
+    const stored = loadFromStorageWithGuard(
+      analystFiltersKey,
+      defaultAnalystFilters,
+      isAnalystTimelineFilters
+    );
+    return stored.activeTag;
+  });
+  const [minConfidence, setMinConfidence] = useState(() => {
+    const stored = loadFromStorageWithGuard(
+      analystFiltersKey,
+      defaultAnalystFilters,
+      isAnalystTimelineFilters
+    );
+    return stored.minConfidence;
+  });
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [newTag, setNewTag] = useState('');
   const [highlights, setHighlights] = useState<Record<string, boolean>>({});
@@ -80,6 +111,10 @@ export const Analyst = () => {
 
     load();
   }, []);
+
+  useEffect(() => {
+    saveToStorage(analystFiltersKey, { query, activeTag, minConfidence });
+  }, [activeTag, minConfidence, query]);
 
   const tags = useMemo(() => {
     const tagSet = new Set<string>();
@@ -383,6 +418,13 @@ export const Analyst = () => {
                 placeholder="Add tag"
                 value={newTag}
                 onChange={(event) => setNewTag(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addTagToSelected(newTag);
+                    setNewTag('');
+                  }
+                }}
               />
               <button
                 className="btn"
