@@ -7,6 +7,7 @@ import { usePreferences } from '../context/PreferencesContext';
 import { useUi } from '../context/UiContext';
 import type { AccessState } from '../context/AccessContext';
 import { loadFromStorageWithGuard, removeFromStorage } from '../utils/storage';
+import { getStoragePerfSnapshot, resetStoragePerf, type StoragePerfSnapshot } from '../utils/perf';
 
 const cadenceOptions = [30, 60, 90] as const;
 const openInviteKey = 'afm.ui.invite.open';
@@ -25,6 +26,7 @@ export const Settings = () => {
   const { access, setAccess, setAccessState } = useAccess();
   const { invites } = useInvites();
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [perf, setPerf] = useState<StoragePerfSnapshot>(() => getStoragePerfSnapshot());
 
   useEffect(() => {
     const shouldOpen = loadFromStorageWithGuard(openInviteKey, false, (value): value is boolean =>
@@ -230,6 +232,70 @@ export const Settings = () => {
               <p>{invites.length === 0 ? 'No invites yet.' : `${invites.length} invite(s) stored locally.`}</p>
             </div>
             <span className="pill">{invites.length}</span>
+          </div>
+        </div>
+        <div className="card surface">
+          <SectionHeader
+            title="Performance"
+            subtitle="Lightweight counters to catch persistence regressions."
+            action={
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button className="btn ghost" onClick={() => setPerf(getStoragePerfSnapshot())}>
+                  Refresh
+                </button>
+                <button
+                  className="btn"
+                  onClick={() => {
+                    resetStoragePerf();
+                    setPerf(getStoragePerfSnapshot());
+                  }}
+                >
+                  Reset
+                </button>
+              </div>
+            }
+          />
+          <div className="stack">
+            <div className="row-card">
+              <div>
+                <h4>localStorage writes</h4>
+                <p>Total writes + bytes since last reset (in-session).</p>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <h4>{perf.totalWrites}</h4>
+                <p className="muted">{Math.round(perf.totalBytes / 1024)} KB</p>
+              </div>
+            </div>
+            <div className="row-card">
+              <div>
+                <h4>Removals</h4>
+                <p>Clears and key deletes.</p>
+              </div>
+              <span className="pill">{perf.totalRemoves}</span>
+            </div>
+            <div className="row-card">
+              <div>
+                <h4>Top keys</h4>
+                <p>Most frequently persisted keys.</p>
+              </div>
+              <span className="pill">{Math.min(5, perf.keys.length)} shown</span>
+            </div>
+            <div className="stack" style={{ gap: 10 }}>
+              {perf.keys.slice(0, 5).map((entry) => (
+                <div key={entry.key} className="access-row">
+                  <div>
+                    <h4 style={{ fontSize: '0.95rem' }}>{entry.key}</h4>
+                    <p>
+                      {entry.writes} write(s) · {Math.round(entry.bytes / 1024)} KB · {entry.removes} remove(s)
+                    </p>
+                  </div>
+                  <span className="pill">
+                    {entry.lastAt ? new Date(entry.lastAt).toLocaleTimeString() : '—'}
+                  </span>
+                </div>
+              ))}
+              {perf.keys.length === 0 ? <p className="muted">No writes recorded yet.</p> : null}
+            </div>
           </div>
         </div>
       </div>

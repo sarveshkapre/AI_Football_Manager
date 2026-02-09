@@ -1,3 +1,5 @@
+import { noteStorageClear, noteStorageRemove, noteStorageWrite } from './perf';
+
 export const loadFromStorage = <T>(key: string, fallback: T): T => {
   try {
     const raw = localStorage.getItem(key);
@@ -21,7 +23,9 @@ export const loadFromStorageWithGuard = <T>(
 
 export const saveToStorage = (key: string, value: unknown) => {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    const serialized = JSON.stringify(value);
+    localStorage.setItem(key, serialized);
+    noteStorageWrite(key, serialized.length);
   } catch {
     // Ignore storage failures (private mode, quota, etc.)
   }
@@ -30,6 +34,7 @@ export const saveToStorage = (key: string, value: unknown) => {
 export const removeFromStorage = (key: string) => {
   try {
     localStorage.removeItem(key);
+    noteStorageRemove(key);
   } catch {
     // Ignore storage failures (private mode, quota, etc.)
   }
@@ -45,6 +50,7 @@ export const clearAfmStorage = () => {
       }
     }
     keys.forEach((key) => localStorage.removeItem(key));
+    noteStorageClear(keys);
   } catch {
     // Ignore storage failures (private mode, quota, etc.)
   }
