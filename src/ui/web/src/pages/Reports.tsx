@@ -10,6 +10,7 @@ import { useReportContext } from '../context/ReportContext';
 import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
 import { useAnnotations } from '../context/AnnotationsContext';
 import { useLabels } from '../context/LabelsContext';
+import { useTelestration } from '../context/TelestrationContext';
 import {
   buildEvidencePackage,
   buildPresentationHtml,
@@ -33,6 +34,7 @@ export const Reports = () => {
   const { logEvent } = useAudit();
   const { annotations } = useAnnotations();
   const { labels } = useLabels();
+  const { strokesByClip } = useTelestration();
 
   useEffect(() => {
     api.getReports().then(setReports);
@@ -145,7 +147,8 @@ export const Reports = () => {
       tags: clip.tags,
       overlays: clip.overlays,
       labels: labels[clip.id] ?? [],
-      annotation: annotations[clip.id]
+      annotation: annotations[clip.id],
+      telestration: strokesByClip[clip.id] ?? []
     }));
 
     const metadata = {
@@ -168,6 +171,9 @@ export const Reports = () => {
 
   const renderBroadcastPack = () => {
     const queueIds = queue.map((clip) => clip.id);
+    const telestration = Object.fromEntries(
+      Object.entries(strokesByClip).filter(([clipId]) => queueIds.includes(clipId))
+    );
     const html = buildPresentationHtml({
       title: 'Broadcast pack',
       match: segmentReport?.title ?? 'Matchday segment',
@@ -181,7 +187,8 @@ export const Reports = () => {
       ),
       annotations: Object.fromEntries(
         Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
-      )
+      ),
+      telestration
     });
     openHtmlPreview(html);
     logEvent('Broadcast pack previewed', `${queue.length} clips`);

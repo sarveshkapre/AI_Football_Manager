@@ -6,7 +6,8 @@ import {
   isNullableString,
   isPreferencesState,
   isSavedSearchArray,
-  isStaffInviteArray
+  isStaffInviteArray,
+  isTelestrationMap
 } from './guards';
 
 describe('storage guards', () => {
@@ -110,5 +111,25 @@ describe('storage guards', () => {
         { id: 'invite-1', email: 'coach@club.com', role: 'Unknown', invitedAt: '2026-02-09' }
       ])
     ).toBe(false);
+  });
+
+  it('validates telestration map', () => {
+    expect(
+      isTelestrationMap({
+        'clip-1': [
+          {
+            id: 'stroke-1',
+            tool: 'freehand',
+            color: '#ff0000',
+            width: 4,
+            points: [
+              { x: 0.1, y: 0.2 },
+              { x: 0.12, y: 0.25 }
+            ]
+          }
+        ]
+      })
+    ).toBe(true);
+    expect(isTelestrationMap({ 'clip-1': [{ id: 'stroke-1' }] })).toBe(false);
   });
 });

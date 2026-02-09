@@ -2,6 +2,7 @@ import type { AnalystTimelineFilters, Clip, OverlayToggle, SavedSearch, Storyboa
 import type { AccessState } from '../context/AccessContext';
 import type { AuditEvent } from '../context/AuditContext';
 import type { StaffInvite } from '../context/InvitesContext';
+import type { TelestrationMap, TelestrationStroke } from '../context/TelestrationContext';
 
 type PreferenceCadence = 30 | 60 | 90;
 
@@ -122,3 +123,21 @@ const isStaffInvite = (value: unknown): value is StaffInvite =>
 
 export const isStaffInviteArray = (value: unknown): value is StaffInvite[] =>
   Array.isArray(value) && value.every(isStaffInvite);
+
+const isTelestrationPoint = (value: unknown): value is { x: number; y: number } =>
+  isRecord(value) && typeof value.x === 'number' && typeof value.y === 'number';
+
+const isTelestrationTool = (value: unknown): value is TelestrationStroke['tool'] =>
+  value === 'freehand' || value === 'arrow';
+
+const isTelestrationStroke = (value: unknown): value is TelestrationStroke =>
+  isRecord(value) &&
+  typeof value.id === 'string' &&
+  isTelestrationTool(value.tool) &&
+  typeof value.color === 'string' &&
+  typeof value.width === 'number' &&
+  Array.isArray(value.points) &&
+  value.points.every(isTelestrationPoint);
+
+export const isTelestrationMap = (value: unknown): value is TelestrationMap =>
+  isRecord(value) && Object.values(value).every((entry) => Array.isArray(entry) && entry.every(isTelestrationStroke));

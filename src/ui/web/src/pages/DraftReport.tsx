@@ -5,6 +5,7 @@ import { useAnnotations } from '../context/AnnotationsContext';
 import { useAudit } from '../context/AuditContext';
 import { useLabels } from '../context/LabelsContext';
 import { useReportContext } from '../context/ReportContext';
+import { useTelestration } from '../context/TelestrationContext';
 import {
   buildCoverText,
   buildPrintableHtml,
@@ -30,6 +31,7 @@ export const DraftReport = () => {
   const { logEvent } = useAudit();
   const { annotations } = useAnnotations();
   const { labels } = useLabels();
+  const { strokesByClip } = useTelestration();
   const [title, setTitle] = useState('Matchday Draft Report');
   const [notes, setNotes] = useState('');
   const [matchLabel, setMatchLabel] = useState('vs. Westbridge');
@@ -48,6 +50,13 @@ export const DraftReport = () => {
   }, [queue]);
 
   const queueIds = useMemo(() => queue.map((clip) => clip.id), [queue]);
+  const telestration = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(strokesByClip).filter(([clipId]) => queueIds.includes(clipId))
+      ),
+    [queueIds, strokesByClip]
+  );
   const shareExpiresAt = useMemo(
     () => computeExpiresAt(shareExpiry, new Date(shareIssuedAt)),
     [shareExpiry, shareIssuedAt]
@@ -78,7 +87,8 @@ export const DraftReport = () => {
       ),
       labels: Object.fromEntries(
         Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
-      )
+      ),
+      telestration
     };
     downloadFile('afm-report.json', JSON.stringify(payload, null, 2), 'application/json');
     logEvent('Report JSON exported', `${queue.length} clips`);
@@ -102,7 +112,8 @@ export const DraftReport = () => {
       ),
       labels: Object.fromEntries(
         Object.entries(labels).filter(([clipId]) => queueIds.includes(clipId))
-      )
+      ),
+      telestration
     };
     downloadFile('afm-notes.json', JSON.stringify(payload, null, 2), 'application/json');
     logEvent('Notes exported', `${queue.length} clips`);
@@ -137,7 +148,8 @@ export const DraftReport = () => {
       ),
       annotations: Object.fromEntries(
         Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
-      )
+      ),
+      telestration
     });
     downloadFile('afm-presentation.html', html, 'text/html');
     logEvent('Presentation HTML exported', title);
@@ -157,7 +169,8 @@ export const DraftReport = () => {
       ),
       annotations: Object.fromEntries(
         Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
-      )
+      ),
+      telestration
     });
     openHtmlPreview(html);
     logEvent('Presentation HTML previewed', title);
@@ -177,7 +190,8 @@ export const DraftReport = () => {
       ),
       annotations: Object.fromEntries(
         Object.entries(annotations).filter(([clipId]) => queueIds.includes(clipId))
-      )
+      ),
+      telestration
     });
     openHtmlPreview(html);
     logEvent('Printable pack previewed', title);

@@ -16,6 +16,7 @@ import { LibraryProvider } from './context/LibraryContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import { ReportProvider, useReportContext } from './context/ReportContext';
 import { StoryboardProvider } from './context/StoryboardContext';
+import { TelestrationProvider } from './context/TelestrationContext';
 import { UiProvider, useUi } from './context/UiContext';
 import { useHashRoute } from './hooks/useHashRoute';
 import { useHotkeys } from './hooks/useHotkeys';
@@ -261,10 +262,12 @@ export default function App() {
                       <LabelsProvider>
                         <AuditProvider>
                           <InvitesProvider>
-                            <PreferencesBridge />
-                            <Shell />
-                            <ToastStack />
-                            <ClipModal />
+                            <TelestrationProvider>
+                              <PreferencesBridge />
+                              <Shell />
+                              <ToastStack />
+                              <ClipModal />
+                            </TelestrationProvider>
                           </InvitesProvider>
                         </AuditProvider>
                       </LabelsProvider>

@@ -1780,10 +1780,58 @@ select {
   gap: 12px;
 }
 
+.telestration-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.telestration-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.telestration-control select {
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  background: var(--surface);
+}
+
+.telestration-control input[type="range"] {
+  width: 140px;
+}
+
+.telestration-actions {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.video-stage {
+  position: relative;
+}
+
 .video-frame {
   height: 220px;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, #1d1d1d, #404040);
+}
+
+.telestration-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
 }
 
 .video-meta {

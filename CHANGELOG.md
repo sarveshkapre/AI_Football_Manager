@@ -54,6 +54,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Insight packs can be queued to reports
 - Auto-generate segment report after upload completes
 - Staff invite modal (email + role preset) with local persistence and audit logging
+- Telestration-lite drawing (freehand + arrow) on evidence clips, persisted per clip and exported in packs
 - CI workflow for typecheck, tests, and production build on push/PR
 - Verification guide for local smoke and CI command parity (`docs/VERIFICATION.md`)
 - Vitest test suite covering time parsing, storage guards, and segment report generation
@@ -74,6 +75,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Draft report Share pack now supports permission presets, expiring links, and a downloadable bundle manifest
 - Analyst timeline filters now persist across sessions, and manual tagging supports Enter-to-add for faster workflows
 - Modals now trap focus, restore focus on close, and support Escape and click-outside close for better keyboard accessibility
+- Clip overlay toggles now affect queued clips and clip exports (no stale overlay state)
 
 ## [0.1.0] - 2026-02-04
 ### Added

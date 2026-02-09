@@ -1,3 +1,5 @@
+import type { TelestrationStroke } from '../context/TelestrationContext';
+
 export const downloadFile = (filename: string, content: string, mime = 'text/plain') => {
   const blob = new Blob([content], { type: `${mime};charset=utf-8;` });
   const link = document.createElement('a');
@@ -52,7 +54,80 @@ interface PresentationPayload {
   clips: PresentationClip[];
   labels?: Record<string, string[]>;
   annotations?: Record<string, string>;
+  telestration?: Record<string, TelestrationStroke[]>;
 }
+
+const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+
+const buildStrokePath = (points: Array<{ x: number; y: number }>, width: number, height: number) => {
+  if (points.length === 0) {
+    return '';
+  }
+  const [first, ...rest] = points;
+  const parts = [`M ${(clamp01(first.x) * width).toFixed(1)} ${(clamp01(first.y) * height).toFixed(1)}`];
+  for (const point of rest) {
+    parts.push(`L ${(clamp01(point.x) * width).toFixed(1)} ${(clamp01(point.y) * height).toFixed(1)}`);
+  }
+  return parts.join(' ');
+};
+
+const buildArrowHead = (start: { x: number; y: number }, end: { x: number; y: number }, headLength: number) => {
+  const angle = Math.atan2(end.y - start.y, end.x - start.x);
+  const left = {
+    x: end.x - headLength * Math.cos(angle - Math.PI / 6),
+    y: end.y - headLength * Math.sin(angle - Math.PI / 6)
+  };
+  const right = {
+    x: end.x - headLength * Math.cos(angle + Math.PI / 6),
+    y: end.y - headLength * Math.sin(angle + Math.PI / 6)
+  };
+  return { left, right };
+};
+
+export const buildTelestrationSvg = (
+  strokes: TelestrationStroke[],
+  width = 1000,
+  height = 562
+) => {
+  if (!strokes || strokes.length === 0) {
+    return '';
+  }
+
+  const body = strokes
+    .map((stroke) => {
+      if (stroke.points.length < 2) {
+        return '';
+      }
+      const safeWidth = Number.isFinite(stroke.width) ? Math.max(1, Math.min(16, stroke.width)) : 3;
+      const color = stroke.color || '#ff3b3b';
+      const d = buildStrokePath(stroke.points, width, height);
+
+      if (stroke.tool === 'arrow') {
+        const start = stroke.points[0];
+        const end = stroke.points[stroke.points.length - 1];
+        const startPx = { x: clamp01(start.x) * width, y: clamp01(start.y) * height };
+        const endPx = { x: clamp01(end.x) * width, y: clamp01(end.y) * height };
+        const head = buildArrowHead(startPx, endPx, 14 + safeWidth);
+        const headPath = `M ${head.left.x.toFixed(1)} ${head.left.y.toFixed(1)} L ${endPx.x.toFixed(
+          1
+        )} ${endPx.y.toFixed(1)} L ${head.right.x.toFixed(1)} ${head.right.y.toFixed(1)}`;
+        return `<g fill="none" stroke="${color}" stroke-width="${safeWidth}" stroke-linecap="round" stroke-linejoin="round">
+  <path d="${d}" />
+  <path d="${headPath}" />
+</g>`;
+      }
+
+      return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${safeWidth}" stroke-linecap="round" stroke-linejoin="round" />`;
+    })
+    .join('');
+
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" aria-label="Telestration overlay">
+  <rect width="${width}" height="${height}" rx="18" fill="#141414"/>
+  <path d="M 80 ${height / 2} H ${width - 80}" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+  <rect x="80" y="70" width="${width - 160}" height="${height - 140}" rx="28" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+  ${body}
+</svg>`;
+};
 
 export const buildPresentationHtml = ({
   title,
@@ -63,12 +138,14 @@ export const buildPresentationHtml = ({
   clipCount,
   clips,
   labels = {},
-  annotations = {}
+  annotations = {},
+  telestration = {}
 }: PresentationPayload) => {
   const clipRows = clips
     .map((clip, index) => {
       const clipLabels = labels[clip.id] ?? [];
       const note = annotations[clip.id];
+      const strokes = telestration[clip.id] ?? [];
       const labelMarkup =
         clipLabels.length > 0
           ? `<div class="chips">${clipLabels
@@ -76,6 +153,8 @@ export const buildPresentationHtml = ({
               .join('')}</div>`
           : '';
       const noteMarkup = note ? `<p class="note">${note}</p>` : '';
+      const telestrationMarkup =
+        strokes.length > 0 ? `<div class="telestration">${buildTelestrationSvg(strokes)}</div>` : '';
       return `<div class="clip">
         <div class="clip-meta">
           <div>
@@ -87,6 +166,7 @@ export const buildPresentationHtml = ({
         </div>
         ${labelMarkup}
         ${noteMarkup}
+        ${telestrationMarkup}
       </div>`;
     })
     .join('');
@@ -217,6 +297,18 @@ export const buildPresentationHtml = ({
       border: 1px solid var(--line);
       color: var(--muted);
     }
+    .telestration {
+      margin-top: 12px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #141414;
+    }
+    .telestration svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -271,12 +363,18 @@ export const buildPrintableHtml = ({
   clipCount,
   clips,
   labels = {},
-  annotations = {}
+  annotations = {},
+  telestration = {}
 }: PresentationPayload) => {
   const clipRows = clips
     .map((clip, index) => {
       const clipLabels = labels[clip.id] ?? [];
       const note = annotations[clip.id];
+      const strokes = telestration[clip.id] ?? [];
+      const telestrationMarkup =
+        strokes.length > 0
+          ? `<div class="telestration">${buildTelestrationSvg(strokes, 900, 506)}</div>`
+          : '';
       return `<tr>
         <td>${index + 1}</td>
         <td>
@@ -286,6 +384,7 @@ export const buildPrintableHtml = ({
             .map((label) => `<span class="chip">${label}</span>`)
             .join('')}</div>` : ''}
           ${note ? `<div class="note">${note}</div>` : ''}
+          ${telestrationMarkup}
         </td>
         <td>${clip.duration}</td>
       </tr>`;
@@ -349,6 +448,17 @@ export const buildPrintableHtml = ({
       color: var(--muted);
       font-size: 0.9rem;
     }
+    .telestration {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .telestration svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
     @media print {
       body { margin: 16mm; }
       header { page-break-after: avoid; }
@@ -392,6 +502,7 @@ interface EvidenceClipManifest {
   overlays: { id: string; label: string; enabled: boolean }[];
   labels?: string[];
   annotation?: string;
+  telestration?: TelestrationStroke[];
 }
 
 export const buildEvidencePackage = (
