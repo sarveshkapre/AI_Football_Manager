@@ -70,6 +70,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Hash route navigation now respects access settings and auto-redirects to the first permitted view
 - Saved library searches are deduplicated, recency-ordered, and capped to prevent list bloat
 - In-app hotkey/help modal (`?`) plus a first-run onboarding tour (skippable)
+- Draft report Share pack now supports permission presets, expiring links, and a downloadable bundle manifest
 
 ## [0.1.0] - 2026-02-04
 ### Added

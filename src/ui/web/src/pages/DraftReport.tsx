@@ -14,7 +14,16 @@ import {
   downloadFile,
   openHtmlPreview
 } from '../utils/export';
+import { buildBundleManifest, buildShareLink, computeExpiresAt } from '../utils/share';
 import { formatDuration, durationToSeconds } from '../utils/time';
+import type { ShareExpiry, SharePermission } from '../utils/share';
+
+const generateShareToken = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `share-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
 
 export const DraftReport = () => {
   const { queue } = useReportContext();
@@ -25,8 +34,13 @@ export const DraftReport = () => {
   const [notes, setNotes] = useState('');
   const [matchLabel, setMatchLabel] = useState('vs. Westbridge');
   const [owner, setOwner] = useState('Lead Analyst');
-  const [sharePermission, setSharePermission] = useState('View');
-  const shareLink = 'https://afm.example.com/share/preview';
+  const [sharePermission, setSharePermission] = useState<SharePermission>('view');
+  const [shareExpiry, setShareExpiry] = useState<ShareExpiry>('24h');
+  const [shareAllowDownload, setShareAllowDownload] = useState(true);
+  const [shareIncludeNotes, setShareIncludeNotes] = useState(true);
+  const [shareToken, setShareToken] = useState(() => generateShareToken());
+  const [shareIssuedAt, setShareIssuedAt] = useState(() => Date.now());
+  const shareBaseUrl = 'https://afm.example.com';
 
   const totalDuration = useMemo(() => {
     const seconds = queue.reduce((sum, clip) => sum + durationToSeconds(clip.duration), 0);
@@ -34,6 +48,21 @@ export const DraftReport = () => {
   }, [queue]);
 
   const queueIds = useMemo(() => queue.map((clip) => clip.id), [queue]);
+  const shareExpiresAt = useMemo(
+    () => computeExpiresAt(shareExpiry, new Date(shareIssuedAt)),
+    [shareExpiry, shareIssuedAt]
+  );
+  const shareLink = useMemo(
+    () =>
+      buildShareLink({
+        baseUrl: shareBaseUrl,
+        token: shareToken,
+        permission: sharePermission,
+        expiresAt: shareExpiresAt,
+        allowDownload: shareAllowDownload
+      }),
+    [shareAllowDownload, shareExpiresAt, sharePermission, shareToken]
+  );
 
   const exportJson = () => {
     const payload = {
@@ -183,16 +212,47 @@ export const DraftReport = () => {
     logEvent('Pack exported', `${queue.length} clips`);
   };
 
+  const exportBundleManifest = () => {
+    const createdAt = new Date().toISOString();
+    const manifest = buildBundleManifest({
+      createdAt,
+      shareLink,
+      permission: sharePermission,
+      expiresAt: shareExpiresAt,
+      allowDownload: shareAllowDownload,
+      title,
+      match: matchLabel,
+      owner,
+      clipCount: queue.length,
+      totalDuration,
+      includeNotes: shareIncludeNotes
+    });
+    downloadFile(
+      'afm-bundle-manifest.json',
+      JSON.stringify(manifest, null, 2),
+      'application/json'
+    );
+    logEvent('Bundle manifest exported', `${queue.length} clips`);
+  };
+
+  const regenerateShare = () => {
+    setShareToken(generateShareToken());
+    setShareIssuedAt(Date.now());
+    logEvent('Share link regenerated', `${sharePermission} · ${shareExpiry}`);
+  };
+
   const copyShare = async () => {
     try {
       await navigator.clipboard.writeText(shareLink);
-      logEvent('Share link copied', sharePermission);
+      logEvent('Share link copied', `${sharePermission} · ${shareExpiry}`);
     } catch {
-      logEvent('Share link generated', sharePermission);
+      logEvent('Share link generated', `${sharePermission} · ${shareExpiry}`);
     }
   };
 
   const coverClips = queue.slice(0, 3);
+  const expiryLabel =
+    shareExpiresAt === null ? 'Never expires' : `Expires ${new Date(shareExpiresAt).toLocaleString()}`;
 
   return (
     <div className="page-content">
@@ -318,17 +378,52 @@ export const DraftReport = () => {
               <span>Share link</span>
               <input value={shareLink} readOnly />
             </label>
+            <p className="muted">{expiryLabel}</p>
             <div className="share-actions">
               <select
                 value={sharePermission}
-                onChange={(event) => setSharePermission(event.target.value)}
+                onChange={(event) => setSharePermission(event.target.value as SharePermission)}
               >
-                <option value="View">View only</option>
-                <option value="Comment">Comment</option>
-                <option value="Edit">Edit</option>
+                <option value="view">View only</option>
+                <option value="comment">Comment</option>
+                <option value="edit">Edit</option>
               </select>
+              <select
+                value={shareExpiry}
+                onChange={(event) => setShareExpiry(event.target.value as ShareExpiry)}
+              >
+                <option value="1h">Expires in 1 hour</option>
+                <option value="24h">Expires in 24 hours</option>
+                <option value="7d">Expires in 7 days</option>
+                <option value="30d">Expires in 30 days</option>
+                <option value="never">Never expires</option>
+              </select>
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  checked={shareAllowDownload}
+                  onChange={(event) => setShareAllowDownload(event.target.checked)}
+                />
+                <span>{shareAllowDownload ? 'Downloads on' : 'Downloads off'}</span>
+              </label>
               <button className="btn primary" onClick={copyShare}>
                 Copy link
+              </button>
+              <button className="btn" onClick={regenerateShare}>
+                Regenerate
+              </button>
+            </div>
+            <div className="share-actions">
+              <label className="toggle">
+                <input
+                  type="checkbox"
+                  checked={shareIncludeNotes}
+                  onChange={(event) => setShareIncludeNotes(event.target.checked)}
+                />
+                <span>{shareIncludeNotes ? 'Include notes' : 'Notes excluded'}</span>
+              </label>
+              <button className="btn" onClick={exportBundleManifest}>
+                Download bundle manifest
               </button>
             </div>
           </div>
