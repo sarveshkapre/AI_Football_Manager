@@ -7,11 +7,14 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
+- [ ] P1 (Selected) - Strengthen “Share pack” flow with permission presets, expiring links, and an exportable bundle manifest (zip-friendly).
+- [ ] P1 (Selected) - Add an in-app hotkey/help overlay (coach-readable, `?`) and a 30-second onboarding tour for first-run users.
+- [ ] P2 (Selected) - Improve Analyst timeline UX with faster tag entry and filter persistence across sessions.
 - [ ] P1 - Add telestration-lite drawing tools (arrows/lines) on evidence clips and include exports in presentation packs.
-- [ ] P1 - Strengthen “Share pack” flow with permission presets, expiring links, and an exportable bundle manifest (zip-friendly).
-- [ ] P2 - Add an in-app hotkey/help overlay (coach-readable) and a 30-second onboarding tour for first-run users.
-- [ ] P2 - Improve Analyst timeline UX with marker snapping, faster tag entry, and filter persistence across sessions.
+- [ ] P2 - Add an “Invite staff” modal (email + role preset) and log invitations to the audit stream.
+- [ ] P2 - Add a one-click “Export zip bundle” option that packages manifest + report + notes + cover + presentation assets.
 - [ ] P3 - Add lightweight performance instrumentation (render timing + localStorage write counts) to catch regressions as the prototype grows.
+- [ ] P3 - Add basic accessibility checks for modals (focus management, escape-close, aria labels) and keyboard-only navigation pass.
 
 ## Implemented
 - [x] 2026-02-09 - Made hash routing access-aware (auto-redirect to first permitted route; hotkeys and topbar respect access). Evidence: `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`.

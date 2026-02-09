@@ -1,9 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { LiveStatus } from './components/LiveStatus';
 import { ClipModal } from './components/Modal/ClipModal';
 import { PreferencesBridge } from './components/PreferencesBridge';
 import { ToastStack } from './components/Toast/ToastStack';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { HotkeyHelpModal } from './components/HotkeyHelpModal';
+import { OnboardingTourModal } from './components/OnboardingTourModal';
 import { AccessProvider, useAccess } from './context/AccessContext';
 import { AnnotationsProvider } from './context/AnnotationsContext';
 import { AuditProvider } from './context/AuditContext';
@@ -23,6 +25,7 @@ import { Ingest } from './pages/Ingest';
 import { Library } from './pages/Library';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
+import { loadFromStorageWithGuard, saveToStorage } from './utils/storage';
 
 const navItems = [
   { key: 'ingest', label: 'Ingest', description: 'Upload + align video' },
@@ -62,12 +65,21 @@ const firstAllowedRoute = (access: Record<string, boolean>) => {
   return 'settings';
 };
 
+const onboardingKey = 'afm.onboarding.v1.seen';
+
 const Shell = () => {
   const route = useHashRoute();
   const activeLabel = useMemo(() => routeLabels[route] ?? 'Coach Mode', [route]);
   const { queue } = useReportContext();
   const { density } = useUi();
   const { access } = useAccess();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(() => {
+    const seen = loadFromStorageWithGuard(onboardingKey, false, (value): value is boolean =>
+      typeof value === 'boolean'
+    );
+    return !seen;
+  });
 
   const allowedNavItems = useMemo(
     () => navItems.filter((item) => access[item.key as keyof typeof access]),
@@ -123,6 +135,13 @@ const Shell = () => {
       } else {
         navigate('library');
       }
+    },
+    onHelp: () => {
+      setHelpOpen((prev) => !prev);
+    },
+    onEscape: () => {
+      setHelpOpen(false);
+      setTourOpen(false);
     }
   });
 
@@ -166,6 +185,9 @@ const Shell = () => {
             <h1>{activeLabel}</h1>
           </div>
           <div className="topbar-actions">
+            <button className="btn ghost" onClick={() => setHelpOpen(true)}>
+              Hotkeys
+            </button>
             <button className="btn" onClick={() => navigate('ingest')}>
               Upload segment
             </button>
@@ -197,6 +219,20 @@ const Shell = () => {
           </button>
         </div>
       ) : null}
+
+      <HotkeyHelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <OnboardingTourModal
+        open={tourOpen}
+        onClose={() => {
+          setTourOpen(false);
+          saveToStorage(onboardingKey, true);
+        }}
+        onStart={() => {
+          setTourOpen(false);
+          saveToStorage(onboardingKey, true);
+          navigate('ingest');
+        }}
+      />
     </div>
   );
 };

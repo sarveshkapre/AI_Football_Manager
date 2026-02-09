@@ -7,6 +7,8 @@ interface HotkeyOptions {
   onReports: () => void;
   onIngest: () => void;
   onSearch: () => void;
+  onHelp?: () => void;
+  onEscape?: () => void;
 }
 
 const isInputElement = (target: EventTarget | null) => {
@@ -33,6 +35,9 @@ export const useHotkeys = (options: HotkeyOptions) => {
         return;
       }
 
+      if (event.key === 'Escape') {
+        latest.current.onEscape?.();
+      }
       if (event.key === 'c' || event.key === 'C') {
         latest.current.onCoach();
       }
@@ -51,6 +56,10 @@ export const useHotkeys = (options: HotkeyOptions) => {
       if (event.key === '/') {
         event.preventDefault();
         latest.current.onSearch();
+      }
+      if (event.key === '?') {
+        event.preventDefault();
+        latest.current.onHelp?.();
       }
     };
 

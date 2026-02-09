@@ -60,7 +60,7 @@ Start here: `docs/PRD.md`.
 - Run tests: `npm run test`
 - Vite root is set to `src/ui/web`
 - Navigate using hash routes: `#ingest`, `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
-- Keyboard shortcuts: `U` Ingest, `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library
+- Keyboard shortcuts: `U` Ingest, `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library, `?` hotkeys/help
 - Draft report route: `#draft`
 - Export mock: draft report page can download JSON/CSV for the current queue
 - Draft cover preview: draft report page includes a presentation cover panel
