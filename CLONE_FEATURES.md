@@ -7,11 +7,16 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
-- [ ] P1 - Add telestration-lite drawing tools (arrows/lines) on evidence clips and include exports in presentation packs.
-- [ ] P2 - Add an “Invite staff” modal (email + role preset) and log invitations to the audit stream.
-- [ ] P2 - Add a one-click “Export zip bundle” option that packages manifest + report + notes + cover + presentation assets.
+- [ ] P1 - Add one-click “Export zip bundle” in Draft Report (manifest + report JSON/CSV + notes + cover text/image + presentation HTML) for offline share handoff.
+- [ ] P1 - Add telestration-lite drawing tools (freehand + arrow) on evidence clips, persist per-clip, and include exports in presentation packs + evidence packages.
+- [ ] P2 - Fix modal accessibility basics: focus trap, Esc-close, return focus on close, and `aria-labelledby` wiring (Clip / Hotkeys / Tour).
+- [ ] P2 - Add an “Invite staff” modal (email + role preset) in Settings, persist invites locally, and log invitations to the audit stream.
+- [ ] P2 - Make ClipModal overlay toggles affect queued clip + clip exports (don’t export stale overlay state).
 - [ ] P3 - Add lightweight performance instrumentation (render timing + localStorage write counts) to catch regressions as the prototype grows.
-- [ ] P3 - Add basic accessibility checks for modals (focus management, escape-close, aria labels) and keyboard-only navigation pass.
+- [ ] P3 - Add keyboard-only navigation pass for the main views (tab order, visible focus states, skip-to-content).
+- [ ] P3 - Add unit tests for new export helpers (zip builder, telestration serialization guards) to keep prototype exports deterministic.
+- [ ] P4 - Add bulk tag/label actions in Analyst timeline (multi-select + apply/remove) to speed up matchday review.
+- [ ] P4 - Add minimal “pack import” flow in Reports (load a saved bundle manifest JSON and hydrate the queue) for round-trip validation.
 
 ## Implemented
 - [x] 2026-02-09 - Strengthened Draft report Share pack with permission presets, expiring links, and a downloadable bundle manifest. Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/share.ts`, `src/ui/web/src/utils/share.test.ts`, `src/ui/web/src/styles.css`.
