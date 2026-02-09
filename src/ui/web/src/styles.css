@@ -30,6 +30,24 @@ body {
   line-height: 1.5;
 }
 
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  z-index: 50;
+  transform: translateY(-140%);
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -333,6 +351,16 @@ select {
 
 .muted {
   color: var(--muted);
+}
+
+.muted.danger {
+  color: var(--danger);
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 16px 0;
 }
 
 .grid {

@@ -24,6 +24,7 @@ interface TelestrationContextValue {
   addStroke: (clipId: string, stroke: TelestrationStroke) => void;
   undoStroke: (clipId: string) => void;
   clearStrokes: (clipId: string) => void;
+  replaceStrokesForClips: (clipIds: string[], nextStrokes: TelestrationMap) => void;
 }
 
 const storageKey = 'afm.telestration';
@@ -70,6 +71,23 @@ export const TelestrationProvider = ({ children }: { children: React.ReactNode }
           delete next[clipId];
           saveToStorage(storageKey, next);
           return next;
+        }),
+      replaceStrokesForClips: (clipIds: string[], nextStrokes: TelestrationMap) =>
+        setStrokesByClip((prev) => {
+          if (clipIds.length === 0) {
+            return prev;
+          }
+          const next = { ...prev };
+          clipIds.forEach((clipId) => {
+            const imported = nextStrokes[clipId];
+            if (Array.isArray(imported) && imported.length > 0) {
+              next[clipId] = imported;
+            } else if (clipId in next) {
+              delete next[clipId];
+            }
+          });
+          saveToStorage(storageKey, next);
+          return next;
         })
     }),
     [strokesByClip]
@@ -85,4 +103,3 @@ export const useTelestration = () => {
   }
   return context;
 };
-

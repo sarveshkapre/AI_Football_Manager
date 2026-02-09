@@ -6,6 +6,7 @@ interface AnnotationsContextValue {
   annotations: Record<string, string>;
   setAnnotation: (clipId: string, note: string) => void;
   removeAnnotation: (clipId: string) => void;
+  replaceAnnotationsForClips: (clipIds: string[], nextAnnotations: Record<string, string>) => void;
 }
 
 const storageKey = 'afm.annotations';
@@ -36,6 +37,23 @@ export const AnnotationsProvider = ({ children }: { children: React.ReactNode })
           }
           const next = { ...prev };
           delete next[clipId];
+          saveToStorage(storageKey, next);
+          return next;
+        }),
+      replaceAnnotationsForClips: (clipIds: string[], nextAnnotations: Record<string, string>) =>
+        setAnnotations((prev) => {
+          if (clipIds.length === 0) {
+            return prev;
+          }
+          const next = { ...prev };
+          clipIds.forEach((clipId) => {
+            const imported = nextAnnotations[clipId];
+            if (typeof imported === 'string' && imported.trim().length > 0) {
+              next[clipId] = imported;
+            } else if (clipId in next) {
+              delete next[clipId];
+            }
+          });
           saveToStorage(storageKey, next);
           return next;
         })

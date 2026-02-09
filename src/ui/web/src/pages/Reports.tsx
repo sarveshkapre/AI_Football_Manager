@@ -17,6 +17,7 @@ import {
   downloadFile,
   openHtmlPreview
 } from '../utils/export';
+import { clipIdsFromPack, importReportPackFromFile, PackImportError } from '../utils/import';
 import { isNullableString } from '../utils/guards';
 import { buildSegmentReport, type SegmentReport } from '../utils/reports';
 import { durationToSeconds, formatDuration } from '../utils/time';
@@ -30,11 +31,14 @@ export const Reports = () => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string>('');
   const [segmentReport, setSegmentReport] = useState<SegmentReport | null>(null);
-  const { queue } = useReportContext();
+  const { queue, setQueue } = useReportContext();
   const { logEvent } = useAudit();
-  const { annotations } = useAnnotations();
-  const { labels } = useLabels();
-  const { strokesByClip } = useTelestration();
+  const { annotations, replaceAnnotationsForClips } = useAnnotations();
+  const { labels, replaceLabelsForClips } = useLabels();
+  const { strokesByClip, replaceStrokesForClips } = useTelestration();
+  const [importStatus, setImportStatus] = useState<string>('');
+  const [importBusy, setImportBusy] = useState(false);
+  const [lastImportedTitle, setLastImportedTitle] = useState<string>('');
 
   useEffect(() => {
     api.getReports().then(setReports);
@@ -194,6 +198,41 @@ export const Reports = () => {
     logEvent('Broadcast pack previewed', `${queue.length} clips`);
   };
 
+  const onImportFile: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || importBusy) {
+      return;
+    }
+
+    setImportBusy(true);
+    setImportStatus('Importing pack...');
+    try {
+      const pack = await importReportPackFromFile(file);
+      const clipIds = clipIdsFromPack(pack);
+
+      setQueue(pack.clips);
+      replaceLabelsForClips(clipIds, pack.labels);
+      replaceAnnotationsForClips(clipIds, pack.annotations);
+      replaceStrokesForClips(clipIds, pack.telestration);
+
+      setLastImportedTitle(pack.title);
+      setImportStatus(`Imported "${pack.title}" (${pack.clips.length} clips).`);
+      logEvent('Pack imported', `${pack.title} · ${pack.clips.length} clips`);
+    } catch (error) {
+      const message =
+        error instanceof PackImportError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : 'Unknown import error';
+      setImportStatus(`Import failed: ${message}`);
+      logEvent('Pack import failed', message);
+    } finally {
+      setImportBusy(false);
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="page-content">
       <SectionHeader
@@ -230,6 +269,29 @@ export const Reports = () => {
             }
           />
           <ReportQueue />
+          <div className="divider" />
+          <div className="form" style={{ paddingTop: 6 }}>
+            <label className="field">
+              <span>Import pack</span>
+              <input
+                type="file"
+                accept=".zip,application/zip,.json,application/json"
+                onChange={onImportFile}
+                disabled={importBusy}
+              />
+            </label>
+            <p className="muted">
+              Import a zip bundle (`afm-bundle.zip`) or report JSON (`afm-report.json`) to hydrate the queue and notes.
+            </p>
+            {importStatus ? (
+              <p className={`muted ${importStatus.startsWith('Import failed') ? 'danger' : ''}`}>
+                {importStatus}
+              </p>
+            ) : null}
+            {lastImportedTitle ? (
+              <p className="eyebrow">Last imported: {lastImportedTitle}</p>
+            ) : null}
+          </div>
         </div>
       </div>
 

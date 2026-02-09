@@ -150,6 +150,9 @@ const Shell = () => {
 
   return (
     <div className={`app-shell density-${density}`}>
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark" />
@@ -158,12 +161,13 @@ const Shell = () => {
             <span className="brand-tag">Matchday Copilot</span>
           </div>
         </div>
-        <nav className="nav">
+        <nav className="nav" aria-label="Primary">
           {allowedNavItems.map((item) => (
             <a
               key={item.key}
               href={`#${item.key}`}
               className={route === item.key ? 'active' : ''}
+              aria-current={route === item.key ? 'page' : undefined}
             >
               <div>
                 <span>{item.label}</span>
@@ -208,7 +212,7 @@ const Shell = () => {
           </div>
         </header>
 
-        <div className="content">
+        <main id="main-content" className="content" tabIndex={-1}>
           {isAllowed && route === 'ingest' && <Ingest />}
           {isAllowed && route === 'coach' && <Coach />}
           {isAllowed && route === 'analyst' && <Analyst />}
@@ -216,7 +220,7 @@ const Shell = () => {
           {isAllowed && route === 'reports' && <Reports />}
           {isAllowed && route === 'draft' && <DraftReport />}
           {isAllowed && route === 'settings' && <Settings />}
-        </div>
+        </main>
       </div>
 
       {route !== 'reports' && route !== 'draft' && queue.length > 0 ? (

@@ -6,6 +6,7 @@ interface LabelsContextValue {
   labels: Record<string, string[]>;
   addLabel: (clipId: string, label: string) => void;
   removeLabel: (clipId: string, label: string) => void;
+  replaceLabelsForClips: (clipIds: string[], nextLabels: Record<string, string[]>) => void;
 }
 
 const storageKey = 'afm.labels';
@@ -41,6 +42,23 @@ export const LabelsProvider = ({ children }: { children: React.ReactNode }) => {
             ...prev,
             [clipId]: existing.filter((item) => item !== label)
           };
+          saveToStorage(storageKey, next);
+          return next;
+        }),
+      replaceLabelsForClips: (clipIds: string[], nextLabels: Record<string, string[]>) =>
+        setLabels((prev) => {
+          if (clipIds.length === 0) {
+            return prev;
+          }
+          const next = { ...prev };
+          clipIds.forEach((clipId) => {
+            const imported = nextLabels[clipId];
+            if (Array.isArray(imported) && imported.length > 0) {
+              next[clipId] = imported;
+            } else if (clipId in next) {
+              delete next[clipId];
+            }
+          });
           saveToStorage(storageKey, next);
           return next;
         })
