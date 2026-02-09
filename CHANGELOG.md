@@ -63,6 +63,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Global UI ErrorBoundary with recovery actions (reload / reset local AFM storage)
 - Aggregated `npm run verify` script for typecheck + tests + build parity with CI
 - Project memory and incident tracking docs (`PROJECT_MEMORY.md`, `INCIDENTS.md`)
+- Reports pack import flow (zip bundle or report JSON) that hydrates the export queue plus clip notes (labels/annotations/telestration)
+- Settings performance panel that surfaces lightweight localStorage persistence counters (writes/removes/bytes + top keys)
 
 ### Changed
 - Ingest now validates segment windows and manual alignment offsets with inline error messaging
@@ -77,6 +79,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Analyst timeline filters now persist across sessions, and manual tagging supports Enter-to-add for faster workflows
 - Modals now trap focus, restore focus on close, and support Escape and click-outside close for better keyboard accessibility
 - Clip overlay toggles now affect queued clips and clip exports (no stale overlay state)
+- Shell navigation now includes a skip-to-content link and exposes `aria-current` for the active route to improve keyboard accessibility
 
 ## [0.1.0] - 2026-02-04
 ### Added

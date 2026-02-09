@@ -7,9 +7,6 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
-- [ ] P1 (Selected) - Add “pack import” flow in Reports (import `afm-bundle.zip` / `afm-report.json`) and hydrate report queue + notes (labels/annotations/telestration) with validation + tests.
-- [ ] P1 (Selected) - Keyboard-only navigation pass (skip-to-content, `aria-current`, visible focus, predictable tab order) across Shell + main views.
-- [ ] P2 (Selected) - Add lightweight performance instrumentation (localStorage write counts + optional render timing) surfaced in Settings for regression detection.
 - [ ] P3 - Investigate and mitigate `npm audit` moderate vulnerabilities without breaking Vite/React tooling.
 - [ ] P3 - Add bulk tag/label actions in Analyst timeline (multi-select + apply/remove) to speed up matchday review.
 - [ ] P3 - Add “imported pack banner” state (show pack title/owner/match + clear-import) to reduce confusion after importing.
@@ -17,6 +14,9 @@
 - [ ] P4 - Add minimal E2E smoke test (app boots + navigate routes + open clip modal) to reduce UI regressions not covered by unit tests.
 
 ## Implemented
+- [x] 2026-02-09 - Added Reports pack import flow for `afm-bundle.zip` / `afm-report.json` that hydrates the report queue + notes (labels/annotations/telestration), with validation and unit tests. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/import.ts`, `src/ui/web/src/utils/import.test.ts`, `src/ui/web/src/context/LabelsContext.tsx`, `src/ui/web/src/context/AnnotationsContext.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`.
+- [x] 2026-02-09 - Keyboard accessibility pass: added skip-to-content link and `aria-current` for active navigation items. Evidence: `src/ui/web/src/App.tsx`, `src/ui/web/src/styles.css`.
+- [x] 2026-02-09 - Added lightweight persistence performance counters (localStorage writes/removes/bytes + top keys) surfaced in Settings. Evidence: `src/ui/web/src/utils/perf.ts`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/pages/Settings.tsx`.
 - [x] 2026-02-09 - Added one-click Draft Report zip bundle export (manifest + report + notes + cover + HTML packs + evidence package) for offline share handoff. Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/export.ts`, `package.json`, `src/ui/web/src/utils/export.test.ts`.
 - [x] 2026-02-09 - Added telestration-lite drawing (freehand + arrow) on evidence clips, persisted per clip, and exported in presentation packs + evidence packages. Evidence: `src/ui/web/src/components/Modal/ClipModal.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`, `src/ui/web/src/utils/export.ts`, `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`.
 - [x] 2026-02-09 - Improved modal accessibility (focus trap, Esc-close, return focus, click-outside close, `aria-labelledby`). Evidence: `src/ui/web/src/components/Modal/Modal.tsx`, `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/components/Modal/ClipModal.tsx`, `src/ui/web/src/styles.css`.

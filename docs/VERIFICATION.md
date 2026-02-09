@@ -12,9 +12,10 @@ Use this checklist before pushing changes to `main`.
 Shortcut: `npm run verify` runs typecheck + tests + build.
 
 ## Local smoke path
-1. Start dev server: `npm run dev -- --host 127.0.0.1 --port 4173`
-2. Verify app responds: `curl -I http://127.0.0.1:4173/`
-3. Stop the dev server.
+1. Build (if needed): `npm run build`
+2. Start preview server: `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort`
+3. Verify app responds: `curl -I http://127.0.0.1:4173/`
+4. Stop the preview server.
 
 Expected smoke result: `HTTP/1.1 200 OK`.
 

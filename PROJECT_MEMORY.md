@@ -32,17 +32,21 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - 2026-02-09 | Add Invite staff flow (local stub) with audit logging | Collaboration entrypoints reduce friction to share packs; persisted invites + audit trail keeps behavior inspectable in a prototype | Evidence: `src/ui/web/src/components/InviteStaffModal.tsx`, `src/ui/web/src/context/InvitesContext.tsx`, `src/ui/web/src/pages/Settings.tsx`, `src/ui/web/src/App.tsx`; `npm test` (pass) | Commit: `3ba4356` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Add telestration-lite drawing (freehand + arrow) and export it in packs | Drawing tools are table-stakes for analyst presentations; persisting normalized strokes enables consistent export/preview without video rendering dependencies | Evidence: `src/ui/web/src/components/Modal/ClipModal.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`, `src/ui/web/src/utils/export.ts`, `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/pages/Reports.tsx`; tests added for guards/export | Commit: `1ff2caf` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Add Draft Report zip bundle export for offline share handoff | Staff workflows often require shipping a single artifact (manifest + packs + notes + cover); zip bundling reduces friction while keeping exports deterministic | Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/export.ts`, `src/ui/web/src/utils/export.test.ts`, dependency `jszip`; `npm test` (pass) | Commit: `ff3b2f5` | Confidence: High | Trust: Trusted
+- 2026-02-09 | Add Reports pack import (zip/report JSON) with validated hydration of queue + notes | Enables round-trip validation of export bundles and reduces friction when staff sends packs back/forth; hydration is constrained to imported clip IDs to avoid wiping unrelated local state | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/import.ts`, `src/ui/web/src/utils/import.test.ts`, `src/ui/web/src/context/LabelsContext.tsx`, `src/ui/web/src/context/AnnotationsContext.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`; `npm run verify` (pass) | Commit: `fe7ab29` | Confidence: High | Trust: Trusted
+- 2026-02-09 | Add skip-to-content link + `aria-current` for active navigation | Improves keyboard accessibility and reduces “tab fatigue” in matchday workflows | Evidence: `src/ui/web/src/App.tsx`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `fe7ab29` | Confidence: High | Trust: Trusted
+- 2026-02-09 | Add lightweight localStorage persistence counters in Settings | Provides quick visibility into persistence churn (writes/removes/bytes) to catch regressions as prototype grows | Evidence: `src/ui/web/src/utils/perf.ts`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/pages/Settings.tsx`; `npm run verify` (pass) | Commit: `83f6402` | Confidence: Medium | Trust: Trusted
 
 ## Mistakes And Fixes
-- None recorded for this cycle.
+- Zip import unit test initially failed in Node when feeding a `Blob` directly into JSZip.
+  Root cause: JSZip load path is sensitive to `Blob` implementations in non-browser environments.
+  Fix: normalize zip inputs to `ArrayBuffer` before calling `JSZip.loadAsync`.
+  Prevention rule: when writing cross-env import/export utilities, add a unit test that exercises the Node path and normalize inputs at boundaries.
 
 ## Verification Evidence
-- `npm test` (pass)
-- `npm run typecheck` (pass)
-- `npm run verify` (pass; Vite build succeeded)
-- `npm run dev -- --host 127.0.0.1 --port 4173` (pass: server started)
-- `curl -I http://127.0.0.1:4173/` (pass: `HTTP/1.1 200 OK`)
-- `npm audit --audit-level=moderate` (fail: 5 moderate vulnerabilities; fix requires `npm audit fix --force` which upgrades Vite to a breaking major)
+- `npm run verify` (pass)
+- `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` (pass: server started)
+- `curl -fsS http://127.0.0.1:4173/` (pass: returned `index.html`)
+- `npm audit --audit-level=moderate` (fail: 5 moderate vulnerabilities; fix requires `npm audit fix --force` upgrading Vite to `7.3.1` which is a breaking major)
 
 ## Gap Map (Cycle 1)
 - Missing (parity): telestration/drawing tools on clips; zip-style export bundles for offline sharing; invite/collaboration entrypoint beyond a stub button.
