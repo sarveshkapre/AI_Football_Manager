@@ -7,11 +7,17 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
-- [ ] P3 - Investigate and mitigate `npm audit` moderate vulnerabilities without breaking Vite/React tooling.
-- [ ] P3 - Add bulk tag/label actions in Analyst timeline (multi-select + apply/remove) to speed up matchday review.
-- [ ] P3 - Add “imported pack banner” state (show pack title/owner/match + clear-import) to reduce confusion after importing.
-- [ ] P4 - Add report-queue presets (coach bench vs analyst room) for faster “build a pack” workflows.
-- [ ] P4 - Add minimal E2E smoke test (app boots + navigate routes + open clip modal) to reduce UI regressions not covered by unit tests.
+Selected (Cycle 4)
+- [ ] P1 - Add bulk tag actions in Analyst timeline (multi-select; apply/remove tags; bulk highlight) to speed up matchday review.
+- [ ] P1 - Add a persistent imported-pack banner in Reports (title/match/owner/source + clear-import) to reduce confusion after importing bundles.
+- [ ] P2 - Add UI smoke coverage (app boots + navigate routes + open clip modal) under Vitest to catch regressions beyond pure utilities.
+- [ ] P2 - Mitigate `npm audit` moderate `esbuild` vulnerability via safe dependency overrides (no forced Vite major upgrade); re-run audit and record evidence.
+
+Other candidates
+- [ ] P3 - Add report-queue presets (coach bench vs analyst room) for faster “build a pack” workflows.
+- [ ] P3 - Add “import strategy” when loading a pack: replace queue vs append; show clip conflict handling.
+- [ ] P4 - Add a “tag palette” (hotkeys + recent tags) to reduce mouse travel during live tagging.
+- [ ] P4 - Add a lightweight visual diff for imported packs (what changed vs current queue) before applying import.
 
 ## Implemented
 - [x] 2026-02-09 - Added Reports pack import flow for `afm-bundle.zip` / `afm-report.json` that hydrates the report queue + notes (labels/annotations/telestration), with validation and unit tests. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/import.ts`, `src/ui/web/src/utils/import.test.ts`, `src/ui/web/src/context/LabelsContext.tsx`, `src/ui/web/src/context/AnnotationsContext.tsx`, `src/ui/web/src/context/TelestrationContext.tsx`.
@@ -48,6 +54,8 @@
 - Offline sharing commonly includes packaged artifacts (video + graphics + notes) rather than single JSON exports; bundling assets into a zip reduces friction for “send to staff” workflows even in a prototype context.
 - Market scan (bounded) suggests parity expectations around live collaboration and “shared timelines” for matchday workflows, plus shareable presentations/packs with permissions. Sources (external, untrusted): https://www.hudl.com/releases/sportscode, https://provideo.catapultsports.com/hc/en-us/articles/7333070047887-Sharing-a-Presentation-Feature-in-Focus-Client, https://provideo.catapultsports.com/hc/en-us/articles/7333023161871-Live-Capture-Using-Multiple-Devices.
 - Market scan (bounded) reinforces that “presentation tooling” is positioned as a first-class workflow (not an export afterthought), including multi-angle/auto-annotations and cloud sharing. Sources (external, untrusted): https://www.catapult.com/solutions/pro-video, https://www.hudl.com/products/studio, https://www.hudl.com/blog/hudl-studio-telestration-sportscode.
+
+- Bounded market refresh (checked 2026-02-09) continues to emphasize: multi-select/bulk tagging, fast evidence packaging, and persistent context after sharing/importing. Sources (external, untrusted): https://www.hudl.com/products/studio, https://www.hudl.com/blog/hudl-studio-telestration-sportscode, https://www.catapult.com/solutions/pro-video, https://provideo.catapultsports.com/hc/en-us/articles/7333070047887-Sharing-a-Presentation-Feature-in-Focus-Client, https://provideo.catapultsports.com/hc/en-us/articles/7333038946959-Freeze-Frame-Telestrations.
 
 ## Notes
 - This file is maintained by the autonomous clone loop.
