@@ -39,3 +39,9 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - `npm run build` (pass)
 - `npm run dev -- --host 127.0.0.1 --port 4173` (pass: server started)
 - `curl -I http://127.0.0.1:4173/` (pass: `HTTP/1.1 200 OK`)
+
+## Gap Map (Cycle 1)
+- Missing (parity): telestration/drawing tools on clips; zip-style export bundles for offline sharing; invite/collaboration entrypoint beyond a stub button.
+- Weak (parity): analyst tagging speed/keyboard depth (improved with Enter-to-add; still lacks tag palettes/hotkeys and bulk ops).
+- Parity (improving): permissioned share flows (now has presets + expiry + manifest, but no server-backed revocation/audit).
+- Differentiator candidates: confidence-gated “evidence-first” recommendations with coach/analyst dual surfaces and fast pack generation.
