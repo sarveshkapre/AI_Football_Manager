@@ -7,9 +7,6 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
-- [ ] P1 (Selected) - Strengthen “Share pack” flow with permission presets, expiring links, and an exportable bundle manifest (zip-friendly).
-- [ ] P1 (Selected) - Add an in-app hotkey/help overlay (coach-readable, `?`) and a 30-second onboarding tour for first-run users.
-- [ ] P2 (Selected) - Improve Analyst timeline UX with faster tag entry and filter persistence across sessions.
 - [ ] P1 - Add telestration-lite drawing tools (arrows/lines) on evidence clips and include exports in presentation packs.
 - [ ] P2 - Add an “Invite staff” modal (email + role preset) and log invitations to the audit stream.
 - [ ] P2 - Add a one-click “Export zip bundle” option that packages manifest + report + notes + cover + presentation assets.
@@ -17,6 +14,9 @@
 - [ ] P3 - Add basic accessibility checks for modals (focus management, escape-close, aria labels) and keyboard-only navigation pass.
 
 ## Implemented
+- [x] 2026-02-09 - Strengthened Draft report Share pack with permission presets, expiring links, and a downloadable bundle manifest. Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/share.ts`, `src/ui/web/src/utils/share.test.ts`, `src/ui/web/src/styles.css`.
+- [x] 2026-02-09 - Added an in-app hotkey/help overlay (coach-readable, `?`) and a skippable first-run onboarding tour. Evidence: `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`, `src/ui/web/src/styles.css`.
+- [x] 2026-02-09 - Persisted Analyst timeline filters across sessions and added Enter-to-add tagging. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/types.ts`.
 - [x] 2026-02-09 - Made hash routing access-aware (auto-redirect to first permitted route; hotkeys and topbar respect access). Evidence: `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`.
 - [x] 2026-02-09 - Deduplicated and recency-ordered saved searches (bump on apply/save; cap list). Evidence: `src/ui/web/src/context/LibraryContext.tsx`, `src/ui/web/src/pages/Library.tsx`, `src/ui/web/src/utils/librarySearches.ts`, `src/ui/web/src/utils/librarySearches.test.ts`, `src/ui/web/src/types.ts`, `src/ui/web/src/utils/guards.ts`.
 - [x] 2026-02-09 - Added global ErrorBoundary and a safe “reset local data” recovery path. Evidence: `src/ui/web/src/components/ErrorBoundary.tsx`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/App.tsx`.
@@ -35,6 +35,7 @@
 - Segment report generation was difficult to validate while embedded in React state handlers; extracting to `utils/reports.ts` made deterministic unit tests straightforward.
 - Enforcing typecheck + tests in CI surfaced latent type mismatches that Vite build alone would not catch.
 - Market baseline for matchday tools clusters around rapid clipping/tagging, role-based access, and shareable packs; the prototype’s fastest wins are reliability and workflow polish (access-aware routing, bounded saved searches, crash recovery).
+- Market scan (bounded) suggests table-stakes: live tagging/hotkeys, rapid clip assembly, and shareable/permissioned packs with expiry. Sources (external, untrusted): https://www.hudl.com/products/sportscode, https://www.catapult.com/solutions/pro-video, https://wyscout.com/, https://www.nacsport.com/, https://longomatch.com/, https://metrica-sports.com/.
 
 ## Notes
 - This file is maintained by the autonomous clone loop.
