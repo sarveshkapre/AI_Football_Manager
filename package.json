@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit",
+    "typecheck:strict": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
+    "verify": "npm run typecheck && npm run test && npm run build",
     "build": "vite build",
     "preview": "vite preview"
   },

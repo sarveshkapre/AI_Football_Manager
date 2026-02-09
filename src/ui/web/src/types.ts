@@ -83,6 +83,7 @@ export interface SavedSearch {
   query: string;
   tag: string | null;
   createdAt: string;
+  lastUsedAt?: string;
 }
 
 export type UploadStatus = 'Uploading' | 'Processing' | 'Ready' | 'Failed';

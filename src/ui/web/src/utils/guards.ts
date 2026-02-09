@@ -47,7 +47,8 @@ const isSavedSearch = (value: unknown): value is SavedSearch =>
   typeof value.name === 'string' &&
   typeof value.query === 'string' &&
   (typeof value.tag === 'string' || value.tag === null) &&
-  typeof value.createdAt === 'string';
+  typeof value.createdAt === 'string' &&
+  (typeof value.lastUsedAt === 'undefined' || typeof value.lastUsedAt === 'string');
 
 const isStoryboard = (value: unknown): value is Storyboard =>
   isRecord(value) &&

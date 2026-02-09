@@ -8,7 +8,7 @@ import { downloadFile } from '../utils/export';
 
 export const Library = () => {
   const { openClip } = useClipContext();
-  const { savedSearches, addSearch, removeSearch } = useLibrary();
+  const { savedSearches, addSearch, removeSearch, touchSearch } = useLibrary();
   const [clips, setClips] = useState<Clip[]>([]);
   const [query, setQuery] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -39,6 +39,7 @@ export const Library = () => {
     }
     setQuery(search.query);
     setActiveTag(search.tag);
+    touchSearch(id);
   };
 
   const saveSearch = () => {

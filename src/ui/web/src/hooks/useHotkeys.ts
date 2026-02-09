@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface HotkeyOptions {
   onCoach: () => void;
@@ -21,6 +21,12 @@ const isInputElement = (target: EventTarget | null) => {
 };
 
 export const useHotkeys = (options: HotkeyOptions) => {
+  const latest = useRef(options);
+
+  useEffect(() => {
+    latest.current = options;
+  }, [options]);
+
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (isInputElement(event.target)) {
@@ -28,27 +34,27 @@ export const useHotkeys = (options: HotkeyOptions) => {
       }
 
       if (event.key === 'c' || event.key === 'C') {
-        options.onCoach();
+        latest.current.onCoach();
       }
       if (event.key === 'a' || event.key === 'A') {
-        options.onAnalyst();
+        latest.current.onAnalyst();
       }
       if (event.key === 'l' || event.key === 'L') {
-        options.onLibrary();
+        latest.current.onLibrary();
       }
       if (event.key === 'r' || event.key === 'R') {
-        options.onReports();
+        latest.current.onReports();
       }
       if (event.key === 'u' || event.key === 'U') {
-        options.onIngest();
+        latest.current.onIngest();
       }
       if (event.key === '/') {
         event.preventDefault();
-        options.onSearch();
+        latest.current.onSearch();
       }
     };
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [options]);
+  }, []);
 };

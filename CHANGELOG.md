@@ -57,6 +57,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Verification guide for local smoke and CI command parity (`docs/VERIFICATION.md`)
 - Vitest test suite covering time parsing, storage guards, and segment report generation
 - Runtime storage guards and validated hydration across UI context stores
+- Global UI ErrorBoundary with recovery actions (reload / reset local AFM storage)
+- Aggregated `npm run verify` script for typecheck + tests + build parity with CI
+- Project memory and incident tracking docs (`PROJECT_MEMORY.md`, `INCIDENTS.md`)
 
 ### Changed
 - Ingest now validates segment windows and manual alignment offsets with inline error messaging
@@ -64,6 +67,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Segment report generation moved to a reusable utility for easier testing and maintenance
 - Time parsing is stricter for malformed values and out-of-range seconds
 - Audit, labels, and annotations updates now use functional state writes to avoid stale-update races
+- Hash route navigation now respects access settings and auto-redirects to the first permitted view
+- Saved library searches are deduplicated, recency-ordered, and capped to prevent list bloat
 
 ## [0.1.0] - 2026-02-04
 ### Added

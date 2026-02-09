@@ -26,3 +26,26 @@ export const saveToStorage = (key: string, value: unknown) => {
     // Ignore storage failures (private mode, quota, etc.)
   }
 };
+
+export const removeFromStorage = (key: string) => {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.)
+  }
+};
+
+export const clearAfmStorage = () => {
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('afm.')) {
+        keys.push(key);
+      }
+    }
+    keys.forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.)
+  }
+};

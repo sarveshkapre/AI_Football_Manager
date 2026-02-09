@@ -5,8 +5,11 @@ Use this checklist before pushing changes to `main`.
 ## Local checks
 1. Install deps: `npm install`
 2. Typecheck: `npm run typecheck`
+   Optional (stricter unused checks): `npm run typecheck:strict`
 3. Unit tests: `npm run test`
 4. Production build: `npm run build`
+
+Shortcut: `npm run verify` runs typecheck + tests + build.
 
 ## Local smoke path
 1. Start dev server: `npm run dev -- --host 127.0.0.1 --port 4173`
@@ -18,6 +21,4 @@ Expected smoke result: `HTTP/1.1 200 OK`.
 ## CI checks
 GitHub Actions runs the same verification steps via `.github/workflows/ci.yml`:
 - `npm ci`
-- `npm run typecheck`
-- `npm run test`
-- `npm run build`
+- `npm run verify`

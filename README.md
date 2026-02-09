@@ -47,6 +47,8 @@ Start here: `docs/PRD.md`.
 - `docs/USER_STORIES.md` — MVP user stories and acceptance criteria
 - `docs/MVP_BACKLOG.md` — draft backlog and milestones
 - `docs/VERIFICATION.md` — local and CI verification checklist
+- `PROJECT_MEMORY.md` — decisions, evidence, and follow-ups
+- `INCIDENTS.md` — failures, root causes, and prevention rules
 
 ## UI prototype
 - React + Vite prototype under `src/ui/web`

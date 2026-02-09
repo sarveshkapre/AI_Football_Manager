@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { LiveStatus } from './components/LiveStatus';
 import { ClipModal } from './components/Modal/ClipModal';
 import { PreferencesBridge } from './components/PreferencesBridge';
 import { ToastStack } from './components/Toast/ToastStack';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AccessProvider, useAccess } from './context/AccessContext';
 import { AnnotationsProvider } from './context/AnnotationsContext';
 import { AuditProvider } from './context/AuditContext';
@@ -42,6 +43,25 @@ const routeLabels: Record<string, string> = {
   ingest: 'Ingest'
 };
 
+const preferredFallbackOrder = [
+  'coach',
+  'analyst',
+  'library',
+  'reports',
+  'ingest',
+  'settings',
+  'draft'
+] as const;
+
+const firstAllowedRoute = (access: Record<string, boolean>) => {
+  for (const key of preferredFallbackOrder) {
+    if (access[key]) {
+      return key;
+    }
+  }
+  return 'settings';
+};
+
 const Shell = () => {
   const route = useHashRoute();
   const activeLabel = useMemo(() => routeLabels[route] ?? 'Coach Mode', [route]);
@@ -54,30 +74,54 @@ const Shell = () => {
     [access]
   );
 
-  const isAllowed = access[route] ?? true;
+  const isAllowed = access[route] ?? false;
+
+  const navigate = (target: keyof typeof access) => {
+    if (access[target]) {
+      window.location.hash = `#${target}`;
+      return;
+    }
+
+    if (target === 'draft' && access.reports) {
+      window.location.hash = '#reports';
+      return;
+    }
+
+    const fallback = firstAllowedRoute(access);
+    window.location.hash = `#${fallback}`;
+  };
+
+  useEffect(() => {
+    if (!isAllowed) {
+      const fallback = firstAllowedRoute(access);
+      if (fallback !== route) {
+        window.location.hash = `#${fallback}`;
+      }
+    }
+  }, [access, isAllowed, route]);
 
   useHotkeys({
     onCoach: () => {
-      window.location.hash = '#coach';
+      navigate('coach');
     },
     onAnalyst: () => {
-      window.location.hash = '#analyst';
+      navigate('analyst');
     },
     onLibrary: () => {
-      window.location.hash = '#library';
+      navigate('library');
     },
     onReports: () => {
-      window.location.hash = '#reports';
+      navigate('reports');
     },
     onIngest: () => {
-      window.location.hash = '#ingest';
+      navigate('ingest');
     },
     onSearch: () => {
       if (route === 'library') {
         const input = document.querySelector('.library-toolbar input') as HTMLInputElement | null;
         input?.focus();
       } else {
-        window.location.hash = '#library';
+        navigate('library');
       }
     }
   });
@@ -122,24 +166,16 @@ const Shell = () => {
             <h1>{activeLabel}</h1>
           </div>
           <div className="topbar-actions">
-            <button className="btn" onClick={() => (window.location.hash = '#ingest')}>
+            <button className="btn" onClick={() => navigate('ingest')}>
               Upload segment
             </button>
-            <button className="btn primary" onClick={() => (window.location.hash = '#draft')}>
+            <button className="btn primary" onClick={() => navigate('draft')}>
               Share pack
             </button>
           </div>
         </header>
 
         <div className="content">
-          {!isAllowed ? (
-            <div className="page-content">
-              <div className="card surface">
-                <h3>Access restricted</h3>
-                <p className="muted">Ask an admin to enable this view in Settings.</p>
-              </div>
-            </div>
-          ) : null}
           {isAllowed && route === 'ingest' && <Ingest />}
           {isAllowed && route === 'coach' && <Coach />}
           {isAllowed && route === 'analyst' && <Analyst />}
@@ -167,29 +203,31 @@ const Shell = () => {
 
 export default function App() {
   return (
-    <ClipProvider>
-      <ReportProvider>
-        <StoryboardProvider>
-          <UiProvider>
-            <PreferencesProvider>
-              <AccessProvider>
-                <LibraryProvider>
-                  <AnnotationsProvider>
-                    <LabelsProvider>
-                      <AuditProvider>
-                        <PreferencesBridge />
-                        <Shell />
-                        <ToastStack />
-                        <ClipModal />
-                      </AuditProvider>
-                    </LabelsProvider>
-                  </AnnotationsProvider>
-                </LibraryProvider>
-              </AccessProvider>
-            </PreferencesProvider>
-          </UiProvider>
-        </StoryboardProvider>
-      </ReportProvider>
-    </ClipProvider>
+    <ErrorBoundary>
+      <ClipProvider>
+        <ReportProvider>
+          <StoryboardProvider>
+            <UiProvider>
+              <PreferencesProvider>
+                <AccessProvider>
+                  <LibraryProvider>
+                    <AnnotationsProvider>
+                      <LabelsProvider>
+                        <AuditProvider>
+                          <PreferencesBridge />
+                          <Shell />
+                          <ToastStack />
+                          <ClipModal />
+                        </AuditProvider>
+                      </LabelsProvider>
+                    </AnnotationsProvider>
+                  </LibraryProvider>
+                </AccessProvider>
+              </PreferencesProvider>
+            </UiProvider>
+          </StoryboardProvider>
+        </ReportProvider>
+      </ClipProvider>
+    </ErrorBoundary>
   );
 }
