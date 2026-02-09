@@ -10,6 +10,7 @@ import { AccessProvider, useAccess } from './context/AccessContext';
 import { AnnotationsProvider } from './context/AnnotationsContext';
 import { AuditProvider } from './context/AuditContext';
 import { ClipProvider } from './context/ClipContext';
+import { InvitesProvider } from './context/InvitesContext';
 import { LabelsProvider } from './context/LabelsContext';
 import { LibraryProvider } from './context/LibraryContext';
 import { PreferencesProvider } from './context/PreferencesContext';
@@ -66,6 +67,7 @@ const firstAllowedRoute = (access: Record<string, boolean>) => {
 };
 
 const onboardingKey = 'afm.onboarding.v1.seen';
+const openInviteKey = 'afm.ui.invite.open';
 
 const Shell = () => {
   const route = useHashRoute();
@@ -174,7 +176,15 @@ const Shell = () => {
         </nav>
         <div className="sidebar-footer">
           <LiveStatus />
-          <button className="btn ghost">Invite staff</button>
+          <button
+            className="btn ghost"
+            onClick={() => {
+              saveToStorage(openInviteKey, true);
+              navigate('settings');
+            }}
+          >
+            Invite staff
+          </button>
         </div>
       </aside>
 
@@ -250,10 +260,12 @@ export default function App() {
                     <AnnotationsProvider>
                       <LabelsProvider>
                         <AuditProvider>
-                          <PreferencesBridge />
-                          <Shell />
-                          <ToastStack />
-                          <ClipModal />
+                          <InvitesProvider>
+                            <PreferencesBridge />
+                            <Shell />
+                            <ToastStack />
+                            <ClipModal />
+                          </InvitesProvider>
                         </AuditProvider>
                       </LabelsProvider>
                     </AnnotationsProvider>

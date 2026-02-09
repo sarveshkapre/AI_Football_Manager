@@ -5,7 +5,8 @@ import {
   isClipArray,
   isNullableString,
   isPreferencesState,
-  isSavedSearchArray
+  isSavedSearchArray,
+  isStaffInviteArray
 } from './guards';
 
 describe('storage guards', () => {
@@ -95,5 +96,19 @@ describe('storage guards', () => {
     );
     expect(isAnalystTimelineFilters({ query: 'x', activeTag: null, minConfidence: 2 })).toBe(false);
     expect(isAnalystTimelineFilters({ query: 1, activeTag: null, minConfidence: 0 })).toBe(false);
+  });
+
+  it('validates staff invites', () => {
+    expect(
+      isStaffInviteArray([
+        { id: 'invite-1', email: 'coach@club.com', role: 'Coach bench', invitedAt: '2026-02-09' }
+      ])
+    ).toBe(true);
+    expect(isStaffInviteArray([{ id: 'invite-1' }])).toBe(false);
+    expect(
+      isStaffInviteArray([
+        { id: 'invite-1', email: 'coach@club.com', role: 'Unknown', invitedAt: '2026-02-09' }
+      ])
+    ).toBe(false);
   });
 });

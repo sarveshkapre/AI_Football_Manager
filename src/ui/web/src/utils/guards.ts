@@ -1,6 +1,7 @@
 import type { AnalystTimelineFilters, Clip, OverlayToggle, SavedSearch, Storyboard } from '../types';
 import type { AccessState } from '../context/AccessContext';
 import type { AuditEvent } from '../context/AuditContext';
+import type { StaffInvite } from '../context/InvitesContext';
 
 type PreferenceCadence = 30 | 60 | 90;
 
@@ -108,3 +109,16 @@ export const isAnalystTimelineFilters = (value: unknown): value is AnalystTimeli
   typeof value.minConfidence === 'number' &&
   value.minConfidence >= 0 &&
   value.minConfidence <= 1;
+
+const isStaffRolePreset = (value: unknown): value is StaffInvite['role'] =>
+  value === 'Full staff' || value === 'Coach bench' || value === 'Analyst room';
+
+const isStaffInvite = (value: unknown): value is StaffInvite =>
+  isRecord(value) &&
+  typeof value.id === 'string' &&
+  typeof value.email === 'string' &&
+  isStaffRolePreset(value.role) &&
+  typeof value.invitedAt === 'string';
+
+export const isStaffInviteArray = (value: unknown): value is StaffInvite[] =>
+  Array.isArray(value) && value.every(isStaffInvite);

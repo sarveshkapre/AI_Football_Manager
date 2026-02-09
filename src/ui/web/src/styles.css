@@ -1825,6 +1825,27 @@ select {
   align-items: center;
 }
 
+.invite-list {
+  display: grid;
+  gap: 10px;
+}
+
+.invite-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.invite-row p {
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
 .toast-stack {
   position: fixed;
   right: 24px;

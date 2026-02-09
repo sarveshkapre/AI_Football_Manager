@@ -1,11 +1,15 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { InviteStaffModal } from '../components/InviteStaffModal';
 import { SectionHeader } from '../components/SectionHeader';
 import { useAccess } from '../context/AccessContext';
+import { useInvites } from '../context/InvitesContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { useUi } from '../context/UiContext';
 import type { AccessState } from '../context/AccessContext';
+import { loadFromStorageWithGuard, removeFromStorage } from '../utils/storage';
 
 const cadenceOptions = [30, 60, 90] as const;
+const openInviteKey = 'afm.ui.invite.open';
 
 export const Settings = () => {
   const {
@@ -19,6 +23,18 @@ export const Settings = () => {
     usePreferences();
   const { density, setDensity } = useUi();
   const { access, setAccess, setAccessState } = useAccess();
+  const { invites } = useInvites();
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  useEffect(() => {
+    const shouldOpen = loadFromStorageWithGuard(openInviteKey, false, (value): value is boolean =>
+      typeof value === 'boolean'
+    );
+    if (shouldOpen) {
+      setInviteOpen(true);
+      removeFromStorage(openInviteKey);
+    }
+  }, []);
 
   const presets: { id: string; label: string; state: AccessState }[] = [
     {
@@ -196,6 +212,29 @@ export const Settings = () => {
           </div>
         </div>
       </div>
+
+      <div className="grid two" style={{ marginTop: 20 }}>
+        <div className="card surface">
+          <SectionHeader
+            title="Collaboration"
+            subtitle="Invite staff to view packs (local prototype stub)."
+            action={
+              <button className="btn primary" onClick={() => setInviteOpen(true)}>
+                Invite staff
+              </button>
+            }
+          />
+          <div className="row-card">
+            <div>
+              <h4>Recent invites</h4>
+              <p>{invites.length === 0 ? 'No invites yet.' : `${invites.length} invite(s) stored locally.`}</p>
+            </div>
+            <span className="pill">{invites.length}</span>
+          </div>
+        </div>
+      </div>
+
+      <InviteStaffModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
     </div>
   );
 };

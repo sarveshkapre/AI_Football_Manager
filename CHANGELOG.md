@@ -53,6 +53,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Coach replay clips can be queued to reports
 - Insight packs can be queued to reports
 - Auto-generate segment report after upload completes
+- Staff invite modal (email + role preset) with local persistence and audit logging
 - CI workflow for typecheck, tests, and production build on push/PR
 - Verification guide for local smoke and CI command parity (`docs/VERIFICATION.md`)
 - Vitest test suite covering time parsing, storage guards, and segment report generation
