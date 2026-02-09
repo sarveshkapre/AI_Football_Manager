@@ -141,3 +141,27 @@ const isTelestrationStroke = (value: unknown): value is TelestrationStroke =>
 
 export const isTelestrationMap = (value: unknown): value is TelestrationMap =>
   isRecord(value) && Object.values(value).every((entry) => Array.isArray(entry) && entry.every(isTelestrationStroke));
+
+const isPackSource = (value: unknown): value is 'json' | 'zip' => value === 'json' || value === 'zip';
+
+export const isReportsLastImportMeta = (
+  value: unknown
+): value is {
+  title: string;
+  notes: string;
+  match: string;
+  owner: string;
+  source: 'json' | 'zip';
+  clipCount: number;
+  importedAt: string;
+} =>
+  isRecord(value) &&
+  typeof value.title === 'string' &&
+  typeof value.notes === 'string' &&
+  typeof value.match === 'string' &&
+  typeof value.owner === 'string' &&
+  isPackSource(value.source) &&
+  typeof value.clipCount === 'number' &&
+  Number.isFinite(value.clipCount) &&
+  value.clipCount >= 0 &&
+  typeof value.importedAt === 'string';

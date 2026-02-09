@@ -18,10 +18,22 @@ import {
   openHtmlPreview
 } from '../utils/export';
 import { clipIdsFromPack, importReportPackFromFile, PackImportError } from '../utils/import';
-import { isNullableString } from '../utils/guards';
+import { isNullableString, isReportsLastImportMeta } from '../utils/guards';
 import { buildSegmentReport, type SegmentReport } from '../utils/reports';
 import { durationToSeconds, formatDuration } from '../utils/time';
 import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
+
+type LastImportMeta = {
+  title: string;
+  notes: string;
+  match: string;
+  owner: string;
+  source: 'json' | 'zip';
+  clipCount: number;
+  importedAt: string;
+};
+
+const lastImportKey = 'afm.reports.lastImport.v1';
 
 export const Reports = () => {
   const [reports, setReports] = useState<ReportItem[]>([]);
@@ -38,7 +50,9 @@ export const Reports = () => {
   const { strokesByClip, replaceStrokesForClips } = useTelestration();
   const [importStatus, setImportStatus] = useState<string>('');
   const [importBusy, setImportBusy] = useState(false);
-  const [lastImportedTitle, setLastImportedTitle] = useState<string>('');
+  const [lastImportMeta, setLastImportMeta] = useState<LastImportMeta | null>(() =>
+    loadFromStorageWithGuard(lastImportKey, null, isReportsLastImportMeta)
+  );
 
   useEffect(() => {
     api.getReports().then(setReports);
@@ -215,7 +229,17 @@ export const Reports = () => {
       replaceAnnotationsForClips(clipIds, pack.annotations);
       replaceStrokesForClips(clipIds, pack.telestration);
 
-      setLastImportedTitle(pack.title);
+      const meta: LastImportMeta = {
+        title: pack.title,
+        notes: pack.notes,
+        match: pack.match,
+        owner: pack.owner,
+        source: pack.source,
+        clipCount: pack.clips.length,
+        importedAt: new Date().toLocaleString()
+      };
+      setLastImportMeta(meta);
+      saveToStorage(lastImportKey, meta);
       setImportStatus(`Imported "${pack.title}" (${pack.clips.length} clips).`);
       logEvent('Pack imported', `${pack.title} · ${pack.clips.length} clips`);
     } catch (error) {
@@ -231,6 +255,13 @@ export const Reports = () => {
       setImportBusy(false);
       event.target.value = '';
     }
+  };
+
+  const clearImportedPackBanner = () => {
+    setLastImportMeta(null);
+    saveToStorage(lastImportKey, null);
+    setImportStatus('');
+    logEvent('Pack banner cleared', 'Reports import');
   };
 
   return (
@@ -288,8 +319,21 @@ export const Reports = () => {
                 {importStatus}
               </p>
             ) : null}
-            {lastImportedTitle ? (
-              <p className="eyebrow">Last imported: {lastImportedTitle}</p>
+            {lastImportMeta ? (
+              <div className="import-banner">
+                <div>
+                  <p className="eyebrow">Imported pack</p>
+                  <h4>{lastImportMeta.title}</h4>
+                  <p className="muted">
+                    {lastImportMeta.match} · {lastImportMeta.owner} · {lastImportMeta.clipCount}{' '}
+                    clips · {lastImportMeta.source.toUpperCase()} · {lastImportMeta.importedAt}
+                  </p>
+                  {lastImportMeta.notes ? <p className="muted">{lastImportMeta.notes}</p> : null}
+                </div>
+                <button className="btn ghost" onClick={clearImportedPackBanner}>
+                  Clear
+                </button>
+              </div>
             ) : null}
           </div>
         </div>

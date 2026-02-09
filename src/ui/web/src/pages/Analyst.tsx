@@ -74,8 +74,10 @@ export const Analyst = () => {
     );
     return stored.minConfidence;
   });
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [primaryEventId, setPrimaryEventId] = useState<string | null>(null);
+  const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [removeTag, setRemoveTag] = useState('');
   const [highlights, setHighlights] = useState<Record<string, boolean>>({});
   const [activeSnapshotId, setActiveSnapshotId] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerDot | null>(null);
@@ -140,8 +142,8 @@ export const Analyst = () => {
   );
 
   const selectedEvent = useMemo(
-    () => timeline.find((event) => event.id === selectedEventId) ?? null,
-    [timeline, selectedEventId]
+    () => timeline.find((event) => event.id === primaryEventId) ?? null,
+    [timeline, primaryEventId]
   );
 
   const activeSnapshot = useMemo(
@@ -179,28 +181,69 @@ export const Analyst = () => {
     return () => window.clearInterval(timer);
   }, [isPlaying, snapshots]);
 
+  const selectedTimelineIds = useMemo(() => {
+    if (selectedEventIds.length > 0) {
+      return selectedEventIds;
+    }
+    return primaryEventId ? [primaryEventId] : [];
+  }, [primaryEventId, selectedEventIds]);
+
   const addTagToSelected = (tag: string) => {
-    if (!selectedEventId || !tag.trim()) {
+    const trimmed = tag.trim();
+    if (selectedTimelineIds.length === 0 || !trimmed) {
       return;
     }
     setTimeline((prev) =>
       prev.map((event) =>
-        event.id === selectedEventId && !event.tags.includes(tag.trim())
-          ? { ...event, tags: [...event.tags, tag.trim()] }
+        selectedTimelineIds.includes(event.id) && !event.tags.includes(trimmed)
+          ? { ...event, tags: [...event.tags, trimmed] }
           : event
       )
     );
-    logEvent('Timeline tag added', `${tag.trim()} (${selectedEventId})`);
+    logEvent(
+      'Timeline tag added',
+      selectedTimelineIds.length === 1
+        ? `${trimmed} (${selectedTimelineIds[0]})`
+        : `${trimmed} (${selectedTimelineIds.length} events)`
+    );
+  };
+
+  const removeTagFromSelected = (tag: string) => {
+    const trimmed = tag.trim();
+    if (selectedTimelineIds.length === 0 || !trimmed) {
+      return;
+    }
+    setTimeline((prev) =>
+      prev.map((event) =>
+        selectedTimelineIds.includes(event.id) && event.tags.includes(trimmed)
+          ? { ...event, tags: event.tags.filter((entry) => entry !== trimmed) }
+          : event
+      )
+    );
+    logEvent(
+      'Timeline tag removed',
+      selectedTimelineIds.length === 1
+        ? `${trimmed} (${selectedTimelineIds[0]})`
+        : `${trimmed} (${selectedTimelineIds.length} events)`
+    );
   };
 
   const toggleHighlight = () => {
-    if (!selectedEventId) {
+    if (selectedTimelineIds.length === 0) {
       return;
     }
-    const label = selectedEvent?.label ?? selectedEventId;
     setHighlights((prev) => {
-      const next = { ...prev, [selectedEventId]: !prev[selectedEventId] };
-      logEvent('Timeline highlight', `${label} (${next[selectedEventId] ? 'Marked' : 'Unmarked'})`);
+      const shouldMark = selectedTimelineIds.some((id) => !prev[id]);
+      const next = { ...prev };
+      for (const id of selectedTimelineIds) {
+        next[id] = shouldMark;
+      }
+      logEvent(
+        'Timeline highlight',
+        selectedTimelineIds.length === 1
+          ? `${selectedEvent?.label ?? selectedTimelineIds[0]} (${shouldMark ? 'Marked' : 'Unmarked'})`
+          : `${selectedTimelineIds.length} events (${shouldMark ? 'Marked' : 'Unmarked'})`
+      );
       return next;
     });
   };
@@ -379,29 +422,67 @@ export const Analyst = () => {
             ))}
           </div>
           <div className="timeline-list">
-            {filteredTimeline.map((event) => (
+            {filteredTimeline.map((timelineEvent) => (
               <button
-                className={`timeline-item ${selectedEventId === event.id ? 'active' : ''}`}
-                key={event.id}
-                onClick={async () => {
-                  setSelectedEventId(event.id);
-                  const clip = await api.getClipById(event.clipId);
+                className={`timeline-item ${primaryEventId === timelineEvent.id ? 'active' : ''} ${
+                  selectedEventIds.includes(timelineEvent.id) ? 'selected' : ''
+                }`}
+                key={timelineEvent.id}
+                onClick={async (mouseEvent) => {
+                  const wantsToggle = mouseEvent.metaKey || mouseEvent.ctrlKey;
+                  const wantsRange = mouseEvent.shiftKey;
+
+                  if (wantsRange && primaryEventId) {
+                    const anchorIndex = filteredTimeline.findIndex(
+                      (entry) => entry.id === primaryEventId
+                    );
+                    const targetIndex = filteredTimeline.findIndex(
+                      (entry) => entry.id === timelineEvent.id
+                    );
+                    if (anchorIndex >= 0 && targetIndex >= 0) {
+                      const start = Math.min(anchorIndex, targetIndex);
+                      const end = Math.max(anchorIndex, targetIndex);
+                      const range = filteredTimeline.slice(start, end + 1).map((entry) => entry.id);
+                      setSelectedEventIds(range);
+                      return;
+                    }
+                  }
+
+                  if (wantsToggle) {
+                    setPrimaryEventId(timelineEvent.id);
+                    setSelectedEventIds((prev) => {
+                      const next = prev.includes(timelineEvent.id)
+                        ? prev.filter((id) => id !== timelineEvent.id)
+                        : [...prev, timelineEvent.id];
+                      if (next.length === 0) {
+                        setPrimaryEventId(null);
+                      }
+                      return next;
+                    });
+                    return;
+                  }
+
+                  setPrimaryEventId(timelineEvent.id);
+                  setSelectedEventIds([timelineEvent.id]);
+                  const clip = await api.getClipById(timelineEvent.clipId);
                   openClip(clip);
                 }}
               >
                 <div>
-                  <p className="eyebrow">{event.minute}</p>
-                  <h4>{event.label}</h4>
+                  <p className="eyebrow">{timelineEvent.minute}</p>
+                  <h4>{timelineEvent.label}</h4>
                   <div className="tag-row">
-                    {event.tags.map((tag) => (
+                    {timelineEvent.tags.map((tag) => (
                       <span className="tag" key={tag}>
                         {tag}
                       </span>
                     ))}
-                    {highlights[event.id] ? <span className="tag highlight-tag">highlight</span> : null}
+                    {highlights[timelineEvent.id] ? (
+                      <span className="tag highlight-tag">highlight</span>
+                    ) : null}
                   </div>
                 </div>
-                <span className="pill">Confidence {event.confidence}</span>
+                <span className="pill">Confidence {timelineEvent.confidence}</span>
               </button>
             ))}
           </div>
@@ -409,7 +490,11 @@ export const Analyst = () => {
             <div>
               <h4>Manual tagging</h4>
               <p className="muted">
-                {selectedEvent ? `Selected: ${selectedEvent.label}` : 'Select a timeline event.'}
+                {selectedTimelineIds.length === 0
+                  ? 'Select timeline events (Cmd/Ctrl-click to multi-select, Shift-click for a range).'
+                  : selectedTimelineIds.length === 1
+                    ? `Selected: ${selectedEvent?.label ?? selectedTimelineIds[0]}`
+                    : `Selected: ${selectedTimelineIds.length} events`}
               </p>
             </div>
             <div className="tagging-row">
@@ -432,12 +517,36 @@ export const Analyst = () => {
                   addTagToSelected(newTag);
                   setNewTag('');
                 }}
-                disabled={!selectedEventId || newTag.trim().length === 0}
+                disabled={selectedTimelineIds.length === 0 || newTag.trim().length === 0}
               >
                 Add tag
               </button>
-              <button className="btn ghost" onClick={toggleHighlight} disabled={!selectedEventId}>
-                {selectedEventId && highlights[selectedEventId] ? 'Unmark highlight' : 'Mark highlight'}
+              <select value={removeTag} onChange={(event) => setRemoveTag(event.target.value)}>
+                <option value="">Remove tag...</option>
+                {tags.map((tag) => (
+                  <option value={tag} key={`remove-${tag}`}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="btn ghost"
+                onClick={() => {
+                  removeTagFromSelected(removeTag);
+                  setRemoveTag('');
+                }}
+                disabled={selectedTimelineIds.length === 0 || removeTag.trim().length === 0}
+              >
+                Remove
+              </button>
+              <button
+                className="btn ghost"
+                onClick={toggleHighlight}
+                disabled={selectedTimelineIds.length === 0}
+              >
+                {selectedTimelineIds.length > 0 && selectedTimelineIds.every((id) => highlights[id])
+                  ? 'Unmark highlight'
+                  : 'Mark highlight'}
               </button>
             </div>
             <div className="quick-tags">
@@ -446,7 +555,7 @@ export const Analyst = () => {
                   key={`quick-${tag}`}
                   className="tag-chip"
                   onClick={() => addTagToSelected(tag)}
-                  disabled={!selectedEventId}
+                  disabled={selectedTimelineIds.length === 0}
                 >
                   {tag}
                 </button>

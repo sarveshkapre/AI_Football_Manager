@@ -584,7 +584,8 @@ select {
 
 .timeline-filters input,
 .timeline-filters select,
-.tagging-row input {
+.tagging-row input,
+.tagging-row select {
   border-radius: 12px;
   border: 1px solid var(--line);
   padding: 10px 14px;
@@ -612,6 +613,11 @@ select {
 .timeline-item.active {
   border-color: rgba(15, 76, 92, 0.5);
   box-shadow: var(--shadow);
+}
+
+.timeline-item.selected {
+  border-color: rgba(15, 76, 92, 0.35);
+  background: rgba(15, 76, 92, 0.06);
 }
 
 .tag-row {
@@ -642,6 +648,22 @@ select {
   background: var(--surface);
   display: grid;
   gap: 12px;
+}
+
+.import-banner {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(27, 153, 139, 0.28);
+  background: rgba(27, 153, 139, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.import-banner .btn {
+  margin-top: 2px;
 }
 
 .tagging-row {
