@@ -54,6 +54,9 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - 2026-02-09 | Add Analyst bulk multi-select tagging + Reports import banner | Reduce matchday friction (bulk tagging, post-import clarity) while staying prototype-safe | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/guards.ts`; `npm run verify` (pass) | Commit: `4b68231` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Clear `npm audit` by overriding `esbuild` | Address dev-server advisory without forcing a Vite major upgrade; keep CI green | Evidence: `package.json`, `package-lock.json`; `npm audit --audit-level=moderate` (pass) | Commit: `820db3e` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Add UI smoke test and fix ClipModal hook ordering | Prevent regressions and eliminate a hook-order crash in a core “open clip” workflow | Evidence: `src/ui/web/src/App.smoke.test.tsx`, `vitest.config.ts`, `src/ui/web/src/components/Modal/ClipModal.tsx`; `npm run verify` (pass) | Commit: `b1ce305`, `4d5faeb` | Confidence: High | Trust: Trusted
+- 2026-02-10 | Add pack import review with strategy + diff + conflict handling | Prevent accidental queue replacement and make pack merge semantics explicit (replace vs append; overlap policies) while keeping local-only prototype safety | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/packDiff.test.ts`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
+- 2026-02-10 | Add Draft Report presets + bench cut | Reduce time-to-pack for matchday by providing role-aligned defaults and a one-click short-pack trim | Evidence: `src/ui/web/src/pages/DraftReport.tsx`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
+- 2026-02-10 | Add recent-tag palette + Alt+1..9 hotkeys in Analyst | Reduce mouse travel during manual/live tagging, preserve recency in local persistence, and keep bulk selection flows fast | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/recentTags.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/recentTags.test.ts`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
 
 ## Mistakes And Fixes
 - Zip import unit test initially failed in Node when feeding a `Blob` directly into JSZip.
@@ -68,11 +71,11 @@ This file is the evolving memory of the repository: decisions, why they were mad
 ## Verification Evidence
 - `npm run verify` (pass)
 - `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` (pass: server started)
-- `curl -fsSI http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`)
+- `curl -I http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`)
 - `npm audit --audit-level=moderate` (pass: 0 vulnerabilities)
 
 ## Gap Map (Cycle 1)
 - Missing (parity): telestration/drawing tools on clips; zip-style export bundles for offline sharing; invite/collaboration entrypoint beyond a stub button.
-- Weak (parity): analyst tagging speed/keyboard depth (improved with Enter-to-add; still lacks tag palettes/hotkeys and bulk ops).
+- Weak (parity): analyst tagging speed/keyboard depth (improved with Enter-to-add, multi-select bulk actions, and recent-tag hotkeys; still lacks true live-capture tagging ergonomics and shared timelines).
 - Parity (improving): permissioned share flows (now has presets + expiry + manifest, but no server-backed revocation/audit).
 - Differentiator candidates: confidence-gated “evidence-first” recommendations with coach/analyst dual surfaces and fast pack generation.

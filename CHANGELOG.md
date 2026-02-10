@@ -68,6 +68,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Analyst bulk actions: multi-select timeline events (Cmd/Ctrl-click, Shift range) with bulk tag add/remove and bulk highlight.
 - Reports import clarity: persistent imported-pack banner (title/match/owner/source + clear) after importing a bundle.
 - UI smoke test coverage (happy-dom) for app boot + route navigation + clip modal open.
+- Reports pack import review modal: Replace vs Append strategy, diff summary (new/overlap/removed + notes changed), and overlap conflict handling for notes.
+- Draft Report pack presets (Coach bench vs Analyst room) plus one-click “bench cut” to trim the queue to a short pack.
+- Analyst recent-tag palette (up to 9) with Alt+1..9 hotkeys and local persistence.
 
 ### Changed
 - Ingest now validates segment windows and manual alignment offsets with inline error messaging
@@ -85,6 +88,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Shell navigation now includes a skip-to-content link and exposes `aria-current` for the active route to improve keyboard accessibility
 - Clip modal no longer violates React Rules of Hooks (prevents runtime crashes when opening clips in strict environments).
 - Dependency hygiene: cleared `npm audit` by overriding `esbuild` without forcing a Vite major upgrade.
+- Reports import flow now requires explicit review before applying changes to the export queue (prevents accidental queue replacement).
 
 ## [0.1.0] - 2026-02-04
 ### Added

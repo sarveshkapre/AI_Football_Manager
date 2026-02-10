@@ -8,12 +8,12 @@
 
 ## Candidate Features To Do
 Selected (Next session)
-- [ ] P3 - Add report-queue presets (coach bench vs analyst room) for faster “build a pack” workflows.
-- [ ] P3 - Add “import strategy” when loading a pack: replace queue vs append; show clip conflict handling.
-- [ ] P4 - Add a “tag palette” (hotkeys + recent tags) to reduce mouse travel during live tagging.
-- [ ] P4 - Add a lightweight visual diff for imported packs (what changed vs current queue) before applying import.
+- [ ] P4 - Reports: add “import undo” (restore previous queue + notes snapshot) for safety when applying a pack.
 
 ## Implemented
+- [x] 2026-02-10 - Reports import safety: added an import review modal with Replace vs Append strategy, a lightweight diff (new/overlap/removed + notes-changed), and explicit overlap conflict handling (labels merge/replace/keep; annotations/telestration keep/replace). Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/packDiff.test.ts`.
+- [x] 2026-02-10 - Draft Report speed: added pack presets (Coach bench vs Analyst room) and a one-click “bench cut” queue trim for short matchday packs. Evidence: `src/ui/web/src/pages/DraftReport.tsx`.
+- [x] 2026-02-10 - Analyst tagging speed: added a recent-tag palette (up to 9) with Alt+1..9 hotkeys; recent tags persist locally. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/recentTags.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/recentTags.test.ts`.
 - [x] 2026-02-09 - Analyst workflow speed: multi-select timeline events (Cmd/Ctrl-click, Shift range) with bulk tag add/remove and bulk highlight. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/styles.css`.
 - [x] 2026-02-09 - Reports clarity: persistent imported-pack banner (title/match/owner/source + clear) after importing a bundle. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/styles.css`.
 - [x] 2026-02-09 - Security hygiene: cleared `npm audit` by overriding `esbuild` without forcing a Vite major upgrade. Evidence: `package.json`, `package-lock.json`.
@@ -54,6 +54,8 @@ Selected (Next session)
 - Market scan (bounded) reinforces that “presentation tooling” is positioned as a first-class workflow (not an export afterthought), including multi-angle/auto-annotations and cloud sharing. Sources (external, untrusted): https://www.catapult.com/solutions/pro-video, https://www.hudl.com/products/studio, https://www.hudl.com/blog/hudl-studio-telestration-sportscode.
 
 - Bounded market refresh (checked 2026-02-09) continues to emphasize: multi-select/bulk tagging, fast evidence packaging, and persistent context after sharing/importing. Sources (external, untrusted): https://www.hudl.com/products/studio, https://www.hudl.com/blog/hudl-studio-telestration-sportscode, https://www.catapult.com/solutions/pro-video, https://provideo.catapultsports.com/hc/en-us/articles/7333070047887-Sharing-a-Presentation-Feature-in-Focus-Client, https://provideo.catapultsports.com/hc/en-us/articles/7333038946959-Freeze-Frame-Telestrations.
+
+- Bounded market refresh (checked 2026-02-10) highlights import/conflict-control as explicit workflow surface area (merge matching tags; avoid overwriting existing notes) and real-time/shared timeline collaboration as a “table stakes” direction for live capture. Sources (external, untrusted): https://support.catapultsports.com/hc/en-us/articles/14951371895183, https://www.hudl.com/releases/sportscode, https://www.hudl.com/blog/new-remote-coding-feature-will-make-hudl-sportscode-a-more-powerful-live-analysis-tool.
 
 ## Notes
 - This file is maintained by the autonomous clone loop.
