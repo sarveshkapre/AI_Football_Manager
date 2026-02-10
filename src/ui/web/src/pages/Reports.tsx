@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/mock';
 import { AuditLog } from '../components/AuditLog';
 import { EngagementStream } from '../components/EngagementStream';
 import { EngagementWidget } from '../components/EngagementWidget';
 import { ReportQueue } from '../components/ReportQueue';
 import { SectionHeader } from '../components/SectionHeader';
+import { Modal, useModalTitleId } from '../components/Modal/Modal';
 import { useAudit } from '../context/AuditContext';
 import { useReportContext } from '../context/ReportContext';
 import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
@@ -17,11 +18,20 @@ import {
   downloadFile,
   openHtmlPreview
 } from '../utils/export';
-import { clipIdsFromPack, importReportPackFromFile, PackImportError } from '../utils/import';
+import { importReportPackFromFile, PackImportError } from '../utils/import';
 import { isNullableString, isReportsLastImportMeta } from '../utils/guards';
 import { buildSegmentReport, type SegmentReport } from '../utils/reports';
 import { durationToSeconds, formatDuration } from '../utils/time';
 import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
+import {
+  computePackDiff,
+  mergeLabels,
+  type PackDiff,
+  type PackImportDecision,
+  type PackOverlapLabelsPolicy,
+  type PackOverlapNotePolicy
+} from '../utils/packDiff';
+import type { ImportedReportPack } from '../utils/import';
 
 type LastImportMeta = {
   title: string;
@@ -35,6 +45,13 @@ type LastImportMeta = {
 
 const lastImportKey = 'afm.reports.lastImport.v1';
 
+const defaultImportDecision: PackImportDecision = {
+  strategy: 'replace',
+  overlapLabels: 'merge',
+  overlapAnnotations: 'keep',
+  overlapTelestration: 'keep'
+};
+
 export const Reports = () => {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [segments, setSegments] = useState<Segment[]>([]);
@@ -43,13 +60,21 @@ export const Reports = () => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string>('');
   const [segmentReport, setSegmentReport] = useState<SegmentReport | null>(null);
-  const { queue, setQueue } = useReportContext();
+  const { queue, setQueue, enqueueClips } = useReportContext();
   const { logEvent } = useAudit();
   const { annotations, replaceAnnotationsForClips } = useAnnotations();
   const { labels, replaceLabelsForClips } = useLabels();
   const { strokesByClip, replaceStrokesForClips } = useTelestration();
   const [importStatus, setImportStatus] = useState<string>('');
   const [importBusy, setImportBusy] = useState(false);
+  const [pendingImport, setPendingImport] = useState<{
+    pack: ImportedReportPack;
+    diff: PackDiff;
+    decision: PackImportDecision;
+  } | null>(null);
+  const importTitleId = useModalTitleId();
+  const applyImportRef = useRef<HTMLButtonElement | null>(null);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const [lastImportMeta, setLastImportMeta] = useState<LastImportMeta | null>(() =>
     loadFromStorageWithGuard(lastImportKey, null, isReportsLastImportMeta)
   );
@@ -212,22 +237,95 @@ export const Reports = () => {
     logEvent('Broadcast pack previewed', `${queue.length} clips`);
   };
 
-  const onImportFile: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file || importBusy) {
+  const closePendingImport = () => {
+    setPendingImport(null);
+    setImportStatus('');
+    if (importInputRef.current) {
+      importInputRef.current.value = '';
+    }
+  };
+
+  const applyPendingImport = () => {
+    if (!pendingImport || importBusy) {
       return;
     }
 
-    setImportBusy(true);
-    setImportStatus('Importing pack...');
-    try {
-      const pack = await importReportPackFromFile(file);
-      const clipIds = clipIdsFromPack(pack);
+    const { pack, diff, decision } = pendingImport;
+    const currentQueueIds = new Set(queue.map((clip) => clip.id));
+    const importedIds = new Set(pack.clips.map((clip) => clip.id));
 
-      setQueue(pack.clips);
-      replaceLabelsForClips(clipIds, pack.labels);
-      replaceAnnotationsForClips(clipIds, pack.annotations);
-      replaceStrokesForClips(clipIds, pack.telestration);
+    setImportBusy(true);
+    setImportStatus('Applying import...');
+    try {
+      if (decision.strategy === 'replace') {
+        setQueue(pack.clips);
+      } else {
+        // Append clips in pack order; enqueueClips will skip duplicates.
+        enqueueClips(pack.clips);
+      }
+
+      const overlapIds = diff.overlappingClipIds;
+      const newIds = diff.newClipIds;
+
+      const labelIds: string[] = [];
+      const nextLabels: Record<string, string[]> = {};
+
+      const annotationIds: string[] = [];
+      const nextAnnotations: Record<string, string> = {};
+
+      const telestrationIds: string[] = [];
+      const nextTelestration = {} as typeof pack.telestration;
+
+      const includeOverlapLabels = (policy: PackOverlapLabelsPolicy) =>
+        policy === 'merge' || policy === 'replace';
+      const includeOverlapNotes = (policy: PackOverlapNotePolicy) => policy === 'replace';
+
+      // New clips always take the imported notes (including clearing stale local notes).
+      newIds.forEach((clipId) => {
+        labelIds.push(clipId);
+        nextLabels[clipId] = pack.labels[clipId] ?? [];
+
+        annotationIds.push(clipId);
+        nextAnnotations[clipId] = pack.annotations[clipId] ?? '';
+
+        telestrationIds.push(clipId);
+        nextTelestration[clipId] = pack.telestration[clipId] ?? [];
+      });
+
+      // Overlapping clips are policy-controlled.
+      if (overlapIds.length > 0) {
+        if (includeOverlapLabels(decision.overlapLabels)) {
+          overlapIds.forEach((clipId) => {
+            labelIds.push(clipId);
+            if (decision.overlapLabels === 'merge') {
+              nextLabels[clipId] = mergeLabels({
+                existing: labels[clipId],
+                imported: pack.labels[clipId]
+              });
+              return;
+            }
+            nextLabels[clipId] = pack.labels[clipId] ?? [];
+          });
+        }
+
+        if (includeOverlapNotes(decision.overlapAnnotations)) {
+          overlapIds.forEach((clipId) => {
+            annotationIds.push(clipId);
+            nextAnnotations[clipId] = pack.annotations[clipId] ?? '';
+          });
+        }
+
+        if (includeOverlapNotes(decision.overlapTelestration)) {
+          overlapIds.forEach((clipId) => {
+            telestrationIds.push(clipId);
+            nextTelestration[clipId] = pack.telestration[clipId] ?? [];
+          });
+        }
+      }
+
+      replaceLabelsForClips(labelIds, nextLabels);
+      replaceAnnotationsForClips(annotationIds, nextAnnotations);
+      replaceStrokesForClips(telestrationIds, nextTelestration);
 
       const meta: LastImportMeta = {
         title: pack.title,
@@ -240,8 +338,53 @@ export const Reports = () => {
       };
       setLastImportMeta(meta);
       saveToStorage(lastImportKey, meta);
-      setImportStatus(`Imported "${pack.title}" (${pack.clips.length} clips).`);
-      logEvent('Pack imported', `${pack.title} · ${pack.clips.length} clips`);
+
+      const strategyLabel = decision.strategy === 'replace' ? 'Replaced queue' : 'Appended clips';
+      setImportStatus(`${strategyLabel}: "${pack.title}" (${pack.clips.length} clips).`);
+      logEvent('Pack imported', `${pack.title} · ${pack.clips.length} clips · ${decision.strategy}`);
+
+      closePendingImport();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : 'Unknown import error';
+      setImportStatus(`Import failed: ${message}`);
+      logEvent('Pack import failed', message);
+    } finally {
+      setImportBusy(false);
+    }
+
+    // Diagnostics-only (no functional impact): expose a quick sanity check in the audit log.
+    if (importedIds.size > 0 && currentQueueIds.size > 0) {
+      logEvent(
+        'Pack import diff',
+        `new:${diff.newClipIds.length} overlap:${diff.overlappingClipIds.length} removed:${diff.removedClipIds.length}`
+      );
+    }
+  };
+
+  const onImportFile: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || importBusy) {
+      return;
+    }
+
+    setImportBusy(true);
+    setImportStatus('Importing pack...');
+    try {
+      const pack = await importReportPackFromFile(file);
+      const diff = computePackDiff({
+        currentQueue: queue,
+        currentLabels: labels,
+        currentAnnotations: annotations,
+        currentTelestration: strokesByClip,
+        pack
+      });
+      setPendingImport({ pack, diff, decision: defaultImportDecision });
+      setImportStatus(`Review import: "${pack.title}" (${pack.clips.length} clips).`);
     } catch (error) {
       const message =
         error instanceof PackImportError
@@ -272,8 +415,8 @@ export const Reports = () => {
         action={<button className="btn primary">New report</button>}
       />
 
-      <div className="grid two">
-        <div className="card surface">
+        <div className="grid two">
+          <div className="card surface">
           <SectionHeader title="Recent reports" />
           <div className="report-list">
             {reports.map((report) => (
@@ -289,7 +432,7 @@ export const Reports = () => {
             ))}
           </div>
         </div>
-        <div className="card surface">
+          <div className="card surface">
           <SectionHeader
             title="Export queue"
             subtitle="Clips added from Coach/Analyst."
@@ -305,6 +448,7 @@ export const Reports = () => {
             <label className="field">
               <span>Import pack</span>
               <input
+                ref={importInputRef}
                 type="file"
                 accept=".zip,application/zip,.json,application/json"
                 onChange={onImportFile}
@@ -338,6 +482,180 @@ export const Reports = () => {
           </div>
         </div>
       </div>
+
+      <Modal
+        open={pendingImport !== null}
+        onClose={closePendingImport}
+        labelledBy={importTitleId}
+        initialFocusRef={applyImportRef}
+        className="import-review-modal"
+      >
+        {pendingImport ? (
+          <>
+            <div className="modal-header">
+              <div>
+                <p className="eyebrow">Import pack</p>
+                <h3 id={importTitleId}>{pendingImport.pack.title}</h3>
+                <p className="muted">
+                  {pendingImport.pack.match} · {pendingImport.pack.owner} · {pendingImport.pack.clips.length} clips ·{' '}
+                  {pendingImport.pack.source.toUpperCase()}
+                </p>
+              </div>
+              <button className="btn ghost" onClick={closePendingImport}>
+                Close
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="import-diff-grid">
+                <div className="import-diff-card">
+                  <p className="eyebrow">New clips</p>
+                  <h4>{pendingImport.diff.newClipIds.length}</h4>
+                </div>
+                <div className="import-diff-card">
+                  <p className="eyebrow">Overlapping clips</p>
+                  <h4>{pendingImport.diff.overlappingClipIds.length}</h4>
+                </div>
+                <div className="import-diff-card">
+                  <p className="eyebrow">Removed (if replace)</p>
+                  <h4>{pendingImport.diff.removedClipIds.length}</h4>
+                </div>
+                <div className="import-diff-card">
+                  <p className="eyebrow">Overlap notes changed</p>
+                  <h4>{pendingImport.diff.overlapNotesChangedIds.length}</h4>
+                </div>
+              </div>
+
+              <div className="row-card">
+                <div>
+                  <h4>Import strategy</h4>
+                  <p>Choose how this pack affects the current export queue.</p>
+                </div>
+                <div className="segment">
+                  <button
+                    className={`segment-btn ${pendingImport.decision.strategy === 'replace' ? 'active' : ''}`}
+                    onClick={() =>
+                      setPendingImport((prev) =>
+                        prev ? { ...prev, decision: { ...prev.decision, strategy: 'replace' } } : prev
+                      )
+                    }
+                  >
+                    Replace
+                  </button>
+                  <button
+                    className={`segment-btn ${pendingImport.decision.strategy === 'append' ? 'active' : ''}`}
+                    onClick={() =>
+                      setPendingImport((prev) =>
+                        prev ? { ...prev, decision: { ...prev.decision, strategy: 'append' } } : prev
+                      )
+                    }
+                  >
+                    Append
+                  </button>
+                </div>
+              </div>
+
+              {pendingImport.diff.overlappingClipIds.length > 0 ? (
+                <div className="row-card">
+                  <div>
+                    <h4>Overlapping clips</h4>
+                    <p>Resolve clip note conflicts when IDs already exist in the queue.</p>
+                  </div>
+                  <div className="import-conflicts">
+                    <label className="field">
+                      <span>Labels</span>
+                      <select
+                        value={pendingImport.decision.overlapLabels}
+                        onChange={(event) =>
+                          setPendingImport((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  decision: {
+                                    ...prev.decision,
+                                    overlapLabels: event.target.value as PackOverlapLabelsPolicy
+                                  }
+                                }
+                              : prev
+                          )
+                        }
+                      >
+                        <option value="merge">Merge (recommended)</option>
+                        <option value="keep">Keep local</option>
+                        <option value="replace">Replace with imported</option>
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>Annotations</span>
+                      <select
+                        value={pendingImport.decision.overlapAnnotations}
+                        onChange={(event) =>
+                          setPendingImport((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  decision: {
+                                    ...prev.decision,
+                                    overlapAnnotations: event.target.value as PackOverlapNotePolicy
+                                  }
+                                }
+                              : prev
+                          )
+                        }
+                      >
+                        <option value="keep">Keep local (recommended)</option>
+                        <option value="replace">Replace with imported</option>
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>Telestration</span>
+                      <select
+                        value={pendingImport.decision.overlapTelestration}
+                        onChange={(event) =>
+                          setPendingImport((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  decision: {
+                                    ...prev.decision,
+                                    overlapTelestration: event.target.value as PackOverlapNotePolicy
+                                  }
+                                }
+                              : prev
+                          )
+                        }
+                      >
+                        <option value="keep">Keep local (recommended)</option>
+                        <option value="replace">Replace with imported</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="callout">
+                <p className="muted">
+                  Tip: choose <strong>Append</strong> to keep your current queue and only bring in new clips.
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn ghost" onClick={closePendingImport} disabled={importBusy}>
+                Cancel
+              </button>
+              <button
+                className="btn primary"
+                onClick={applyPendingImport}
+                disabled={importBusy}
+                ref={applyImportRef}
+              >
+                Apply import
+              </button>
+            </div>
+          </>
+        ) : null}
+      </Modal>
 
       <div className="grid two">
         <div className="card surface">

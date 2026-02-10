@@ -10,6 +10,7 @@ import { useStoryboards } from '../context/StoryboardContext';
 import { useReportContext } from '../context/ReportContext';
 import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 import { isAnalystTimelineFilters } from '../utils/guards';
+import { bumpRecentTags } from '../utils/recentTags';
 import type { Clip, MinimapSnapshot, OverlayToggle, PlayerDot, TimelineEvent } from '../types';
 import type { AnalystTimelineFilters } from '../types';
 
@@ -32,11 +33,15 @@ interface InsightPack {
 }
 
 const analystFiltersKey = 'afm.analyst.timelineFilters.v1';
+const recentTagsKey = 'afm.analyst.recentTags.v1';
 const defaultAnalystFilters: AnalystTimelineFilters = {
   query: '',
   activeTag: null,
   minConfidence: 0
 };
+
+const isStringArrayGuard = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string');
 
 export const Analyst = () => {
   const { openClip } = useClipContext();
@@ -79,6 +84,9 @@ export const Analyst = () => {
   const [newTag, setNewTag] = useState('');
   const [removeTag, setRemoveTag] = useState('');
   const [highlights, setHighlights] = useState<Record<string, boolean>>({});
+  const [recentTags, setRecentTags] = useState<string[]>(() =>
+    loadFromStorageWithGuard(recentTagsKey, [], isStringArrayGuard)
+  );
   const [activeSnapshotId, setActiveSnapshotId] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerDot | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -118,12 +126,35 @@ export const Analyst = () => {
     saveToStorage(analystFiltersKey, { query, activeTag, minConfidence });
   }, [activeTag, minConfidence, query]);
 
+  useEffect(() => {
+    saveToStorage(recentTagsKey, recentTags);
+  }, [recentTags]);
+
   const tags = useMemo(() => {
     const tagSet = new Set<string>();
     timeline.forEach((event) => event.tags.forEach((tag) => tagSet.add(tag)));
     clips.forEach((clip) => clip.tags.forEach((tag) => tagSet.add(tag)));
     return Array.from(tagSet).sort();
   }, [timeline, clips]);
+
+  const paletteTags = useMemo(() => {
+    const next: string[] = [];
+    recentTags.forEach((tag) => {
+      const trimmed = tag.trim();
+      if (trimmed && !next.includes(trimmed)) {
+        next.push(trimmed);
+      }
+    });
+    tags.forEach((tag) => {
+      if (next.length >= 9) {
+        return;
+      }
+      if (!next.includes(tag)) {
+        next.push(tag);
+      }
+    });
+    return next.slice(0, 9);
+  }, [recentTags, tags]);
 
   const filteredTimeline = useMemo(() => {
     return timeline.filter((event) => {
@@ -206,6 +237,8 @@ export const Analyst = () => {
         ? `${trimmed} (${selectedTimelineIds[0]})`
         : `${trimmed} (${selectedTimelineIds.length} events)`
     );
+
+    setRecentTags((prev) => bumpRecentTags({ recent: prev, tag: trimmed, cap: 9 }));
   };
 
   const removeTagFromSelected = (tag: string) => {
@@ -247,6 +280,30 @@ export const Analyst = () => {
       return next;
     });
   };
+
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if (!event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+      if (selectedTimelineIds.length === 0) {
+        return;
+      }
+      const digit = Number(event.key);
+      if (!Number.isInteger(digit) || digit <= 0) {
+        return;
+      }
+      const tag = paletteTags[digit - 1];
+      if (!tag) {
+        return;
+      }
+      event.preventDefault();
+      addTagToSelected(tag);
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [addTagToSelected, paletteTags, selectedTimelineIds]);
 
   const quickQuestions = [
     'Where are we overloaded?',
@@ -550,17 +607,23 @@ export const Analyst = () => {
               </button>
             </div>
             <div className="quick-tags">
-              {tags.slice(0, 6).map((tag) => (
+              {paletteTags.map((tag, idx) => (
                 <button
-                  key={`quick-${tag}`}
+                  key={`quick-${tag}-${idx}`}
                   className="tag-chip"
                   onClick={() => addTagToSelected(tag)}
                   disabled={selectedTimelineIds.length === 0}
                 >
+                  <span className="keycap" aria-hidden="true">
+                    {idx + 1}
+                  </span>{' '}
                   {tag}
                 </button>
               ))}
             </div>
+            <p className="muted" style={{ margin: 0 }}>
+              Hotkeys: <span className="keycap">Alt</span> + <span className="keycap">1</span>...<span className="keycap">9</span>
+            </p>
           </div>
         </div>
 

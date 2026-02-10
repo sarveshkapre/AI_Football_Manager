@@ -666,6 +666,30 @@ select {
   margin-top: 2px;
 }
 
+.import-review-modal {
+  width: min(820px, 92vw);
+}
+
+.import-diff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.import-diff-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: #fbfcfd;
+}
+
+.import-conflicts {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
 .tagging-row {
   display: grid;
   gap: 12px;
@@ -677,6 +701,24 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.quick-tags .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-tags .tag-chip .keycap {
+  min-width: 26px;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+}
+
+.quick-tags .tag-chip.active .keycap {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
 }
 
 .overlay-controls {

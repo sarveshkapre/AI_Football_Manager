@@ -31,7 +31,7 @@ const generateShareToken = () => {
 };
 
 export const DraftReport = () => {
-  const { queue } = useReportContext();
+  const { queue, setQueue } = useReportContext();
   const { logEvent } = useAudit();
   const { annotations } = useAnnotations();
   const { labels } = useLabels();
@@ -47,6 +47,7 @@ export const DraftReport = () => {
   const [shareToken, setShareToken] = useState(() => generateShareToken());
   const [shareIssuedAt, setShareIssuedAt] = useState(() => Date.now());
   const [zipBusy, setZipBusy] = useState(false);
+  const [preset, setPreset] = useState<'custom' | 'bench' | 'analyst'>('custom');
   const shareBaseUrl = 'https://afm.example.com';
 
   const totalDuration = useMemo(() => {
@@ -404,6 +405,67 @@ export const DraftReport = () => {
     }
   };
 
+  const applyPreset = (nextPreset: 'bench' | 'analyst') => {
+    if (nextPreset === 'bench') {
+      setTitle('Bench Pack');
+      setOwner('Coach bench');
+      setSharePermission('view');
+      setShareExpiry('1h');
+      setShareAllowDownload(true);
+      setShareIncludeNotes(false);
+      setPreset('bench');
+      logEvent('Pack preset applied', 'Coach bench');
+      return;
+    }
+
+    setTitle('Matchday Draft Report');
+    setOwner('Lead Analyst');
+    setSharePermission('comment');
+    setShareExpiry('24h');
+    setShareAllowDownload(true);
+    setShareIncludeNotes(true);
+    setPreset('analyst');
+    logEvent('Pack preset applied', 'Analyst room');
+  };
+
+  const applyBenchCut = () => {
+    if (queue.length === 0) {
+      return;
+    }
+
+    const maxSeconds = 180;
+    const maxClips = 8;
+
+    let seconds = 0;
+    const next: typeof queue = [];
+
+    for (const clip of queue) {
+      if (next.length >= maxClips) {
+        break;
+      }
+
+      const duration = durationToSeconds(clip.duration);
+      if (next.length > 0 && seconds + duration > maxSeconds) {
+        break;
+      }
+
+      next.push(clip);
+      seconds += duration;
+
+      if (seconds >= maxSeconds) {
+        break;
+      }
+    }
+
+    if (next.length === 0) {
+      next.push(queue[0]);
+      seconds = durationToSeconds(queue[0].duration);
+    }
+
+    setQueue(next);
+    logEvent('Bench cut applied', `${next.length} clips · ${formatDuration(seconds)}`);
+  };
+
   const coverClips = queue.slice(0, 3);
   const expiryLabel =
     shareExpiresAt === null ? 'Never expires' : `Expires ${new Date(shareExpiresAt).toLocaleString()}`;
@@ -423,6 +485,35 @@ export const DraftReport = () => {
       <div className="grid two">
         <div className="card surface">
           <div className="form">
+            <div className="row-card">
+              <div>
+                <h4>Pack presets</h4>
+                <p>Fast defaults for bench vs analyst workflows.</p>
+              </div>
+              <div className="segment">
+                <button
+                  className={`segment-btn ${preset === 'bench' ? 'active' : ''}`}
+                  onClick={() => applyPreset('bench')}
+                >
+                  Coach bench
+                </button>
+                <button
+                  className={`segment-btn ${preset === 'analyst' ? 'active' : ''}`}
+                  onClick={() => applyPreset('analyst')}
+                >
+                  Analyst room
+                </button>
+              </div>
+            </div>
+            <div className="row-card">
+              <div>
+                <h4>Bench cut</h4>
+                <p>Trim the current queue into a short pack (up to 8 clips, up to 3 minutes).</p>
+              </div>
+              <button className="btn" onClick={applyBenchCut} disabled={queue.length === 0}>
+                Apply bench cut
+              </button>
+            </div>
             <label className="field">
               <span>Report title</span>
               <input
