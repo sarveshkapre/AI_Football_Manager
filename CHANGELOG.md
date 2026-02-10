@@ -89,6 +89,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Clip modal no longer violates React Rules of Hooks (prevents runtime crashes when opening clips in strict environments).
 - Dependency hygiene: cleared `npm audit` by overriding `esbuild` without forcing a Vite major upgrade.
 - Reports import flow now requires explicit review before applying changes to the export queue (prevents accidental queue replacement).
+- Reports import undo: one-click “Undo import” restores the previous queue + notes snapshot after applying a pack.
 
 ## [0.1.0] - 2026-02-04
 ### Added

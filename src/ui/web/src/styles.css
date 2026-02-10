@@ -666,6 +666,16 @@ select {
   margin-top: 2px;
 }
 
+.import-banner-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.import-banner-actions .btn {
+  margin-top: 2px;
+}
+
 .import-review-modal {
   width: min(820px, 92vw);
 }

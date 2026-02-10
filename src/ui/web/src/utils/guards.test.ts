@@ -5,6 +5,7 @@ import {
   isClipArray,
   isNullableString,
   isPreferencesState,
+  isReportsImportUndoSnapshot,
   isSavedSearchArray,
   isStaffInviteArray,
   isTelestrationMap
@@ -131,5 +132,36 @@ describe('storage guards', () => {
       })
     ).toBe(true);
     expect(isTelestrationMap({ 'clip-1': [{ id: 'stroke-1' }] })).toBe(false);
+  });
+
+  it('validates reports import undo snapshot', () => {
+    const clip = {
+      id: 'clip-1',
+      title: 'Press beaten',
+      duration: '0:12',
+      tags: ['press'],
+      overlays: [{ id: 'o1', label: 'Spacing box', enabled: true }]
+    };
+
+    expect(
+      isReportsImportUndoSnapshot({
+        createdAt: '2026-02-10T00:00:00.000Z',
+        pack: {
+          title: 'Bench cut pack',
+          match: 'Arsenal vs Opponent',
+          owner: 'Analyst room',
+          source: 'zip',
+          clipCount: 1
+        },
+        affectedClipIds: ['clip-1'],
+        previousQueue: [clip],
+        previousLabels: { 'clip-1': ['press'] },
+        previousAnnotations: { 'clip-1': 'Keep trap wide' },
+        previousTelestration: { 'clip-1': [] },
+        previousLastImportMeta: null
+      })
+    ).toBe(true);
+
+    expect(isReportsImportUndoSnapshot({ createdAt: 'x' })).toBe(false);
   });
 });

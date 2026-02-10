@@ -165,3 +165,48 @@ export const isReportsLastImportMeta = (
   Number.isFinite(value.clipCount) &&
   value.clipCount >= 0 &&
   typeof value.importedAt === 'string';
+
+export const isReportsImportUndoSnapshot = (
+  value: unknown
+): value is {
+  createdAt: string;
+  pack: {
+    title: string;
+    match: string;
+    owner: string;
+    source: 'json' | 'zip';
+    clipCount: number;
+  };
+  affectedClipIds: string[];
+  previousQueue: Clip[];
+  previousLabels: Record<string, string[]>;
+  previousAnnotations: Record<string, string>;
+  previousTelestration: TelestrationMap;
+  previousLastImportMeta:
+    | null
+    | {
+        title: string;
+        notes: string;
+        match: string;
+        owner: string;
+        source: 'json' | 'zip';
+        clipCount: number;
+        importedAt: string;
+      };
+} =>
+  isRecord(value) &&
+  typeof value.createdAt === 'string' &&
+  isRecord(value.pack) &&
+  typeof value.pack.title === 'string' &&
+  typeof value.pack.match === 'string' &&
+  typeof value.pack.owner === 'string' &&
+  isPackSource(value.pack.source) &&
+  typeof value.pack.clipCount === 'number' &&
+  Number.isFinite(value.pack.clipCount) &&
+  value.pack.clipCount >= 0 &&
+  isStringArray(value.affectedClipIds) &&
+  isClipArray(value.previousQueue) &&
+  isLabelsMap(value.previousLabels) &&
+  isAnnotationsMap(value.previousAnnotations) &&
+  isTelestrationMap(value.previousTelestration) &&
+  (value.previousLastImportMeta === null || isReportsLastImportMeta(value.previousLastImportMeta));

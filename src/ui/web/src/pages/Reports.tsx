@@ -11,7 +11,7 @@ import { useReportContext } from '../context/ReportContext';
 import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
 import { useAnnotations } from '../context/AnnotationsContext';
 import { useLabels } from '../context/LabelsContext';
-import { useTelestration } from '../context/TelestrationContext';
+import { useTelestration, type TelestrationMap } from '../context/TelestrationContext';
 import {
   buildEvidencePackage,
   buildPresentationHtml,
@@ -19,7 +19,11 @@ import {
   openHtmlPreview
 } from '../utils/export';
 import { importReportPackFromFile, PackImportError } from '../utils/import';
-import { isNullableString, isReportsLastImportMeta } from '../utils/guards';
+import {
+  isNullableString,
+  isReportsImportUndoSnapshot,
+  isReportsLastImportMeta
+} from '../utils/guards';
 import { buildSegmentReport, type SegmentReport } from '../utils/reports';
 import { durationToSeconds, formatDuration } from '../utils/time';
 import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
@@ -44,12 +48,30 @@ type LastImportMeta = {
 };
 
 const lastImportKey = 'afm.reports.lastImport.v1';
+const importUndoKey = 'afm.reports.importUndo.v1';
 
 const defaultImportDecision: PackImportDecision = {
   strategy: 'replace',
   overlapLabels: 'merge',
   overlapAnnotations: 'keep',
   overlapTelestration: 'keep'
+};
+
+type ImportUndoSnapshot = {
+  createdAt: string;
+  pack: {
+    title: string;
+    match: string;
+    owner: string;
+    source: 'json' | 'zip';
+    clipCount: number;
+  };
+  affectedClipIds: string[];
+  previousQueue: Clip[];
+  previousLabels: Record<string, string[]>;
+  previousAnnotations: Record<string, string>;
+  previousTelestration: TelestrationMap;
+  previousLastImportMeta: LastImportMeta | null;
 };
 
 export const Reports = () => {
@@ -77,6 +99,9 @@ export const Reports = () => {
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [lastImportMeta, setLastImportMeta] = useState<LastImportMeta | null>(() =>
     loadFromStorageWithGuard(lastImportKey, null, isReportsLastImportMeta)
+  );
+  const [importUndo, setImportUndo] = useState<ImportUndoSnapshot | null>(() =>
+    loadFromStorageWithGuard(importUndoKey, null, isReportsImportUndoSnapshot)
   );
 
   useEffect(() => {
@@ -245,6 +270,46 @@ export const Reports = () => {
     }
   };
 
+  const clearImportUndo = () => {
+    setImportUndo(null);
+    saveToStorage(importUndoKey, null);
+  };
+
+  const undoLastImport = () => {
+    if (!importUndo || importBusy) {
+      return;
+    }
+
+    setImportBusy(true);
+    setImportStatus('Undoing import...');
+    try {
+      setQueue(importUndo.previousQueue);
+
+      const affected = importUndo.affectedClipIds;
+      replaceLabelsForClips(affected, importUndo.previousLabels);
+      replaceAnnotationsForClips(affected, importUndo.previousAnnotations);
+      replaceStrokesForClips(affected, importUndo.previousTelestration);
+
+      setLastImportMeta(importUndo.previousLastImportMeta);
+      saveToStorage(lastImportKey, importUndo.previousLastImportMeta);
+
+      clearImportUndo();
+      setImportStatus('Import undone.');
+      logEvent('Pack import undone', importUndo.pack.title);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : 'Unknown undo error';
+      setImportStatus(`Undo failed: ${message}`);
+      logEvent('Pack import undo failed', message);
+    } finally {
+      setImportBusy(false);
+    }
+  };
+
   const applyPendingImport = () => {
     if (!pendingImport || importBusy) {
       return;
@@ -257,6 +322,32 @@ export const Reports = () => {
     setImportBusy(true);
     setImportStatus('Applying import...');
     try {
+      const affectedClipIds = Array.from(new Set([...diff.newClipIds, ...diff.overlappingClipIds]));
+      const snapshot: ImportUndoSnapshot = {
+        createdAt: new Date().toISOString(),
+        pack: {
+          title: pack.title,
+          match: pack.match,
+          owner: pack.owner,
+          source: pack.source,
+          clipCount: pack.clips.length
+        },
+        affectedClipIds,
+        previousQueue: queue,
+        previousLabels: Object.fromEntries(
+          affectedClipIds.map((clipId) => [clipId, labels[clipId] ?? []])
+        ),
+        previousAnnotations: Object.fromEntries(
+          affectedClipIds.map((clipId) => [clipId, annotations[clipId] ?? ''])
+        ),
+        previousTelestration: Object.fromEntries(
+          affectedClipIds.map((clipId) => [clipId, strokesByClip[clipId] ?? []])
+        ),
+        previousLastImportMeta: lastImportMeta
+      };
+      setImportUndo(snapshot);
+      saveToStorage(importUndoKey, snapshot);
+
       if (decision.strategy === 'replace') {
         setQueue(pack.clips);
       } else {
@@ -403,6 +494,7 @@ export const Reports = () => {
   const clearImportedPackBanner = () => {
     setLastImportMeta(null);
     saveToStorage(lastImportKey, null);
+    clearImportUndo();
     setImportStatus('');
     logEvent('Pack banner cleared', 'Reports import');
   };
@@ -474,9 +566,16 @@ export const Reports = () => {
                   </p>
                   {lastImportMeta.notes ? <p className="muted">{lastImportMeta.notes}</p> : null}
                 </div>
-                <button className="btn ghost" onClick={clearImportedPackBanner}>
-                  Clear
-                </button>
+                <div className="import-banner-actions">
+                  {importUndo ? (
+                    <button className="btn" onClick={undoLastImport} disabled={importBusy}>
+                      Undo import
+                    </button>
+                  ) : null}
+                  <button className="btn ghost" onClick={clearImportedPackBanner} disabled={importBusy}>
+                    Clear
+                  </button>
+                </div>
               </div>
             ) : null}
           </div>
