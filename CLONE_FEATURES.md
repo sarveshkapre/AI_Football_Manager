@@ -11,7 +11,7 @@ Selected (This session)
 - [x] P3 - Reports: add a confirm step for “Clear queue” to prevent accidental loss. (Impact 3, Effort 1, Fit 4, Diff 0, Risk 1, Confidence 5)
 
 Selected (Next session)
-- [ ] P3 - Settings: add “Backup / Restore local AFM data” to export/import all persisted contexts (queue, notes, settings, saved searches) as a single bundle. (Impact 4, Effort 4, Fit 5, Diff 1, Risk 3, Confidence 2)
+- No items selected yet.
 
 Backlog
 - [ ] P3 - Reports: import review modal should optionally list “new” and “overlap” clip titles for operator confidence before applying changes. (Impact 3, Effort 3, Fit 4, Diff 0, Risk 2, Confidence 3)
@@ -22,6 +22,7 @@ Backlog
 - [ ] P4 - UX: add Reports import hotkey (focus file picker) and better status affordances for long imports. (Impact 2, Effort 2, Fit 3, Diff 0, Risk 1, Confidence 4)
 
 ## Implemented
+- [x] 2026-02-10 - Settings backup/restore: added a versioned JSON backup of all `afm.*` localStorage keys plus a restore flow that overwrites AFM local data and reloads to rehydrate state. Evidence: `src/ui/web/src/utils/backup.ts`, `src/ui/web/src/utils/backup.test.ts`, `src/ui/web/src/pages/Settings.tsx`; `npm run verify` (pass).
 - [x] 2026-02-10 - Reliability: eliminated Node WebStorage `localStorage` warnings in the happy-dom UI smoke by forcing an in-memory storage implementation, and hardened storage utilities to prefer `window.localStorage` and no-op when unavailable. Added unit coverage for storage fallback/no-op behavior. Evidence: `src/ui/web/src/App.smoke.test.tsx`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/utils/storage.test.ts`; `npm run verify` (pass).
 - [x] 2026-02-10 - Reports export queue safety: “Clear queue” now requires confirmation to prevent accidental loss. Evidence: `src/ui/web/src/components/ReportQueue.tsx`, `src/ui/web/src/components/ReportQueue.test.tsx`.
 - [x] 2026-02-10 - Reports import undo: added a persisted one-step “Undo import” that restores the previous queue + notes snapshot after applying a pack; warns before overwriting if the queue changed since import; clearing the imported-pack banner also clears the undo snapshot. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass).

@@ -65,6 +65,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Project memory and incident tracking docs (`PROJECT_MEMORY.md`, `INCIDENTS.md`)
 - Reports pack import flow (zip bundle or report JSON) that hydrates the export queue plus clip notes (labels/annotations/telestration)
 - Settings performance panel that surfaces lightweight localStorage persistence counters (writes/removes/bytes + top keys)
+- Settings Backup / Restore: download a versioned snapshot of all `afm.*` localStorage keys and restore it (overwrites AFM local data and reloads to rehydrate state)
 - Analyst bulk actions: multi-select timeline events (Cmd/Ctrl-click, Shift range) with bulk tag add/remove and bulk highlight.
 - Reports import clarity: persistent imported-pack banner (title/match/owner/source + clear) after importing a bundle.
 - UI smoke test coverage (happy-dom) for app boot + route navigation + clip modal open.
