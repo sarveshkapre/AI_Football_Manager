@@ -57,6 +57,7 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - 2026-02-10 | Add pack import review with strategy + diff + conflict handling | Prevent accidental queue replacement and make pack merge semantics explicit (replace vs append; overlap policies) while keeping local-only prototype safety | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/packDiff.test.ts`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
 - 2026-02-10 | Add Draft Report presets + bench cut | Reduce time-to-pack for matchday by providing role-aligned defaults and a one-click short-pack trim | Evidence: `src/ui/web/src/pages/DraftReport.tsx`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
 - 2026-02-10 | Add recent-tag palette + Alt+1..9 hotkeys in Analyst | Reduce mouse travel during manual/live tagging, preserve recency in local persistence, and keep bulk selection flows fast | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/recentTags.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/recentTags.test.ts`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
+- 2026-02-10 | Add Reports import undo snapshot | Reduce operator risk after applying an imported pack by providing a one-step “Undo import” that restores the previous queue + notes snapshot | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass); `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` + `curl -I http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`) | Commit: `422d046` | Confidence: High | Trust: Trusted
 
 ## Mistakes And Fixes
 - Zip import unit test initially failed in Node when feeding a `Blob` directly into JSZip.
@@ -73,9 +74,12 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` (pass: server started)
 - `curl -I http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`)
 - `npm audit --audit-level=moderate` (pass: 0 vulnerabilities)
+- 2026-02-10: `npm run verify` (pass: typecheck + 35 tests + build)
+- 2026-02-10: `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` (pass: served at `http://127.0.0.1:4173/`)
+- 2026-02-10: `curl -I http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`)
 
 ## Gap Map (Cycle 1)
 - Missing (parity): telestration/drawing tools on clips; zip-style export bundles for offline sharing; invite/collaboration entrypoint beyond a stub button.
-- Weak (parity): analyst tagging speed/keyboard depth (improved with Enter-to-add, multi-select bulk actions, and recent-tag hotkeys; still lacks true live-capture tagging ergonomics and shared timelines).
+- Weak (parity): safe report-pack import ergonomics (now has explicit review + overlap policies + one-step undo, but lacks clip-level preview and multi-step history); analyst tagging speed/keyboard depth (improved with Enter-to-add, multi-select bulk actions, and recent-tag hotkeys; still lacks true live-capture tagging ergonomics and shared timelines).
 - Parity (improving): permissioned share flows (now has presets + expiry + manifest, but no server-backed revocation/audit).
 - Differentiator candidates: confidence-gated “evidence-first” recommendations with coach/analyst dual surfaces and fast pack generation.
