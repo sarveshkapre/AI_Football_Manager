@@ -67,6 +67,7 @@ type ImportUndoSnapshot = {
     clipCount: number;
   };
   affectedClipIds: string[];
+  postImportQueueIds?: string[];
   previousQueue: Clip[];
   previousLabels: Record<string, string[]>;
   previousAnnotations: Record<string, string>;
@@ -280,6 +281,20 @@ export const Reports = () => {
       return;
     }
 
+    const currentQueueIds = queue.map((clip) => clip.id);
+    const expectedQueueIds = importUndo.postImportQueueIds;
+    const arraysEqual = (a: string[], b: string[]) =>
+      a.length === b.length && a.every((value, idx) => value === b[idx]);
+
+    if (!expectedQueueIds || !arraysEqual(expectedQueueIds, currentQueueIds)) {
+      const ok = window.confirm(
+        'Your export queue changed since the last import. Undo will overwrite the current queue and restore the pre-import state. Continue?'
+      );
+      if (!ok) {
+        return;
+      }
+    }
+
     setImportBusy(true);
     setImportStatus('Undoing import...');
     try {
@@ -322,6 +337,22 @@ export const Reports = () => {
     setImportBusy(true);
     setImportStatus('Applying import...');
     try {
+      const previousQueueIds = queue.map((clip) => clip.id);
+      const postImportQueueIds =
+        decision.strategy === 'replace'
+          ? pack.clips.map((clip) => clip.id)
+          : (() => {
+              const existing = new Set(previousQueueIds);
+              const next = [...previousQueueIds];
+              pack.clips.forEach((clip) => {
+                if (!existing.has(clip.id)) {
+                  next.push(clip.id);
+                  existing.add(clip.id);
+                }
+              });
+              return next;
+            })();
+
       const affectedClipIds = Array.from(new Set([...diff.newClipIds, ...diff.overlappingClipIds]));
       const snapshot: ImportUndoSnapshot = {
         createdAt: new Date().toISOString(),
@@ -333,6 +364,7 @@ export const Reports = () => {
           clipCount: pack.clips.length
         },
         affectedClipIds,
+        postImportQueueIds,
         previousQueue: queue,
         previousLabels: Object.fromEntries(
           affectedClipIds.map((clipId) => [clipId, labels[clipId] ?? []])
@@ -497,6 +529,71 @@ export const Reports = () => {
     clearImportUndo();
     setImportStatus('');
     logEvent('Pack banner cleared', 'Reports import');
+  };
+
+  const undoLastImport = () => {
+    if (!lastUndoState || importBusy) {
+      return;
+    }
+
+    const currentSig = JSON.stringify({
+      queueIds: queue.map((clip) => clip.id),
+      labels: labels,
+      annotations: annotations,
+      telestration: strokesByClip
+    });
+    const undoSig = JSON.stringify({
+      queueIds: lastUndoState.previousQueue.map((clip) => clip.id),
+      labels: lastUndoState.previousLabels,
+      annotations: lastUndoState.previousAnnotations,
+      telestration: lastUndoState.previousTelestration
+    });
+
+    if (currentSig !== undoSig) {
+      const ok = window.confirm(
+        'Your export queue or notes changed since the import. Undo will overwrite the current queue, labels, annotations, and telestration. Continue?'
+      );
+      if (!ok) {
+        return;
+      }
+    }
+
+    setImportBusy(true);
+    setImportStatus('Undoing import...');
+    try {
+      setQueue(lastUndoState.previousQueue);
+      const clipIds = Array.from(
+        new Set([
+          ...Object.keys(labels),
+          ...Object.keys(annotations),
+          ...Object.keys(strokesByClip),
+          ...Object.keys(lastUndoState.previousLabels),
+          ...Object.keys(lastUndoState.previousAnnotations),
+          ...Object.keys(lastUndoState.previousTelestration)
+        ])
+      );
+
+      // Replace notes for every known clip id, so removed keys are cleared.
+      replaceLabelsForClips(clipIds, lastUndoState.previousLabels);
+      replaceAnnotationsForClips(clipIds, lastUndoState.previousAnnotations);
+      replaceStrokesForClips(clipIds, lastUndoState.previousTelestration);
+
+      setLastUndoState(null);
+      saveToStorage(lastUndoKey, null);
+      setImportStatus(`Undid import: "${lastUndoState.importTitle}".`);
+      logEvent('Pack import undone', lastUndoState.importTitle);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : 'Unknown undo error';
+      setImportStatus(`Undo failed: ${message}`);
+      logEvent('Pack import undo failed', message);
+    } finally {
+      setImportBusy(false);
+    }
   };
 
   return (

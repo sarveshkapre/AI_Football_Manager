@@ -154,6 +154,26 @@ describe('storage guards', () => {
           clipCount: 1
         },
         affectedClipIds: ['clip-1'],
+        postImportQueueIds: ['clip-1'],
+        previousQueue: [clip],
+        previousLabels: { 'clip-1': ['press'] },
+        previousAnnotations: { 'clip-1': 'Keep trap wide' },
+        previousTelestration: { 'clip-1': [] },
+        previousLastImportMeta: null
+      })
+    ).toBe(true);
+
+    expect(
+      isReportsImportUndoSnapshot({
+        createdAt: '2026-02-10T00:00:00.000Z',
+        pack: {
+          title: 'Bench cut pack',
+          match: 'Arsenal vs Opponent',
+          owner: 'Analyst room',
+          source: 'zip',
+          clipCount: 1
+        },
+        affectedClipIds: ['clip-1'],
         previousQueue: [clip],
         previousLabels: { 'clip-1': ['press'] },
         previousAnnotations: { 'clip-1': 'Keep trap wide' },

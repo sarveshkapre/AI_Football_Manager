@@ -7,6 +7,9 @@
 - Gaps found during codebase exploration
 
 ## Candidate Features To Do
+Selected (This session)
+- [ ] P3 - Reports: add a confirm step for “Clear queue” to prevent accidental loss. (Impact 3, Effort 1, Fit 4, Diff 0, Risk 1, Confidence 5)
+
 Selected (Next session)
 - [ ] P3 - Settings: add “Backup / Restore local AFM data” to export/import all persisted contexts (queue, notes, settings, saved searches) as a single bundle. (Impact 4, Effort 4, Fit 5, Diff 1, Risk 3, Confidence 2)
 
@@ -20,7 +23,7 @@ Backlog
 
 ## Implemented
 - [x] 2026-02-10 - Reliability: eliminated Node WebStorage `localStorage` warnings in the happy-dom UI smoke by forcing an in-memory storage implementation, and hardened storage utilities to prefer `window.localStorage` and no-op when unavailable. Added unit coverage for storage fallback/no-op behavior. Evidence: `src/ui/web/src/App.smoke.test.tsx`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/utils/storage.test.ts`; `npm run verify` (pass).
-- [x] 2026-02-10 - Reports import undo: added a persisted one-step “Undo import” that restores the previous queue + notes snapshot after applying a pack; clearing the imported-pack banner also clears the undo snapshot. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass).
+- [x] 2026-02-10 - Reports import undo: added a persisted one-step “Undo import” that restores the previous queue + notes snapshot after applying a pack; warns before overwriting if the queue changed since import; clearing the imported-pack banner also clears the undo snapshot. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass).
 - [x] 2026-02-10 - Reports import safety: added an import review modal with Replace vs Append strategy, a lightweight diff (new/overlap/removed + notes-changed), and explicit overlap conflict handling (labels merge/replace/keep; annotations/telestration keep/replace). Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/packDiff.test.ts`.
 - [x] 2026-02-10 - Draft Report speed: added pack presets (Coach bench vs Analyst room) and a one-click “bench cut” queue trim for short matchday packs. Evidence: `src/ui/web/src/pages/DraftReport.tsx`.
 - [x] 2026-02-10 - Analyst tagging speed: added a recent-tag palette (up to 9) with Alt+1..9 hotkeys; recent tags persist locally. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/recentTags.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/recentTags.test.ts`.

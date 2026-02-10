@@ -178,6 +178,7 @@ export const isReportsImportUndoSnapshot = (
     clipCount: number;
   };
   affectedClipIds: string[];
+  postImportQueueIds?: string[];
   previousQueue: Clip[];
   previousLabels: Record<string, string[]>;
   previousAnnotations: Record<string, string>;
@@ -205,6 +206,7 @@ export const isReportsImportUndoSnapshot = (
   Number.isFinite(value.pack.clipCount) &&
   value.pack.clipCount >= 0 &&
   isStringArray(value.affectedClipIds) &&
+  (typeof value.postImportQueueIds === 'undefined' || isStringArray(value.postImportQueueIds)) &&
   isClipArray(value.previousQueue) &&
   isLabelsMap(value.previousLabels) &&
   isAnnotationsMap(value.previousAnnotations) &&

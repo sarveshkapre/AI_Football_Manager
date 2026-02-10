@@ -71,6 +71,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Reports pack import review modal: Replace vs Append strategy, diff summary (new/overlap/removed + notes changed), and overlap conflict handling for notes.
 - Draft Report pack presets (Coach bench vs Analyst room) plus one-click “bench cut” to trim the queue to a short pack.
 - Analyst recent-tag palette (up to 9) with Alt+1..9 hotkeys and local persistence.
+- Reports import undo: one-click “Undo import” restores the pre-import export queue plus labels/annotations/telestration, with a persisted one-level snapshot and overwrite confirmation when state has changed.
 
 ### Changed
 - Ingest now validates segment windows and manual alignment offsets with inline error messaging

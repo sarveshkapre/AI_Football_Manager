@@ -76,7 +76,9 @@ This file is the evolving memory of the repository: decisions, why they were mad
   Prevention rule: when using fake timers in React tests, advance inside `act()` and prefer role-scoped queries over global text matches for content that can appear in multiple places.
 
 ## Verification Evidence
-- `npm run verify` (pass)
+- `npm run typecheck` (pass)
+- `npm test` (pass)
+- `npm run build` (pass)
 - `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` (pass: server started)
 - `curl -I http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`)
 - `npm audit --audit-level=moderate` (pass: 0 vulnerabilities)
