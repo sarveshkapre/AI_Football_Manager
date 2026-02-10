@@ -2,6 +2,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
+import { clearAfmStorage } from './utils/storage';
+
+const createMemoryStorage = (): Storage => {
+  const data = new Map<string, string>();
+  return {
+    get length() {
+      return data.size;
+    },
+    key(index: number) {
+      return Array.from(data.keys())[index] ?? null;
+    },
+    getItem(key: string) {
+      return data.get(key) ?? null;
+    },
+    setItem(key: string, value: string) {
+      data.set(key, value);
+    },
+    removeItem(key: string) {
+      data.delete(key);
+    },
+    clear() {
+      data.clear();
+    }
+  } as unknown as Storage;
+};
 
 const advance = async (ms: number) => {
   await act(async () => {
@@ -12,12 +37,20 @@ const advance = async (ms: number) => {
 describe('App smoke', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // On newer Node versions, global `localStorage` is an experimental WebStorage
+    // implementation that emits warnings unless configured. Force a deterministic
+    // in-memory storage for this integration smoke.
+    const memoryStorage = createMemoryStorage();
+    Object.defineProperty(window, 'localStorage', {
+      value: memoryStorage,
+      configurable: true
+    });
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: memoryStorage,
+      configurable: true
+    });
     window.location.hash = '#analyst';
-    try {
-      localStorage.clear();
-    } catch {
-      // Best-effort cleanup; storage can be unavailable in some environments.
-    }
+    clearAfmStorage();
   });
 
   afterEach(() => {

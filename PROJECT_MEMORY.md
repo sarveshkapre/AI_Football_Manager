@@ -36,6 +36,7 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - **Follow-ups**:
   - Consider a true browser E2E pass (Playwright) once CI/runtime budgets are clear.
   - Evaluate whether happy-dom warnings in CI should be eliminated (switch to jsdom or configure environment options).
+    Done 2026-02-10: force an in-memory `localStorage` in the UI smoke and make storage helpers prefer `window.localStorage` to avoid Node WebStorage warnings.
 - **Trust label**: Trusted
 - **Confidence**: High
 
@@ -57,6 +58,7 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - 2026-02-10 | Add pack import review with strategy + diff + conflict handling | Prevent accidental queue replacement and make pack merge semantics explicit (replace vs append; overlap policies) while keeping local-only prototype safety | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/packDiff.test.ts`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
 - 2026-02-10 | Add Draft Report presets + bench cut | Reduce time-to-pack for matchday by providing role-aligned defaults and a one-click short-pack trim | Evidence: `src/ui/web/src/pages/DraftReport.tsx`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
 - 2026-02-10 | Add recent-tag palette + Alt+1..9 hotkeys in Analyst | Reduce mouse travel during manual/live tagging, preserve recency in local persistence, and keep bulk selection flows fast | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/recentTags.ts`, `src/ui/web/src/styles.css`, `src/ui/web/src/utils/recentTags.test.ts`; `npm run verify` (pass) | Commit: `8b74500` | Confidence: High | Trust: Trusted
+- 2026-02-10 | Eliminate Node WebStorage `localStorage` warnings in UI smoke | Keep verification output clean and make storage utilities robust in non-browser runtimes by using `window.localStorage` when available and stubbing deterministic in-memory storage for the happy-dom integration smoke | Evidence: `src/ui/web/src/App.smoke.test.tsx`, `src/ui/web/src/utils/storage.ts`, `src/ui/web/src/utils/storage.test.ts`; `npm run verify` (pass) | Commit: n/a | Confidence: High | Trust: Trusted
 - 2026-02-10 | Add Reports import undo snapshot | Reduce operator risk after applying an imported pack by providing a one-step “Undo import” that restores the previous queue + notes snapshot | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass); `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` + `curl -I http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`) | Commit: `422d046` | Confidence: High | Trust: Trusted
 
 ## Mistakes And Fixes

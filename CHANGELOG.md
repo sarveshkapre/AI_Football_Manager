@@ -90,6 +90,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Dependency hygiene: cleared `npm audit` by overriding `esbuild` without forcing a Vite major upgrade.
 - Reports import flow now requires explicit review before applying changes to the export queue (prevents accidental queue replacement).
 - Reports import undo: one-click “Undo import” restores the previous queue + notes snapshot after applying a pack.
+- Storage utilities now prefer `window.localStorage` (no-op when unavailable) and the UI smoke test uses an in-memory storage stub, eliminating Node WebStorage warnings during verification.
 
 ## [0.1.0] - 2026-02-04
 ### Added

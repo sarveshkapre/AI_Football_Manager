@@ -265,7 +265,14 @@ export const ClipModal = () => {
 
             <label className="telestration-control">
               <span className="muted">Color</span>
-              <select value={strokeColor} onChange={(event) => setStrokeColor(event.target.value as any)}>
+              <select
+                value={strokeColor}
+                onChange={(event) => {
+                  const next =
+                    colors.find((color) => color === event.target.value) ?? colors[0];
+                  setStrokeColor(next);
+                }}
+              >
                 {colors.map((value) => (
                   <option key={value} value={value}>
                     {value.toUpperCase()}
