@@ -68,6 +68,10 @@ This file is the evolving memory of the repository: decisions, why they were mad
   Root cause: early return prevented some hooks from running on initial render; later renders added hooks.
   Fix: move “no clip” return after hooks and guard inside effects/memos.
   Prevention rule: add/keep at least one UI integration smoke test that opens the ClipModal and navigates routes.
+- UI smoke test flaked in GitHub Actions (missing timeline entry / duplicate clip title match).
+  Root cause: advancing fake timers outside React `act()` and relying on unscoped `getByText()` queries made the test timing-sensitive and vulnerable to duplicate text nodes (timeline vs modal header).
+  Fix: wrap timer advancement in `act()`, clear storage via `localStorage.clear()`, retry the timeline lookup with bounded advances, and assert on the modal header via role/level.
+  Prevention rule: when using fake timers in React tests, advance inside `act()` and prefer role-scoped queries over global text matches for content that can appear in multiple places.
 
 ## Verification Evidence
 - `npm run verify` (pass)
@@ -77,6 +81,7 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - 2026-02-10: `npm run verify` (pass: typecheck + 35 tests + build)
 - 2026-02-10: `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` (pass: served at `http://127.0.0.1:4173/`)
 - 2026-02-10: `curl -I http://127.0.0.1:4173/ | head` (pass: `HTTP/1.1 200 OK`)
+- 2026-02-10: `gh run watch 21854691755 --exit-status` (pass: CI green)
 
 ## Gap Map (Cycle 1)
 - Missing (parity): telestration/drawing tools on clips; zip-style export bundles for offline sharing; invite/collaboration entrypoint beyond a stub button.
