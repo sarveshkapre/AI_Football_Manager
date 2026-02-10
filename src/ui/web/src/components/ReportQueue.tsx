@@ -7,6 +7,17 @@ export const ReportQueue = () => {
   const { queue, removeClip, clearQueue, setQueue } = useReportContext();
   const { handleDragStart, handleDragOver, handleDrop } = useDragList(queue, setQueue);
 
+  const confirmClearQueue = () => {
+    if (queue.length === 0) {
+      return;
+    }
+    const ok = window.confirm('Clear the export queue? This cannot be undone.');
+    if (!ok) {
+      return;
+    }
+    clearQueue();
+  };
+
   if (queue.length === 0) {
     return (
       <div className="queue-empty">
@@ -40,7 +51,7 @@ export const ReportQueue = () => {
         </div>
       ))}
       <div className="queue-actions">
-        <button className="btn" onClick={clearQueue}>
+        <button className="btn" onClick={confirmClearQueue}>
           Clear queue
         </button>
         <button className="btn primary" onClick={() => (window.location.hash = '#draft')}>

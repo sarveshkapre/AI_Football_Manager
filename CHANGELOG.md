@@ -71,7 +71,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Reports pack import review modal: Replace vs Append strategy, diff summary (new/overlap/removed + notes changed), and overlap conflict handling for notes.
 - Draft Report pack presets (Coach bench vs Analyst room) plus one-click “bench cut” to trim the queue to a short pack.
 - Analyst recent-tag palette (up to 9) with Alt+1..9 hotkeys and local persistence.
-- Reports import undo: one-click “Undo import” restores the pre-import export queue plus labels/annotations/telestration, with a persisted one-level snapshot and overwrite confirmation when state has changed.
+- Reports import undo: one-click “Undo import” restores the pre-import export queue + notes snapshot, warns before overwriting if the queue changed since import, and clearing the imported-pack banner clears the undo snapshot.
 
 ### Changed
 - Ingest now validates segment windows and manual alignment offsets with inline error messaging
@@ -90,8 +90,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Clip modal no longer violates React Rules of Hooks (prevents runtime crashes when opening clips in strict environments).
 - Dependency hygiene: cleared `npm audit` by overriding `esbuild` without forcing a Vite major upgrade.
 - Reports import flow now requires explicit review before applying changes to the export queue (prevents accidental queue replacement).
-- Reports import undo: one-click “Undo import” restores the previous queue + notes snapshot after applying a pack.
 - Storage utilities now prefer `window.localStorage` (no-op when unavailable) and the UI smoke test uses an in-memory storage stub, eliminating Node WebStorage warnings during verification.
+- Reports export queue now confirms before clearing the queue (prevents accidental loss).
 
 ## [0.1.0] - 2026-02-04
 ### Added
