@@ -72,6 +72,7 @@ Start here: `docs/PRD.md`.
 - Pack stub: draft report can download a JSON pack bundle (metadata + CSV + cover)
 - Zip bundle export: draft report can download a zip containing manifest + report + notes + cover + HTML packs + evidence package
 - Pack import: Reports can import `afm-bundle.zip` or `afm-report.json` to hydrate the report queue and clip notes
+- Pack import review: Reports preview clip titles for new/overlap/removed/note-changed buckets before applying import changes
 - Ingest workflow: upload queue, alignment, segment builder, and pipeline status
 - Coach fast clipping: one-tap 10s/20s/45s capture plus custom in/out
 - Role-based access: settings include presets and per-view toggles

@@ -73,6 +73,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Draft Report pack presets (Coach bench vs Analyst room) plus one-click “bench cut” to trim the queue to a short pack.
 - Analyst recent-tag palette (up to 9) with Alt+1..9 hotkeys and local persistence.
 - Reports import undo: one-click “Undo import” restores the pre-import export queue + notes snapshot, warns before overwriting if the queue changed since import, and clearing the imported-pack banner clears the undo snapshot.
+- Reports import review now includes clip-title previews for new/overlap/removed/notes-changed diff buckets before applying import.
 
 ### Changed
 - Ingest now validates segment windows and manual alignment offsets with inline error messaging
@@ -93,6 +94,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Reports import flow now requires explicit review before applying changes to the export queue (prevents accidental queue replacement).
 - Storage utilities now prefer `window.localStorage` (no-op when unavailable) and the UI smoke test uses an in-memory storage stub, eliminating Node WebStorage warnings during verification.
 - Reports export queue now confirms before clearing the queue (prevents accidental loss).
+- Reports import diff utilities now provide deterministic clip-title preview groups for safer operator review and easier regression testing.
 
 ## [0.1.0] - 2026-02-04
 ### Added

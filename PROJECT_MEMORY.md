@@ -41,6 +41,8 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - **Confidence**: High
 
 ## Recent Decisions (Structured)
+- 2026-02-11 | Add clip-title previews to Reports import review modal + deterministic preview utility tests | Import decisions were still counts-only; operators needed concrete examples of what changes before applying replace/append in high-pressure workflows | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/utils/packDiff.test.ts`, `src/ui/web/src/styles.css`, `README.md`; `npm run verify` (pass) | Commit: pending | Confidence: High | Trust: Trusted
+- 2026-02-11 | Bounded market refresh for matchday video tools | Revalidate parity expectations before choosing Cycle 1 work; import safety/review clarity remains a stable table-stakes pattern | Evidence: https://support.catapultsports.com/hc/en-us/articles/14951371895183, https://support.catapultsports.com/hc/en-us/articles/360002587274-Importing-a-database-into-Focus, https://www.hudl.com/releases/sportscode, https://longomatch.com/switching-to-the-new-database-format-in-longomatch-pro-1-3-0 | Commit: n/a | Confidence: Medium | Trust: Untrusted
 - 2026-02-09 | Add in-app hotkey help (`?`) + first-run onboarding tour | Improve first-run comprehension and reduce bench friction; keep the “coach-readable in 5 seconds” bar | Evidence: `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `fb50412` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Strengthen Draft report Share pack with permission presets + expiring links + bundle manifest export | Match table-stakes share workflows (permissioning, expiry, offline handoff) while staying prototype-safe | Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/share.ts`, `src/ui/web/src/utils/share.test.ts`, `src/ui/web/src/styles.css`; `npm test` (pass) | Commit: `c76663e` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Persist Analyst timeline filters + speed up manual tagging (Enter-to-add) | Analysts repeatedly filter by tag/confidence; persistence removes rework and Enter-to-add reduces friction during live review | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/utils/guards.ts`, `src/ui/web/src/utils/guards.test.ts`, `src/ui/web/src/types.ts` | Commit: `aea3334` | Confidence: High | Trust: Trusted
@@ -78,6 +80,13 @@ This file is the evolving memory of the repository: decisions, why they were mad
   Prevention rule: when using fake timers in React tests, advance inside `act()` and prefer role-scoped queries over global text matches for content that can appear in multiple places.
 
 ## Verification Evidence
+- 2026-02-11: `gh issue list --state open --limit 200 --json number,title,author,labels,url` (pass: `[]`, no open trusted-author issues)
+- 2026-02-11: `gh run view 21854594556 --log-failed` (pass: identified historical flaky smoke failure context in `App.smoke.test.tsx`)
+- 2026-02-11: `gh run list --limit 10 --json databaseId,headSha,status,conclusion,workflowName,createdAt,url` (pass: latest CI runs are `success`; only 21854594556 failed historically)
+- 2026-02-11: `npm run typecheck:strict` (pass)
+- 2026-02-11: `npm run test` (pass: 13 files, 47 tests)
+- 2026-02-11: `npm run verify` (pass: typecheck + tests + build)
+- 2026-02-11: `npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` + `curl -I http://127.0.0.1:4173/ | head -n 1` (pass: `HTTP/1.1 200 OK`)
 - `npm run typecheck` (pass)
 - `npm test` (pass)
 - `npm run build` (pass)

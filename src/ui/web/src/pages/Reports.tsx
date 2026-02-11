@@ -28,6 +28,7 @@ import { buildSegmentReport, type SegmentReport } from '../utils/reports';
 import { durationToSeconds, formatDuration } from '../utils/time';
 import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 import {
+  buildPackDiffPreview,
   computePackDiff,
   mergeLabels,
   type PackDiff,
@@ -104,6 +105,17 @@ export const Reports = () => {
   const [importUndo, setImportUndo] = useState<ImportUndoSnapshot | null>(() =>
     loadFromStorageWithGuard(importUndoKey, null, isReportsImportUndoSnapshot)
   );
+  const importPreview = useMemo(() => {
+    if (!pendingImport) {
+      return null;
+    }
+    return buildPackDiffPreview({
+      diff: pendingImport.diff,
+      currentQueue: queue,
+      pack: pendingImport.pack,
+      limit: 5
+    });
+  }, [pendingImport, queue]);
 
   useEffect(() => {
     api.getReports().then(setReports);
@@ -656,6 +668,55 @@ export const Reports = () => {
                   <h4>{pendingImport.diff.overlapNotesChangedIds.length}</h4>
                 </div>
               </div>
+
+              {importPreview ? (
+                <div className="import-preview-grid">
+                  {[
+                    {
+                      key: 'new',
+                      label: 'New clip preview',
+                      group: importPreview.newClips,
+                      empty: 'No new clips in this import.'
+                    },
+                    {
+                      key: 'overlap',
+                      label: 'Overlapping clip preview',
+                      group: importPreview.overlappingClips,
+                      empty: 'No overlapping clips.'
+                    },
+                    {
+                      key: 'removed',
+                      label: 'Removed if replace',
+                      group: importPreview.removedClips,
+                      empty: 'No clips removed in replace mode.'
+                    },
+                    {
+                      key: 'notes',
+                      label: 'Notes changed preview',
+                      group: importPreview.notesChanged,
+                      empty: 'No note conflicts detected.'
+                    }
+                  ].map(({ key, label, group, empty }) => (
+                    <div className="import-preview-card" key={key}>
+                      <p className="eyebrow">{label}</p>
+                      {group.items.length > 0 ? (
+                        <ul className="import-preview-list">
+                          {group.items.map((item) => (
+                            <li key={item.id} title={item.id}>
+                              <span>{item.title}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="muted">{empty}</p>
+                      )}
+                      {group.hasMore ? (
+                        <p className="muted">+{group.total - group.items.length} more…</p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
               <div className="row-card">
                 <div>

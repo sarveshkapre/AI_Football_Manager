@@ -22,6 +22,24 @@ export interface PackDiff {
   overlapNotesChangedIds: string[];
 }
 
+export interface PackDiffPreviewItem {
+  id: string;
+  title: string;
+}
+
+export interface PackDiffPreviewGroup {
+  total: number;
+  hasMore: boolean;
+  items: PackDiffPreviewItem[];
+}
+
+export interface PackDiffPreview {
+  newClips: PackDiffPreviewGroup;
+  overlappingClips: PackDiffPreviewGroup;
+  removedClips: PackDiffPreviewGroup;
+  notesChanged: PackDiffPreviewGroup;
+}
+
 const normalizeLabels = (labels: string[] | undefined) => {
   if (!Array.isArray(labels) || labels.length === 0) {
     return [];
@@ -120,3 +138,70 @@ export const mergeLabels = ({
   existing: string[] | undefined;
   imported: string[] | undefined;
 }) => normalizeLabels([...(existing ?? []), ...(imported ?? [])]);
+
+const buildClipTitleIndex = (clips: Clip[]) => new Map(clips.map((clip) => [clip.id, clip.title]));
+
+const mapIdsToPreviewGroup = ({
+  ids,
+  preferredTitles,
+  fallbackTitles,
+  limit
+}: {
+  ids: string[];
+  preferredTitles: Map<string, string>;
+  fallbackTitles: Map<string, string>;
+  limit: number;
+}): PackDiffPreviewGroup => {
+  const safeLimit = Number.isFinite(limit) ? Math.max(0, Math.trunc(limit)) : 5;
+  const limited = ids.slice(0, safeLimit);
+  return {
+    total: ids.length,
+    hasMore: ids.length > limited.length,
+    items: limited.map((id) => ({
+      id,
+      title: preferredTitles.get(id) ?? fallbackTitles.get(id) ?? id
+    }))
+  };
+};
+
+export const buildPackDiffPreview = ({
+  diff,
+  currentQueue,
+  pack,
+  limit = 5
+}: {
+  diff: PackDiff;
+  currentQueue: Clip[];
+  pack: ImportedReportPack;
+  limit?: number;
+}): PackDiffPreview => {
+  const currentTitles = buildClipTitleIndex(currentQueue);
+  const importedTitles = buildClipTitleIndex(pack.clips);
+
+  return {
+    newClips: mapIdsToPreviewGroup({
+      ids: diff.newClipIds,
+      preferredTitles: importedTitles,
+      fallbackTitles: currentTitles,
+      limit
+    }),
+    overlappingClips: mapIdsToPreviewGroup({
+      ids: diff.overlappingClipIds,
+      preferredTitles: importedTitles,
+      fallbackTitles: currentTitles,
+      limit
+    }),
+    removedClips: mapIdsToPreviewGroup({
+      ids: diff.removedClipIds,
+      preferredTitles: currentTitles,
+      fallbackTitles: importedTitles,
+      limit
+    }),
+    notesChanged: mapIdsToPreviewGroup({
+      ids: diff.overlapNotesChangedIds,
+      preferredTitles: importedTitles,
+      fallbackTitles: currentTitles,
+      limit
+    })
+  };
+};
