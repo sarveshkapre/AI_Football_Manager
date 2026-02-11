@@ -58,6 +58,18 @@ const defaultImportDecision: PackImportDecision = {
   overlapTelestration: 'keep'
 };
 
+const isInputElement = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+  return (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.tagName === 'SELECT' ||
+    target.isContentEditable
+  );
+};
+
 type ImportUndoSnapshot = {
   createdAt: string;
   pack: {
@@ -91,6 +103,7 @@ export const Reports = () => {
   const { strokesByClip, replaceStrokesForClips } = useTelestration();
   const [importStatus, setImportStatus] = useState<string>('');
   const [importBusy, setImportBusy] = useState(false);
+  const [showImportClipPreview, setShowImportClipPreview] = useState(false);
   const [pendingImport, setPendingImport] = useState<{
     pack: ImportedReportPack;
     diff: PackDiff;
@@ -145,6 +158,22 @@ export const Reports = () => {
     load();
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (importBusy || isInputElement(event.target) || event.altKey || event.ctrlKey || event.metaKey) {
+        return;
+      }
+      if (event.key !== 'i' && event.key !== 'I') {
+        return;
+      }
+      event.preventDefault();
+      importInputRef.current?.click();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [importBusy]);
+
   const segmentOptions = useMemo(
     () =>
       segments.map((segment) => ({
@@ -158,6 +187,21 @@ export const Reports = () => {
     const seconds = queue.reduce((sum, clip) => sum + durationToSeconds(clip.duration), 0);
     return formatDuration(seconds);
   }, [queue]);
+
+  const importStatusTone = useMemo<'danger' | 'success' | 'info'>(() => {
+    if (importStatus.startsWith('Import failed') || importStatus.startsWith('Undo failed')) {
+      return 'danger';
+    }
+    if (
+      importStatus.startsWith('Applying') ||
+      importStatus.startsWith('Importing') ||
+      importStatus.startsWith('Review import') ||
+      importStatus.startsWith('Undoing')
+    ) {
+      return 'info';
+    }
+    return 'success';
+  }, [importStatus]);
 
   const generateSegmentReport = () => {
     const segment = segments.find((item) => item.id === selectedSegmentId);
@@ -277,6 +321,7 @@ export const Reports = () => {
 
   const closePendingImport = () => {
     setPendingImport(null);
+    setShowImportClipPreview(false);
     setImportStatus('');
     if (importInputRef.current) {
       importInputRef.current.value = '';
@@ -519,6 +564,7 @@ export const Reports = () => {
         pack
       });
       setPendingImport({ pack, diff, decision: defaultImportDecision });
+      setShowImportClipPreview(false);
       setImportStatus(`Review import: "${pack.title}" (${pack.clips.length} clips).`);
     } catch (error) {
       const message =
@@ -580,9 +626,22 @@ export const Reports = () => {
           />
           <ReportQueue />
           <div className="divider" />
-          <div className="form" style={{ paddingTop: 6 }}>
+          <div className="form" style={{ paddingTop: 6 }} aria-busy={importBusy}>
+            <div className="import-picker-actions">
+              <button
+                className="btn"
+                onClick={() => importInputRef.current?.click()}
+                disabled={importBusy}
+                type="button"
+              >
+                Choose file
+              </button>
+              <p className="muted">
+                Shortcut: <span className="keycap">I</span>
+              </p>
+            </div>
             <label className="field">
-              <span>Import pack</span>
+              <span>Import pack file</span>
               <input
                 ref={importInputRef}
                 type="file"
@@ -595,7 +654,8 @@ export const Reports = () => {
               Import a zip bundle (`afm-bundle.zip`) or report JSON (`afm-report.json`) to hydrate the queue and notes.
             </p>
             {importStatus ? (
-              <p className={`muted ${importStatus.startsWith('Import failed') ? 'danger' : ''}`}>
+              <p className={`status-inline ${importStatusTone}`}>
+                {importBusy ? <span className="status-dot" aria-hidden="true" /> : null}
                 {importStatus}
               </p>
             ) : null}
@@ -669,7 +729,21 @@ export const Reports = () => {
                 </div>
               </div>
 
-              {importPreview ? (
+              <div className="row-card">
+                <div>
+                  <h4>Clip title preview</h4>
+                  <p>Optionally review clip titles before applying this import.</p>
+                </div>
+                <button
+                  className="btn ghost"
+                  type="button"
+                  onClick={() => setShowImportClipPreview((prev) => !prev)}
+                >
+                  {showImportClipPreview ? 'Hide clip lists' : 'Show clip lists'}
+                </button>
+              </div>
+
+              {showImportClipPreview && importPreview ? (
                 <div className="import-preview-grid">
                   {[
                     {
@@ -842,7 +916,7 @@ export const Reports = () => {
                 disabled={importBusy}
                 ref={applyImportRef}
               >
-                Apply import
+                {importBusy ? 'Working...' : 'Apply import'}
               </button>
             </div>
           </>

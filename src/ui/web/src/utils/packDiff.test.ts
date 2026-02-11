@@ -46,7 +46,9 @@ describe('pack diff utils', () => {
       clips: [clip('a')],
       annotations: { a: 'new note' },
       labels: { a: ['Key'] },
-      telestration: { a: [{ id: 's1', tool: 'freehand', color: '#fff', width: 2, points: [{ x: 0.1, y: 0.2 }] }] },
+      telestration: {
+        a: [{ id: 's1', tool: 'freehand', color: '#fff', width: 2, points: [{ x: 0.1, y: 0.2 }] }]
+      },
       source: 'json'
     };
 
@@ -69,28 +71,20 @@ describe('pack diff utils', () => {
     ]);
   });
 
-  it('builds deterministic clip-title previews from the diff groups', () => {
+  it('builds deterministic clip-title previews from diff groups', () => {
     const pack: ImportedReportPack = {
       title: 'Pack',
       notes: '',
       match: 'vs',
       owner: 'Analyst',
-      clips: [
-        clip('b', 'Imported B'),
-        clip('c', 'Imported C'),
-        clip('d', 'Imported D')
-      ],
+      clips: [clip('b', 'Imported B'), clip('c', 'Imported C'), clip('d', 'Imported D')],
       annotations: { b: 'new note' },
       labels: {},
       telestration: {},
       source: 'json'
     };
 
-    const currentQueue = [
-      clip('a', 'Current A'),
-      clip('b', 'Current B'),
-      clip('e', 'Current E')
-    ];
+    const currentQueue = [clip('a', 'Current A'), clip('b', 'Current B'), clip('e', 'Current E')];
 
     const diff = computePackDiff({
       currentQueue,

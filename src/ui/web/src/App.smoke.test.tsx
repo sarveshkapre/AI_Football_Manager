@@ -1,6 +1,6 @@
 /* @vitest-environment happy-dom */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import App from './App';
 import { clearAfmStorage } from './utils/storage';
 
@@ -54,6 +54,7 @@ describe('App smoke', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.useRealTimers();
   });
 
@@ -90,5 +91,32 @@ describe('App smoke', () => {
     await advance(1000);
 
     expect(screen.getByText('Recent reports')).toBeTruthy();
+  });
+
+  it('supports one-step undo for analyst bulk edits', async () => {
+    render(<App />);
+    await advance(2000);
+
+    const firstEvent = screen.getByText('Press trap fails on right').closest('button');
+    const secondEvent = screen.getByText('Overload creates entry').closest('button');
+    expect(firstEvent).not.toBeNull();
+    expect(secondEvent).not.toBeNull();
+
+    fireEvent.click(firstEvent as HTMLButtonElement, { ctrlKey: true });
+    fireEvent.click(secondEvent as HTMLButtonElement, { ctrlKey: true });
+
+    const newTag = 'bulk-undo-check';
+    const taggingPanel = screen.getByText('Manual tagging').closest('.tagging-panel');
+    expect(taggingPanel).not.toBeNull();
+    const panelQueries = within(taggingPanel as HTMLElement);
+
+    fireEvent.change(panelQueries.getByPlaceholderText('Add tag'), {
+      target: { value: newTag }
+    });
+    fireEvent.click(panelQueries.getByRole('button', { name: 'Add tag' }));
+
+    expect(screen.queryAllByText(newTag).length).toBeGreaterThan(0);
+    fireEvent.click(panelQueries.getByRole('button', { name: 'Undo bulk edit' }));
+    expect(screen.queryAllByText(newTag).length).toBe(0);
   });
 });

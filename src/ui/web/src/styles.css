@@ -732,6 +732,76 @@ select {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+.import-picker-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+
+.status-inline.info {
+  color: var(--accent);
+}
+
+.status-inline.success {
+  color: var(--success);
+}
+
+.status-inline.danger {
+  color: var(--danger);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(15, 76, 92, 0.25);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+.import-preview-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.import-preview-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: #fbfcfd;
+  min-height: 128px;
+}
+
+.import-preview-list {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.import-preview-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(222, 217, 209, 0.55);
+}
+
+.import-preview-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .tagging-row {
   display: grid;
   gap: 12px;
@@ -761,6 +831,11 @@ select {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.35);
   color: #fff;
+}
+
+.tagging-actions {
+  display: grid;
+  gap: 8px;
 }
 
 .overlay-controls {
@@ -2082,6 +2157,12 @@ select {
 
   .topbar-actions {
     flex-wrap: wrap;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

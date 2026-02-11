@@ -68,6 +68,18 @@ export const HotkeyHelpModal = ({ open, onClose }: { open: boolean; onClose: () 
               </ul>
             </section>
 
+            {access.reports ? (
+              <section className="hotkey-section">
+                <h4>Reports</h4>
+                <ul className="hotkey-list">
+                  <li className="hotkey-row">
+                    <span>Open import picker</span>
+                    <span className="hotkey-keys">{keycap('I')}</span>
+                  </li>
+                </ul>
+              </section>
+            ) : null}
+
             <section className="hotkey-section">
               <h4>System</h4>
               <ul className="hotkey-list">

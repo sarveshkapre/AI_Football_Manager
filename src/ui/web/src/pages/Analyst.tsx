@@ -32,6 +32,14 @@ interface InsightPack {
   createdAt: string;
 }
 
+interface BulkEditUndoSnapshot {
+  createdAt: string;
+  reason: string;
+  timeline: TimelineEvent[];
+  highlights: Record<string, boolean>;
+  selectedEventIds: string[];
+}
+
 const analystFiltersKey = 'afm.analyst.timelineFilters.v1';
 const recentTagsKey = 'afm.analyst.recentTags.v1';
 const defaultAnalystFilters: AnalystTimelineFilters = {
@@ -84,6 +92,7 @@ export const Analyst = () => {
   const [newTag, setNewTag] = useState('');
   const [removeTag, setRemoveTag] = useState('');
   const [highlights, setHighlights] = useState<Record<string, boolean>>({});
+  const [bulkEditUndo, setBulkEditUndo] = useState<BulkEditUndoSnapshot | null>(null);
   const [recentTags, setRecentTags] = useState<string[]>(() =>
     loadFromStorageWithGuard(recentTagsKey, [], isStringArrayGuard)
   );
@@ -224,13 +233,29 @@ export const Analyst = () => {
     if (selectedTimelineIds.length === 0 || !trimmed) {
       return;
     }
-    setTimeline((prev) =>
-      prev.map((event) =>
-        selectedTimelineIds.includes(event.id) && !event.tags.includes(trimmed)
-          ? { ...event, tags: [...event.tags, trimmed] }
-          : event
-      )
-    );
+    let changed = false;
+    setTimeline((prev) => {
+      const next = prev.map((event) => {
+        if (!selectedTimelineIds.includes(event.id) || event.tags.includes(trimmed)) {
+          return event;
+        }
+        changed = true;
+        return { ...event, tags: [...event.tags, trimmed] };
+      });
+      if (changed && selectedTimelineIds.length > 1) {
+        setBulkEditUndo({
+          createdAt: new Date().toLocaleTimeString(),
+          reason: `Added tag "${trimmed}" to ${selectedTimelineIds.length} events`,
+          timeline: prev,
+          highlights: { ...highlights },
+          selectedEventIds: [...selectedTimelineIds]
+        });
+      }
+      return next;
+    });
+    if (!changed) {
+      return;
+    }
     logEvent(
       'Timeline tag added',
       selectedTimelineIds.length === 1
@@ -246,13 +271,29 @@ export const Analyst = () => {
     if (selectedTimelineIds.length === 0 || !trimmed) {
       return;
     }
-    setTimeline((prev) =>
-      prev.map((event) =>
-        selectedTimelineIds.includes(event.id) && event.tags.includes(trimmed)
-          ? { ...event, tags: event.tags.filter((entry) => entry !== trimmed) }
-          : event
-      )
-    );
+    let changed = false;
+    setTimeline((prev) => {
+      const next = prev.map((event) => {
+        if (!selectedTimelineIds.includes(event.id) || !event.tags.includes(trimmed)) {
+          return event;
+        }
+        changed = true;
+        return { ...event, tags: event.tags.filter((entry) => entry !== trimmed) };
+      });
+      if (changed && selectedTimelineIds.length > 1) {
+        setBulkEditUndo({
+          createdAt: new Date().toLocaleTimeString(),
+          reason: `Removed tag "${trimmed}" from ${selectedTimelineIds.length} events`,
+          timeline: prev,
+          highlights: { ...highlights },
+          selectedEventIds: [...selectedTimelineIds]
+        });
+      }
+      return next;
+    });
+    if (!changed) {
+      return;
+    }
     logEvent(
       'Timeline tag removed',
       selectedTimelineIds.length === 1
@@ -265,11 +306,27 @@ export const Analyst = () => {
     if (selectedTimelineIds.length === 0) {
       return;
     }
+    let changed = false;
     setHighlights((prev) => {
       const shouldMark = selectedTimelineIds.some((id) => !prev[id]);
       const next = { ...prev };
       for (const id of selectedTimelineIds) {
+        if (next[id] !== shouldMark) {
+          changed = true;
+        }
         next[id] = shouldMark;
+      }
+      if (!changed) {
+        return prev;
+      }
+      if (selectedTimelineIds.length > 1) {
+        setBulkEditUndo({
+          createdAt: new Date().toLocaleTimeString(),
+          reason: `${shouldMark ? 'Marked' : 'Unmarked'} highlight on ${selectedTimelineIds.length} events`,
+          timeline: [...timeline],
+          highlights: { ...prev },
+          selectedEventIds: [...selectedTimelineIds]
+        });
       }
       logEvent(
         'Timeline highlight',
@@ -279,6 +336,18 @@ export const Analyst = () => {
       );
       return next;
     });
+  };
+
+  const undoBulkEdit = () => {
+    if (!bulkEditUndo) {
+      return;
+    }
+    setTimeline(bulkEditUndo.timeline);
+    setHighlights(bulkEditUndo.highlights);
+    setSelectedEventIds(bulkEditUndo.selectedEventIds);
+    setPrimaryEventId(bulkEditUndo.selectedEventIds[0] ?? null);
+    logEvent('Timeline bulk edit undone', bulkEditUndo.reason);
+    setBulkEditUndo(null);
   };
 
   useEffect(() => {
@@ -624,6 +693,16 @@ export const Analyst = () => {
             <p className="muted" style={{ margin: 0 }}>
               Hotkeys: <span className="keycap">Alt</span> + <span className="keycap">1</span>...<span className="keycap">9</span>
             </p>
+            <div className="tagging-actions">
+              <button className="btn ghost" onClick={undoBulkEdit} disabled={!bulkEditUndo}>
+                Undo bulk edit
+              </button>
+              {bulkEditUndo ? (
+                <p className="muted">Last bulk edit ({bulkEditUndo.createdAt}): {bulkEditUndo.reason}</p>
+              ) : (
+                <p className="muted">Undo becomes available after a multi-select bulk edit.</p>
+              )}
+            </div>
           </div>
         </div>
 
