@@ -41,7 +41,7 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - **Confidence**: High
 
 ## Recent Decisions (Structured)
-- 2026-02-11 | Add clip-title previews to Reports import review modal + deterministic preview utility tests | Import decisions were still counts-only; operators needed concrete examples of what changes before applying replace/append in high-pressure workflows | Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/utils/packDiff.test.ts`, `src/ui/web/src/styles.css`, `README.md`; `npm run verify` (pass) | Commit: `bdef607` | Confidence: High | Trust: Trusted
+- 2026-02-11 | Add analyst bulk-edit undo + import-review operator safety UX (optional title previews, `I` hotkey, clearer busy statuses) | Multi-select edits and pack imports are high-frequency operations where accidental actions are costly; one-step recovery and clearer pre-apply review reduce matchday risk | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/utils/packDiff.test.ts`, `src/ui/web/src/App.smoke.test.tsx`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `efe9f07` | Confidence: High | Trust: Trusted
 - 2026-02-11 | Bounded market refresh for matchday video tools | Revalidate parity expectations before choosing Cycle 1 work; import safety/review clarity remains a stable table-stakes pattern | Evidence: https://support.catapultsports.com/hc/en-us/articles/14951371895183, https://support.catapultsports.com/hc/en-us/articles/360002587274-Importing-a-database-into-Focus, https://www.hudl.com/releases/sportscode, https://longomatch.com/switching-to-the-new-database-format-in-longomatch-pro-1-3-0 | Commit: n/a | Confidence: Medium | Trust: Untrusted
 - 2026-02-09 | Add in-app hotkey help (`?`) + first-run onboarding tour | Improve first-run comprehension and reduce bench friction; keep the “coach-readable in 5 seconds” bar | Evidence: `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `fb50412` | Confidence: High | Trust: Trusted
 - 2026-02-09 | Strengthen Draft report Share pack with permission presets + expiring links + bundle manifest export | Match table-stakes share workflows (permissioning, expiry, offline handoff) while staying prototype-safe | Evidence: `src/ui/web/src/pages/DraftReport.tsx`, `src/ui/web/src/utils/share.ts`, `src/ui/web/src/utils/share.test.ts`, `src/ui/web/src/styles.css`; `npm test` (pass) | Commit: `c76663e` | Confidence: High | Trust: Trusted
@@ -78,6 +78,10 @@ This file is the evolving memory of the repository: decisions, why they were mad
   Root cause: advancing fake timers outside React `act()` and relying on unscoped `getByText()` queries made the test timing-sensitive and vulnerable to duplicate text nodes (timeline vs modal header).
   Fix: wrap timer advancement in `act()`, clear storage via `localStorage.clear()`, retry the timeline lookup with bounded advances, and assert on the modal header via role/level.
   Prevention rule: when using fake timers in React tests, advance inside `act()` and prefer role-scoped queries over global text matches for content that can appear in multiple places.
+- New smoke coverage for bulk-edit undo initially failed due ambiguous text/placeholder selectors and persistent DOM between tests.
+  Root cause: test queries were not scoped to the Analyst tagging panel, and cleanup was not explicit between smoke test cases.
+  Fix: scope queries with `within(taggingPanel)`, assert via `queryAllByText` for repeated labels, and call `cleanup()` in `afterEach`.
+  Prevention rule: in UI smoke tests, always scope interactions to the nearest feature container and assume common labels can appear multiple times across the app shell.
 
 ## Verification Evidence
 - 2026-02-11: `gh issue list --state open --limit 200 --json number,title,author,labels,url` (pass: `[]`, no open trusted-author issues)
@@ -101,6 +105,6 @@ This file is the evolving memory of the repository: decisions, why they were mad
 
 ## Gap Map (Cycle 1)
 - Missing (parity): telestration/drawing tools on clips; zip-style export bundles for offline sharing; invite/collaboration entrypoint beyond a stub button.
-- Weak (parity): safe report-pack import ergonomics (now has explicit review + overlap policies + one-step undo, but lacks clip-level preview and multi-step history); analyst tagging speed/keyboard depth (improved with Enter-to-add, multi-select bulk actions, and recent-tag hotkeys; still lacks true live-capture tagging ergonomics and shared timelines).
+- Weak (parity): safe report-pack import ergonomics (now has explicit review + overlap policies + clip-title previews + one-step undo, but lacks multi-step history and hard size guardrails); analyst tagging speed/keyboard depth (improved with Enter-to-add, multi-select bulk actions, recent-tag hotkeys, and one-step bulk undo; still lacks true live-capture tagging ergonomics and shared timelines).
 - Parity (improving): permissioned share flows (now has presets + expiry + manifest, but no server-backed revocation/audit).
 - Differentiator candidates: confidence-gated “evidence-first” recommendations with coach/analyst dual surfaces and fast pack generation.

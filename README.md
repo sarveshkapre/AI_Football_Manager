@@ -61,6 +61,7 @@ Start here: `docs/PRD.md`.
 - Vite root is set to `src/ui/web`
 - Navigate using hash routes: `#ingest`, `#coach`, `#analyst`, `#library`, `#reports`, `#settings`
 - Keyboard shortcuts: `U` Ingest, `C` Coach, `A` Analyst, `L` Library, `R` Reports, `/` search library, `?` hotkeys/help
+- Reports shortcut: `I` opens the import pack picker when viewing Reports
 - Draft report route: `#draft`
 - Export mock: draft report page can download JSON/CSV for the current queue
 - Draft cover preview: draft report page includes a presentation cover panel

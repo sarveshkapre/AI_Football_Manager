@@ -33,3 +33,14 @@ This file captures real failures, root-cause analysis, and prevention rules.
   - Prefer role-based, scoped queries (modal heading) over global `getByText()` for content that can appear in multiple places.
   - Treat CI-only failures as flakiness until proven otherwise; add bounded retries or deterministic flushing to eliminate timing sensitivity.
 - **Evidence**: failing run `gh run watch 21854594556 --exit-status` (failed), fix commit `894fe6b`, succeeding run `gh run watch 21854691755 --exit-status` (pass), `npm run verify` (pass).
+
+- **Date**: 2026-02-11
+- **Summary**: New smoke coverage for Analyst bulk-edit undo initially failed due ambiguous selectors and repeated text nodes.
+- **Impact**: Local verification failed; risk of reintroducing flaky CI if assertions remain global and non-scoped.
+- **Root cause**: Test used global `getByText`/`getByPlaceholderText` on labels that appear in multiple UI regions and did not explicitly clean DOM between cases.
+- **Fix**: Scoped the test to `.tagging-panel` with `within(...)`, switched to `queryAllByText` where duplicates are expected, and added explicit `cleanup()` in `afterEach`.
+- **Prevention rule(s)**:
+  - Scope smoke-test selectors to the closest feature container; avoid global selectors for reused labels.
+  - Use `queryAllBy*` for intentionally repeated text and assert counts/deltas rather than uniqueness.
+  - Add explicit cleanup in smoke suites when multiple integration cases run in the same file.
+- **Evidence**: `src/ui/web/src/App.smoke.test.tsx`, `npm test` (pass), `npm run verify` (pass).

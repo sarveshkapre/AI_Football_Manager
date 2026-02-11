@@ -8,32 +8,38 @@
 
 ## Candidate Features To Do
 Selected (This session)
-- [x] P1 - Reports import review: show clip-title previews for New / Overlap / Removed / Notes-changed groups before apply, with compact counts-first UX. (Impact 5, Effort 3, Fit 5, Diff 1, Risk 2, Confidence 4)
-- [x] P2 - Reliability: add deterministic unit tests for import preview diff semantics and ordering stability. (Impact 4, Effort 2, Fit 5, Diff 0, Risk 1, Confidence 5)
+- [x] P1 - Analyst: add one-step “Undo bulk edit” for multi-select tag/highlight changes so operators can safely recover from accidental bulk actions. (Impact 5, Effort 3, Fit 5, Diff 1, Risk 2, Confidence 4)
+- [x] P1 - Reports: extend import review to optionally show clip-title previews for new, overlapping, removed, and notes-changed clips before apply. (Impact 4, Effort 2, Fit 5, Diff 0, Risk 1, Confidence 5)
+- [x] P2 - Reports UX: add import hotkey (`I`) plus explicit busy/status affordances for longer pack imports. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
+- [x] P2 - Reliability: add deterministic unit coverage for import preview group mapping and overflow semantics. (Impact 4, Effort 2, Fit 5, Diff 0, Risk 1, Confidence 5)
 
 Selected (Next session)
 - [ ] P2 - Reliability: add a happy-dom integration smoke that imports a pack in Reports and verifies Undo import restores queue + notes state. (Impact 4, Effort 4, Fit 5, Diff 0, Risk 3, Confidence 3)
 - [ ] P2 - Performance: debounce high-frequency telestration persistence writes to reduce localStorage churn during drawing-heavy sessions. (Impact 4, Effort 4, Fit 4, Diff 0, Risk 3, Confidence 3)
-- [ ] P2 - Analyst workflow: single-step undo for bulk tag/highlight operations. (Impact 4, Effort 4, Fit 4, Diff 1, Risk 3, Confidence 3)
+- [ ] P2 - Reports import safety: hard-limit import file size and clip count with explicit operator override copy to prevent accidental huge local imports. (Impact 4, Effort 2, Fit 5, Diff 0, Risk 2, Confidence 4)
 
 Backlog
-- [ ] P2 - Reports import safety: hard-limit import file size and clip count with explicit operator override copy to prevent accidental huge local imports. (Impact 4, Effort 2, Fit 5, Diff 0, Risk 2, Confidence 4)
 - [ ] P2 - Reports import clarity: optional “show all clip titles” drawer for each diff bucket (new/overlap/removed/notes changed). (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
-- [ ] P2 - Reports UX: add “focus import picker” hotkey in Reports and expose it in hotkey help. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
 - [ ] P2 - Reports reliability: detect duplicate clip IDs inside imported packs and surface actionable conflict messaging. (Impact 4, Effort 3, Fit 5, Diff 0, Risk 2, Confidence 4)
+- [ ] P2 - Reports data hygiene: surface explicit “append skipped duplicates” count after import apply. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
+- [ ] P3 - Analyst workflow: add keyboard shortcut for bulk highlight toggle on selected timeline events. (Impact 2, Effort 1, Fit 4, Diff 0, Risk 1, Confidence 4)
+- [ ] P3 - Analyst: add timeline filter presets (save/apply/delete) for recurring matchday review patterns. (Impact 3, Effort 3, Fit 4, Diff 1, Risk 2, Confidence 3)
 - [ ] P3 - Reports import undo: promote to bounded multi-step history (last 3 imports) with explicit memory cap. (Impact 3, Effort 4, Fit 4, Diff 1, Risk 3, Confidence 2)
+- [ ] P3 - Reports: refactor import/apply/undo logic into a dedicated hook to reduce page-component complexity and regression risk. (Impact 3, Effort 3, Fit 4, Diff 0, Risk 2, Confidence 3)
+- [ ] P3 - Security: validate import JSON schema version and reject unknown future major versions with clear upgrade guidance. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
+- [ ] P3 - Accessibility: add ARIA live region announcements for import success/failure/undo states. (Impact 2, Effort 2, Fit 3, Diff 0, Risk 1, Confidence 4)
 - [ ] P3 - QA: add Playwright browser smoke for import review modal open/apply/cancel and queue visibility. (Impact 3, Effort 4, Fit 4, Diff 0, Risk 3, Confidence 3)
 - [ ] P3 - CI hardening: add optional `npm run typecheck:strict` gate on CI or nightly workflow to catch maintenance drift earlier. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 2, Confidence 4)
-- [ ] P3 - DX: split import-apply side effects into a pure helper to improve testability and reduce risk in `Reports.tsx`. (Impact 3, Effort 3, Fit 4, Diff 0, Risk 2, Confidence 3)
-- [ ] P3 - Security hygiene: validate import JSON schema version and reject unknown future major versions with clear upgrade guidance. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
 - [ ] P3 - Presentation parity: allow pinning Coach cards and auto-queueing pinned cards into Draft Report. (Impact 3, Effort 4, Fit 4, Diff 2, Risk 3, Confidence 2)
-- [ ] P3 - Reports UX: add long-import status affordances (progress steps + success/error summary card). (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
-- [ ] P3 - Reports data hygiene: surface explicit “append skipped duplicates” count after import apply. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
-- [ ] P3 - Reports export safety: add confirmation and optional snapshot before “replace queue” import apply. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
-- [ ] P3 - Reliability: add a smoke check for backup/restore + report queue hydration interaction to prevent cross-feature regressions. (Impact 3, Effort 3, Fit 4, Diff 0, Risk 2, Confidence 3)
-- [ ] P4 - Analyst collaboration: draft local “shared timeline” simulation stub (read-only events feed) to prepare for V2 real-time workflows. (Impact 2, Effort 4, Fit 3, Diff 2, Risk 3, Confidence 2)
+- [ ] P3 - DX: add `npm run smoke` script to automate local preview + HTTP 200 verification for quick release confidence. (Impact 2, Effort 1, Fit 4, Diff 0, Risk 1, Confidence 5)
+- [ ] P4 - Documentation: trim README to a true 1–2 screen overview and move long feature bullets into dedicated docs pages. (Impact 2, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
+- [ ] P4 - Reliability: add lightweight telemetry for uncaught promise rejections in UI to improve post-failure diagnosis. (Impact 2, Effort 2, Fit 3, Diff 0, Risk 2, Confidence 3)
+- [ ] P4 - UX: add “recently imported packs” history list with timestamp/source for operator recall across sessions. (Impact 2, Effort 3, Fit 3, Diff 0, Risk 2, Confidence 3)
+- [ ] P4 - Data quality: add report queue duplicate-intent hints (same title/duration) before export. (Impact 2, Effort 2, Fit 3, Diff 0, Risk 1, Confidence 3)
 
 ## Implemented
+- [x] 2026-02-11 - Analyst bulk-edit safety: added one-step “Undo bulk edit” for multi-select timeline tag/highlight operations, plus tighter no-op guarding so unchanged bulk actions do not emit misleading audit events. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/App.smoke.test.tsx`; `npm run verify` (pass).
+- [x] 2026-02-11 - Reports import UX polish: added `I` hotkey to open import picker, clearer import busy/status messaging, and surfaced the shortcut in hotkey help. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/styles.css`; `npm run verify` (pass).
 - [x] 2026-02-11 - Reports import review now shows clip-title previews for new/overlap/removed/notes-changed buckets (counts-first + compact lists), reducing operator ambiguity before apply. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass).
 - [x] 2026-02-11 - Reliability: added deterministic unit coverage for import preview group mapping and overflow semantics. Evidence: `src/ui/web/src/utils/packDiff.test.ts`; `npm run test` (pass).
 - [x] 2026-02-10 - Settings backup/restore: added a versioned JSON backup of all `afm.*` localStorage keys plus a restore flow that overwrites AFM local data and reloads to rehydrate state. Evidence: `src/ui/web/src/utils/backup.ts`, `src/ui/web/src/utils/backup.test.ts`, `src/ui/web/src/pages/Settings.tsx`; `npm run verify` (pass).
