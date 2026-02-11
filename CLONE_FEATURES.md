@@ -8,6 +8,7 @@
 
 ## Candidate Features To Do
 Selected (This session)
+- [x] P2 - Reports architecture cleanup: extract import/apply/undo state machine into `useReportImportFlow` with pure helper utilities, preserving behavior while reducing page complexity. (Impact 4, Effort 3, Fit 5, Diff 0, Risk 2, Confidence 4)
 - [x] P1 - Analyst: add one-step “Undo bulk edit” for multi-select tag/highlight changes so operators can safely recover from accidental bulk actions. (Impact 5, Effort 3, Fit 5, Diff 1, Risk 2, Confidence 4)
 - [x] P1 - Reports: extend import review to optionally show clip-title previews for new, overlapping, removed, and notes-changed clips before apply. (Impact 4, Effort 2, Fit 5, Diff 0, Risk 1, Confidence 5)
 - [x] P2 - Reports UX: add import hotkey (`I`) plus explicit busy/status affordances for longer pack imports. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
@@ -25,7 +26,6 @@ Backlog
 - [ ] P3 - Analyst workflow: add keyboard shortcut for bulk highlight toggle on selected timeline events. (Impact 2, Effort 1, Fit 4, Diff 0, Risk 1, Confidence 4)
 - [ ] P3 - Analyst: add timeline filter presets (save/apply/delete) for recurring matchday review patterns. (Impact 3, Effort 3, Fit 4, Diff 1, Risk 2, Confidence 3)
 - [ ] P3 - Reports import undo: promote to bounded multi-step history (last 3 imports) with explicit memory cap. (Impact 3, Effort 4, Fit 4, Diff 1, Risk 3, Confidence 2)
-- [ ] P3 - Reports: refactor import/apply/undo logic into a dedicated hook to reduce page-component complexity and regression risk. (Impact 3, Effort 3, Fit 4, Diff 0, Risk 2, Confidence 3)
 - [ ] P3 - Security: validate import JSON schema version and reject unknown future major versions with clear upgrade guidance. (Impact 3, Effort 2, Fit 4, Diff 0, Risk 1, Confidence 4)
 - [ ] P3 - Accessibility: add ARIA live region announcements for import success/failure/undo states. (Impact 2, Effort 2, Fit 3, Diff 0, Risk 1, Confidence 4)
 - [ ] P3 - QA: add Playwright browser smoke for import review modal open/apply/cancel and queue visibility. (Impact 3, Effort 4, Fit 4, Diff 0, Risk 3, Confidence 3)
@@ -38,6 +38,7 @@ Backlog
 - [ ] P4 - Data quality: add report queue duplicate-intent hints (same title/duration) before export. (Impact 2, Effort 2, Fit 3, Diff 0, Risk 1, Confidence 3)
 
 ## Implemented
+- [x] 2026-02-11 - Reports cleanup refactor: moved import/apply/undo/banner logic out of `Reports.tsx` into `useReportImportFlow`, plus extracted deterministic helper utilities for queue-id/write-set/snapshot behavior and added focused tests. Evidence: `src/ui/web/src/hooks/useReportImportFlow.ts`, `src/ui/web/src/utils/reportImportFlow.ts`, `src/ui/web/src/utils/reportImportFlow.test.ts`, `src/ui/web/src/pages/Reports.tsx`; `npm run verify` (pass).
 - [x] 2026-02-11 - Analyst bulk-edit safety: added one-step “Undo bulk edit” for multi-select timeline tag/highlight operations, plus tighter no-op guarding so unchanged bulk actions do not emit misleading audit events. Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/App.smoke.test.tsx`; `npm run verify` (pass).
 - [x] 2026-02-11 - Reports import UX polish: added `I` hotkey to open import picker, clearer import busy/status messaging, and surfaced the shortcut in hotkey help. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/styles.css`; `npm run verify` (pass).
 - [x] 2026-02-11 - Reports import review now shows clip-title previews for new/overlap/removed/notes-changed buckets (counts-first + compact lists), reducing operator ambiguity before apply. Evidence: `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass).

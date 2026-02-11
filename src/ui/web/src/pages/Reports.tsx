@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/mock';
 import { AuditLog } from '../components/AuditLog';
 import { EngagementStream } from '../components/EngagementStream';
@@ -11,82 +11,22 @@ import { useReportContext } from '../context/ReportContext';
 import type { Clip, Recommendation, ReportItem, Segment, TimelineEvent } from '../types';
 import { useAnnotations } from '../context/AnnotationsContext';
 import { useLabels } from '../context/LabelsContext';
-import { useTelestration, type TelestrationMap } from '../context/TelestrationContext';
+import { useTelestration } from '../context/TelestrationContext';
 import {
   buildEvidencePackage,
   buildPresentationHtml,
   downloadFile,
   openHtmlPreview
 } from '../utils/export';
-import { importReportPackFromFile, PackImportError } from '../utils/import';
-import {
-  isNullableString,
-  isReportsImportUndoSnapshot,
-  isReportsLastImportMeta
-} from '../utils/guards';
+import { isNullableString } from '../utils/guards';
 import { buildSegmentReport, type SegmentReport } from '../utils/reports';
 import { durationToSeconds, formatDuration } from '../utils/time';
 import { loadFromStorageWithGuard, saveToStorage } from '../utils/storage';
 import {
-  buildPackDiffPreview,
-  computePackDiff,
-  mergeLabels,
-  type PackDiff,
-  type PackImportDecision,
   type PackOverlapLabelsPolicy,
   type PackOverlapNotePolicy
 } from '../utils/packDiff';
-import type { ImportedReportPack } from '../utils/import';
-
-type LastImportMeta = {
-  title: string;
-  notes: string;
-  match: string;
-  owner: string;
-  source: 'json' | 'zip';
-  clipCount: number;
-  importedAt: string;
-};
-
-const lastImportKey = 'afm.reports.lastImport.v1';
-const importUndoKey = 'afm.reports.importUndo.v1';
-
-const defaultImportDecision: PackImportDecision = {
-  strategy: 'replace',
-  overlapLabels: 'merge',
-  overlapAnnotations: 'keep',
-  overlapTelestration: 'keep'
-};
-
-const isInputElement = (target: EventTarget | null) => {
-  if (!(target instanceof HTMLElement)) {
-    return false;
-  }
-  return (
-    target.tagName === 'INPUT' ||
-    target.tagName === 'TEXTAREA' ||
-    target.tagName === 'SELECT' ||
-    target.isContentEditable
-  );
-};
-
-type ImportUndoSnapshot = {
-  createdAt: string;
-  pack: {
-    title: string;
-    match: string;
-    owner: string;
-    source: 'json' | 'zip';
-    clipCount: number;
-  };
-  affectedClipIds: string[];
-  postImportQueueIds?: string[];
-  previousQueue: Clip[];
-  previousLabels: Record<string, string[]>;
-  previousAnnotations: Record<string, string>;
-  previousTelestration: TelestrationMap;
-  previousLastImportMeta: LastImportMeta | null;
-};
+import { useReportImportFlow } from '../hooks/useReportImportFlow';
 
 export const Reports = () => {
   const [reports, setReports] = useState<ReportItem[]>([]);
@@ -101,34 +41,37 @@ export const Reports = () => {
   const { annotations, replaceAnnotationsForClips } = useAnnotations();
   const { labels, replaceLabelsForClips } = useLabels();
   const { strokesByClip, replaceStrokesForClips } = useTelestration();
-  const [importStatus, setImportStatus] = useState<string>('');
-  const [importBusy, setImportBusy] = useState(false);
-  const [showImportClipPreview, setShowImportClipPreview] = useState(false);
-  const [pendingImport, setPendingImport] = useState<{
-    pack: ImportedReportPack;
-    diff: PackDiff;
-    decision: PackImportDecision;
-  } | null>(null);
   const importTitleId = useModalTitleId();
-  const applyImportRef = useRef<HTMLButtonElement | null>(null);
-  const importInputRef = useRef<HTMLInputElement | null>(null);
-  const [lastImportMeta, setLastImportMeta] = useState<LastImportMeta | null>(() =>
-    loadFromStorageWithGuard(lastImportKey, null, isReportsLastImportMeta)
-  );
-  const [importUndo, setImportUndo] = useState<ImportUndoSnapshot | null>(() =>
-    loadFromStorageWithGuard(importUndoKey, null, isReportsImportUndoSnapshot)
-  );
-  const importPreview = useMemo(() => {
-    if (!pendingImport) {
-      return null;
-    }
-    return buildPackDiffPreview({
-      diff: pendingImport.diff,
-      currentQueue: queue,
-      pack: pendingImport.pack,
-      limit: 5
-    });
-  }, [pendingImport, queue]);
+  const {
+    applyImportRef,
+    importInputRef,
+    importStatus,
+    importStatusTone,
+    importBusy,
+    showImportClipPreview,
+    setShowImportClipPreview,
+    pendingImport,
+    setPendingImport,
+    importPreview,
+    lastImportMeta,
+    importUndo,
+    onImportFile,
+    closePendingImport,
+    applyPendingImport,
+    undoLastImport,
+    clearImportedPackBanner
+  } = useReportImportFlow({
+    queue,
+    setQueue,
+    enqueueClips,
+    labels,
+    annotations,
+    strokesByClip,
+    replaceLabelsForClips,
+    replaceAnnotationsForClips,
+    replaceStrokesForClips,
+    logEvent
+  });
 
   useEffect(() => {
     api.getReports().then(setReports);
@@ -158,22 +101,6 @@ export const Reports = () => {
     load();
   }, []);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (importBusy || isInputElement(event.target) || event.altKey || event.ctrlKey || event.metaKey) {
-        return;
-      }
-      if (event.key !== 'i' && event.key !== 'I') {
-        return;
-      }
-      event.preventDefault();
-      importInputRef.current?.click();
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [importBusy]);
-
   const segmentOptions = useMemo(
     () =>
       segments.map((segment) => ({
@@ -187,21 +114,6 @@ export const Reports = () => {
     const seconds = queue.reduce((sum, clip) => sum + durationToSeconds(clip.duration), 0);
     return formatDuration(seconds);
   }, [queue]);
-
-  const importStatusTone = useMemo<'danger' | 'success' | 'info'>(() => {
-    if (importStatus.startsWith('Import failed') || importStatus.startsWith('Undo failed')) {
-      return 'danger';
-    }
-    if (
-      importStatus.startsWith('Applying') ||
-      importStatus.startsWith('Importing') ||
-      importStatus.startsWith('Review import') ||
-      importStatus.startsWith('Undoing')
-    ) {
-      return 'info';
-    }
-    return 'success';
-  }, [importStatus]);
 
   const generateSegmentReport = () => {
     const segment = segments.find((item) => item.id === selectedSegmentId);
@@ -317,276 +229,6 @@ export const Reports = () => {
     });
     openHtmlPreview(html);
     logEvent('Broadcast pack previewed', `${queue.length} clips`);
-  };
-
-  const closePendingImport = () => {
-    setPendingImport(null);
-    setShowImportClipPreview(false);
-    setImportStatus('');
-    if (importInputRef.current) {
-      importInputRef.current.value = '';
-    }
-  };
-
-  const clearImportUndo = () => {
-    setImportUndo(null);
-    saveToStorage(importUndoKey, null);
-  };
-
-  const undoLastImport = () => {
-    if (!importUndo || importBusy) {
-      return;
-    }
-
-    const currentQueueIds = queue.map((clip) => clip.id);
-    const expectedQueueIds = importUndo.postImportQueueIds;
-    const arraysEqual = (a: string[], b: string[]) =>
-      a.length === b.length && a.every((value, idx) => value === b[idx]);
-
-    if (!expectedQueueIds || !arraysEqual(expectedQueueIds, currentQueueIds)) {
-      const ok = window.confirm(
-        'Your export queue changed since the last import. Undo will overwrite the current queue and restore the pre-import state. Continue?'
-      );
-      if (!ok) {
-        return;
-      }
-    }
-
-    setImportBusy(true);
-    setImportStatus('Undoing import...');
-    try {
-      setQueue(importUndo.previousQueue);
-
-      const affected = importUndo.affectedClipIds;
-      replaceLabelsForClips(affected, importUndo.previousLabels);
-      replaceAnnotationsForClips(affected, importUndo.previousAnnotations);
-      replaceStrokesForClips(affected, importUndo.previousTelestration);
-
-      setLastImportMeta(importUndo.previousLastImportMeta);
-      saveToStorage(lastImportKey, importUndo.previousLastImportMeta);
-
-      clearImportUndo();
-      setImportStatus('Import undone.');
-      logEvent('Pack import undone', importUndo.pack.title);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : typeof error === 'string'
-            ? error
-            : 'Unknown undo error';
-      setImportStatus(`Undo failed: ${message}`);
-      logEvent('Pack import undo failed', message);
-    } finally {
-      setImportBusy(false);
-    }
-  };
-
-  const applyPendingImport = () => {
-    if (!pendingImport || importBusy) {
-      return;
-    }
-
-    const { pack, diff, decision } = pendingImport;
-    const currentQueueIds = new Set(queue.map((clip) => clip.id));
-    const importedIds = new Set(pack.clips.map((clip) => clip.id));
-
-    setImportBusy(true);
-    setImportStatus('Applying import...');
-    try {
-      const previousQueueIds = queue.map((clip) => clip.id);
-      const postImportQueueIds =
-        decision.strategy === 'replace'
-          ? pack.clips.map((clip) => clip.id)
-          : (() => {
-              const existing = new Set(previousQueueIds);
-              const next = [...previousQueueIds];
-              pack.clips.forEach((clip) => {
-                if (!existing.has(clip.id)) {
-                  next.push(clip.id);
-                  existing.add(clip.id);
-                }
-              });
-              return next;
-            })();
-
-      const affectedClipIds = Array.from(new Set([...diff.newClipIds, ...diff.overlappingClipIds]));
-      const snapshot: ImportUndoSnapshot = {
-        createdAt: new Date().toISOString(),
-        pack: {
-          title: pack.title,
-          match: pack.match,
-          owner: pack.owner,
-          source: pack.source,
-          clipCount: pack.clips.length
-        },
-        affectedClipIds,
-        postImportQueueIds,
-        previousQueue: queue,
-        previousLabels: Object.fromEntries(
-          affectedClipIds.map((clipId) => [clipId, labels[clipId] ?? []])
-        ),
-        previousAnnotations: Object.fromEntries(
-          affectedClipIds.map((clipId) => [clipId, annotations[clipId] ?? ''])
-        ),
-        previousTelestration: Object.fromEntries(
-          affectedClipIds.map((clipId) => [clipId, strokesByClip[clipId] ?? []])
-        ),
-        previousLastImportMeta: lastImportMeta
-      };
-      setImportUndo(snapshot);
-      saveToStorage(importUndoKey, snapshot);
-
-      if (decision.strategy === 'replace') {
-        setQueue(pack.clips);
-      } else {
-        // Append clips in pack order; enqueueClips will skip duplicates.
-        enqueueClips(pack.clips);
-      }
-
-      const overlapIds = diff.overlappingClipIds;
-      const newIds = diff.newClipIds;
-
-      const labelIds: string[] = [];
-      const nextLabels: Record<string, string[]> = {};
-
-      const annotationIds: string[] = [];
-      const nextAnnotations: Record<string, string> = {};
-
-      const telestrationIds: string[] = [];
-      const nextTelestration = {} as typeof pack.telestration;
-
-      const includeOverlapLabels = (policy: PackOverlapLabelsPolicy) =>
-        policy === 'merge' || policy === 'replace';
-      const includeOverlapNotes = (policy: PackOverlapNotePolicy) => policy === 'replace';
-
-      // New clips always take the imported notes (including clearing stale local notes).
-      newIds.forEach((clipId) => {
-        labelIds.push(clipId);
-        nextLabels[clipId] = pack.labels[clipId] ?? [];
-
-        annotationIds.push(clipId);
-        nextAnnotations[clipId] = pack.annotations[clipId] ?? '';
-
-        telestrationIds.push(clipId);
-        nextTelestration[clipId] = pack.telestration[clipId] ?? [];
-      });
-
-      // Overlapping clips are policy-controlled.
-      if (overlapIds.length > 0) {
-        if (includeOverlapLabels(decision.overlapLabels)) {
-          overlapIds.forEach((clipId) => {
-            labelIds.push(clipId);
-            if (decision.overlapLabels === 'merge') {
-              nextLabels[clipId] = mergeLabels({
-                existing: labels[clipId],
-                imported: pack.labels[clipId]
-              });
-              return;
-            }
-            nextLabels[clipId] = pack.labels[clipId] ?? [];
-          });
-        }
-
-        if (includeOverlapNotes(decision.overlapAnnotations)) {
-          overlapIds.forEach((clipId) => {
-            annotationIds.push(clipId);
-            nextAnnotations[clipId] = pack.annotations[clipId] ?? '';
-          });
-        }
-
-        if (includeOverlapNotes(decision.overlapTelestration)) {
-          overlapIds.forEach((clipId) => {
-            telestrationIds.push(clipId);
-            nextTelestration[clipId] = pack.telestration[clipId] ?? [];
-          });
-        }
-      }
-
-      replaceLabelsForClips(labelIds, nextLabels);
-      replaceAnnotationsForClips(annotationIds, nextAnnotations);
-      replaceStrokesForClips(telestrationIds, nextTelestration);
-
-      const meta: LastImportMeta = {
-        title: pack.title,
-        notes: pack.notes,
-        match: pack.match,
-        owner: pack.owner,
-        source: pack.source,
-        clipCount: pack.clips.length,
-        importedAt: new Date().toLocaleString()
-      };
-      setLastImportMeta(meta);
-      saveToStorage(lastImportKey, meta);
-
-      const strategyLabel = decision.strategy === 'replace' ? 'Replaced queue' : 'Appended clips';
-      setImportStatus(`${strategyLabel}: "${pack.title}" (${pack.clips.length} clips).`);
-      logEvent('Pack imported', `${pack.title} · ${pack.clips.length} clips · ${decision.strategy}`);
-
-      closePendingImport();
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : typeof error === 'string'
-            ? error
-            : 'Unknown import error';
-      setImportStatus(`Import failed: ${message}`);
-      logEvent('Pack import failed', message);
-    } finally {
-      setImportBusy(false);
-    }
-
-    // Diagnostics-only (no functional impact): expose a quick sanity check in the audit log.
-    if (importedIds.size > 0 && currentQueueIds.size > 0) {
-      logEvent(
-        'Pack import diff',
-        `new:${diff.newClipIds.length} overlap:${diff.overlappingClipIds.length} removed:${diff.removedClipIds.length}`
-      );
-    }
-  };
-
-  const onImportFile: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file || importBusy) {
-      return;
-    }
-
-    setImportBusy(true);
-    setImportStatus('Importing pack...');
-    try {
-      const pack = await importReportPackFromFile(file);
-      const diff = computePackDiff({
-        currentQueue: queue,
-        currentLabels: labels,
-        currentAnnotations: annotations,
-        currentTelestration: strokesByClip,
-        pack
-      });
-      setPendingImport({ pack, diff, decision: defaultImportDecision });
-      setShowImportClipPreview(false);
-      setImportStatus(`Review import: "${pack.title}" (${pack.clips.length} clips).`);
-    } catch (error) {
-      const message =
-        error instanceof PackImportError
-          ? error.message
-          : error instanceof Error
-            ? error.message
-            : 'Unknown import error';
-      setImportStatus(`Import failed: ${message}`);
-      logEvent('Pack import failed', message);
-    } finally {
-      setImportBusy(false);
-      event.target.value = '';
-    }
-  };
-
-  const clearImportedPackBanner = () => {
-    setLastImportMeta(null);
-    saveToStorage(lastImportKey, null);
-    clearImportUndo();
-    setImportStatus('');
-    logEvent('Pack banner cleared', 'Reports import');
   };
 
   return (

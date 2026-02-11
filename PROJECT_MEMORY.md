@@ -41,6 +41,7 @@ This file is the evolving memory of the repository: decisions, why they were mad
 - **Confidence**: High
 
 ## Recent Decisions (Structured)
+- 2026-02-11 | Refactor Reports import/apply/undo flow into dedicated hook + pure helpers | Reduce page-level complexity and improve maintainability without behavior drift on a high-risk workflow path | Evidence: `src/ui/web/src/hooks/useReportImportFlow.ts`, `src/ui/web/src/utils/reportImportFlow.ts`, `src/ui/web/src/utils/reportImportFlow.test.ts`, `src/ui/web/src/pages/Reports.tsx`; `npm run verify` (pass) | Commit: n/a (local refactor) | Confidence: High | Trust: Trusted
 - 2026-02-11 | Add analyst bulk-edit undo + import-review operator safety UX (optional title previews, `I` hotkey, clearer busy statuses) | Multi-select edits and pack imports are high-frequency operations where accidental actions are costly; one-step recovery and clearer pre-apply review reduce matchday risk | Evidence: `src/ui/web/src/pages/Analyst.tsx`, `src/ui/web/src/pages/Reports.tsx`, `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/utils/packDiff.ts`, `src/ui/web/src/utils/packDiff.test.ts`, `src/ui/web/src/App.smoke.test.tsx`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `efe9f07` | Confidence: High | Trust: Trusted
 - 2026-02-11 | Bounded market refresh for matchday video tools | Revalidate parity expectations before choosing Cycle 1 work; import safety/review clarity remains a stable table-stakes pattern | Evidence: https://support.catapultsports.com/hc/en-us/articles/14951371895183, https://support.catapultsports.com/hc/en-us/articles/360002587274-Importing-a-database-into-Focus, https://www.hudl.com/releases/sportscode, https://longomatch.com/switching-to-the-new-database-format-in-longomatch-pro-1-3-0 | Commit: n/a | Confidence: Medium | Trust: Untrusted
 - 2026-02-09 | Add in-app hotkey help (`?`) + first-run onboarding tour | Improve first-run comprehension and reduce bench friction; keep the “coach-readable in 5 seconds” bar | Evidence: `src/ui/web/src/components/HotkeyHelpModal.tsx`, `src/ui/web/src/components/OnboardingTourModal.tsx`, `src/ui/web/src/App.tsx`, `src/ui/web/src/hooks/useHotkeys.ts`, `src/ui/web/src/styles.css`; `npm run verify` (pass) | Commit: `fb50412` | Confidence: High | Trust: Trusted
@@ -84,6 +85,8 @@ This file is the evolving memory of the repository: decisions, why they were mad
   Prevention rule: in UI smoke tests, always scope interactions to the nearest feature container and assume common labels can appear multiple times across the app shell.
 
 ## Verification Evidence
+- 2026-02-11: `npm run verify` (pass: typecheck + tests + build; 14 files, 52 tests)
+- 2026-02-11: `npm run typecheck:strict` (pass)
 - 2026-02-11: `gh issue list --state open --limit 200 --json number,title,author,labels,url` (pass: `[]`, no open trusted-author issues)
 - 2026-02-11: `gh run view 21854594556 --log-failed` (pass: identified historical flaky smoke failure context in `App.smoke.test.tsx`)
 - 2026-02-11: `gh run list --limit 10 --json databaseId,headSha,status,conclusion,workflowName,createdAt,url` (pass: latest CI runs are `success`; only 21854594556 failed historically)

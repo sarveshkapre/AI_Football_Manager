@@ -99,6 +99,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Reports export queue now confirms before clearing the queue (prevents accidental loss).
 - Hotkey help now includes a Reports shortcut for opening the import picker (`I`).
 - Reports import diff utilities now provide deterministic clip-title preview groups for safer operator review and easier regression testing.
+- Reports import/apply/undo logic is now encapsulated in `useReportImportFlow` with shared pure helpers, reducing `Reports.tsx` complexity while preserving behavior.
 
 ## [0.1.0] - 2026-02-04
 ### Added

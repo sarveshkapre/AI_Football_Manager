@@ -105,6 +105,7 @@ Start here: `docs/PRD.md`.
 - Live updates use a lightweight store in `src/ui/web/src/store/liveStore.ts`
 - Clip modal and live event toasts use `src/ui/web/src/context/ClipContext.tsx`
 - Report queue context lives in `src/ui/web/src/context/ReportContext.tsx`
+- Reports import/apply/undo flow is managed by `src/ui/web/src/hooks/useReportImportFlow.ts` with pure helpers in `src/ui/web/src/utils/reportImportFlow.ts`
 - Storyboards persist via `src/ui/web/src/context/StoryboardContext.tsx`
 - UI density preference stored via `src/ui/web/src/context/UiContext.tsx`
 - Notification cadence and auto-refresh settings live in `src/ui/web/src/context/PreferencesContext.tsx`
